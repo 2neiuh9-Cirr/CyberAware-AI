@@ -1,0 +1,24 @@
+# Local secrets and user data
+.env*
+!.env.example
+/data/
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+coverage/
+
+# Temporary and generated files
+tmp/
+outputs/
+render_google/
+render_google_facebook/
+
+# Local archives
+*.zip
+
+# Logs and operating system files
+*.log
+.DS_Store
+Thumbs.db

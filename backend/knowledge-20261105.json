@@ -1,0 +1,844 @@
+{
+  "batch": "vn-20261105",
+  "retrievedAt": "2026-11-05T05:45:46.729Z",
+  "notes": "Quy tắc heuristic do CyberAware biên soạn; không phải kết luận của cơ quan chức năng. Cảnh báo tóm tắt theo nguồn; không đưa tên miền lịch sử vào danh sách chặn.",
+  "rules": [
+    {
+      "id": "vn-20261105-sms-01",
+      "type": "sms",
+      "title": "Yêu cầu cung cấp OTP để hoàn tiền",
+      "terms": [
+        "gui ma otp de hoan tien",
+        "cung cap otp de nhan tien"
+      ],
+      "weight": 30
+    },
+    {
+      "id": "vn-20261105-sms-02",
+      "type": "sms",
+      "title": "Yêu cầu gửi ảnh hai mặt thẻ",
+      "terms": [
+        "gui anh hai mat the",
+        "chup hai mat the ngan hang"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-sms-03",
+      "type": "sms",
+      "title": "Yêu cầu tắt bảo vệ thiết bị",
+      "terms": [
+        "tat play protect",
+        "vo hieu hoa bao ve"
+      ],
+      "weight": 30
+    },
+    {
+      "id": "vn-20261105-sms-04",
+      "type": "sms",
+      "title": "Cài ứng dụng từ nguồn ngoài",
+      "terms": [
+        "cai dat apk",
+        "bat nguon khong xac dinh"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-sms-05",
+      "type": "sms",
+      "title": "Yêu cầu quyền trợ năng",
+      "terms": [
+        "bat quyen tro nang",
+        "cap quyen accessibility"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-sms-06",
+      "type": "sms",
+      "title": "Cài phần mềm điều khiển từ xa",
+      "terms": [
+        "cai anydesk",
+        "cai teamviewer",
+        "cai rustdesk"
+      ],
+      "weight": 20
+    },
+    {
+      "id": "vn-20261105-sms-07",
+      "type": "sms",
+      "title": "Đề nghị giữ bí mật với gia đình",
+      "terms": [
+        "khong duoc noi voi gia dinh",
+        "giu bi mat voi nguoi than"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-sms-08",
+      "type": "sms",
+      "title": "Yêu cầu nộp tiền chứng minh vô tội",
+      "terms": [
+        "chuyen tien de chung minh vo toi",
+        "nop tien de chung minh trong sach"
+      ],
+      "weight": 40
+    },
+    {
+      "id": "vn-20261105-sms-09",
+      "type": "sms",
+      "title": "Dọa bắt giữ nếu không chuyển khoản",
+      "terms": [
+        "khong chuyen tien se bi bat",
+        "chuyen khoan de tranh bi bat"
+      ],
+      "weight": 40
+    },
+    {
+      "id": "vn-20261105-sms-10",
+      "type": "sms",
+      "title": "Thu phí nhận bưu kiện bất ngờ",
+      "terms": [
+        "dong phi de nhan buu kien",
+        "nop phi hai quan de nhan qua"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-sms-11",
+      "type": "sms",
+      "title": "Giả giao hàng yêu cầu hủy hội viên",
+      "terms": [
+        "huy dang ky hoi vien giao hang",
+        "huy goi hoi vien shipper"
+      ],
+      "weight": 30
+    },
+    {
+      "id": "vn-20261105-sms-12",
+      "type": "sms",
+      "title": "Dụ nạp tiền sửa lỗi nhiệm vụ",
+      "terms": [
+        "nap them de sua loi don hang",
+        "bu don de rut tien"
+      ],
+      "weight": 35
+    },
+    {
+      "id": "vn-20261105-sms-13",
+      "type": "sms",
+      "title": "Đòi tiền mở khóa khoản rút",
+      "terms": [
+        "dong phi mo khoa rut tien",
+        "nop tien de mo bang tai khoan"
+      ],
+      "weight": 35
+    },
+    {
+      "id": "vn-20261105-sms-14",
+      "type": "sms",
+      "title": "Đòi thuế trước khi rút lợi nhuận",
+      "terms": [
+        "dong thue de rut loi nhuan",
+        "nop thue truoc khi rut tien"
+      ],
+      "weight": 35
+    },
+    {
+      "id": "vn-20261105-sms-15",
+      "type": "sms",
+      "title": "Hứa lấy lại tiền bị lừa",
+      "terms": [
+        "cam ket lay lai tien bi lua",
+        "thu hoi tien treo khong can coc"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-sms-16",
+      "type": "sms",
+      "title": "Tuyển dụng yêu cầu đặt cọc",
+      "terms": [
+        "dong coc de nhan viec",
+        "chuyen phi phong van"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-sms-17",
+      "type": "sms",
+      "title": "Mời làm đánh giá có đặt cọc",
+      "terms": [
+        "nap tien de danh gia san pham",
+        "dat coc lam nhiem vu"
+      ],
+      "weight": 30
+    },
+    {
+      "id": "vn-20261105-sms-18",
+      "type": "sms",
+      "title": "Giả người thân đổi số để vay tiền",
+      "terms": [
+        "me oi con doi so",
+        "bo oi con mat dien thoai"
+      ],
+      "weight": 20
+    },
+    {
+      "id": "vn-20261105-sms-19",
+      "type": "sms",
+      "title": "Giả trường học đòi viện phí gấp",
+      "terms": [
+        "con dang cap cuu chuyen tien gap",
+        "dong vien phi gap cho con"
+      ],
+      "weight": 30
+    },
+    {
+      "id": "vn-20261105-sms-20",
+      "type": "sms",
+      "title": "Học bổng yêu cầu phí giải ngân",
+      "terms": [
+        "phi giai ngan hoc bong",
+        "dong phi de nhan hoc bong"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-sms-21",
+      "type": "sms",
+      "title": "Đổi SIM để chiếm số điện thoại",
+      "terms": [
+        "chuyen sim 4g theo huong dan",
+        "gui ma doi esim"
+      ],
+      "weight": 20
+    },
+    {
+      "id": "vn-20261105-sms-22",
+      "type": "sms",
+      "title": "Khóa thuê bao ép cập nhật qua link",
+      "terms": [
+        "cap nhat ngay de tranh khoa sim",
+        "chuan hoa ngay neu khong bi khoa"
+      ],
+      "weight": 20
+    },
+    {
+      "id": "vn-20261105-sms-23",
+      "type": "sms",
+      "title": "Đề nghị gửi cụm từ khôi phục ví",
+      "terms": [
+        "gui cum tu khoi phuc",
+        "cung cap seed phrase",
+        "gui private key"
+      ],
+      "weight": 40
+    },
+    {
+      "id": "vn-20261105-sms-24",
+      "type": "sms",
+      "title": "Đầu tư bảo đảm không thua lỗ",
+      "terms": [
+        "cam ket khong thua lo",
+        "bao loi nhuan moi ngay"
+      ],
+      "weight": 30
+    },
+    {
+      "id": "vn-20261105-sms-25",
+      "type": "sms",
+      "title": "Vay tiền yêu cầu phí trước",
+      "terms": [
+        "dong phi bao hiem khoan vay truoc",
+        "chuyen phi de giai ngan"
+      ],
+      "weight": 30
+    },
+    {
+      "id": "vn-20261105-sms-26",
+      "type": "sms",
+      "title": "Sửa sai số tài khoản vay",
+      "terms": [
+        "nop tien sua sai so tai khoan",
+        "dong phi sua ho so vay"
+      ],
+      "weight": 35
+    },
+    {
+      "id": "vn-20261105-sms-27",
+      "type": "sms",
+      "title": "Quà tặng yêu cầu mã ngân hàng",
+      "terms": [
+        "nhap otp de nhan qua",
+        "gui otp de nhan thuong"
+      ],
+      "weight": 35
+    },
+    {
+      "id": "vn-20261105-sms-28",
+      "type": "sms",
+      "title": "Mạo danh đồng bộ BHXH thu tiền",
+      "terms": [
+        "chuyen tien de dong bo vssid",
+        "dong phi xac thuc bhxh"
+      ],
+      "weight": 30
+    },
+    {
+      "id": "vn-20261105-sms-29",
+      "type": "sms",
+      "title": "Phạt nguội yêu cầu chuyển khoản gấp",
+      "terms": [
+        "nop phat ngay qua link",
+        "chuyen tien phat nguoi vao tai khoan"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-sms-30",
+      "type": "sms",
+      "title": "Hoàn thuế yêu cầu OTP",
+      "terms": [
+        "gui otp de hoan thue",
+        "nhap ma ngan hang de hoan thue"
+      ],
+      "weight": 35
+    },
+    {
+      "id": "vn-20261105-url-01",
+      "type": "url",
+      "title": "Tệp cài đặt Android từ URL — cần kiểm tra nguồn",
+      "terms": [
+        ".apk"
+      ],
+      "weight": 15
+    },
+    {
+      "id": "vn-20261105-url-02",
+      "type": "url",
+      "title": "Hồ sơ cấu hình thiết bị Apple — cần kiểm tra nguồn",
+      "terms": [
+        ".mobileconfig"
+      ],
+      "weight": 15
+    },
+    {
+      "id": "vn-20261105-url-03",
+      "type": "url",
+      "title": "Tệp thực thi Windows — cần kiểm tra nguồn",
+      "terms": [
+        ".exe"
+      ],
+      "weight": 10
+    },
+    {
+      "id": "vn-20261105-url-04",
+      "type": "url",
+      "title": "Tệp cài đặt Windows — cần kiểm tra nguồn",
+      "terms": [
+        ".msi"
+      ],
+      "weight": 10
+    },
+    {
+      "id": "vn-20261105-url-05",
+      "type": "url",
+      "title": "Tệp script PowerShell — cần kiểm tra nguồn",
+      "terms": [
+        ".ps1"
+      ],
+      "weight": 15
+    },
+    {
+      "id": "vn-20261105-url-06",
+      "type": "url",
+      "title": "Tệp script Visual Basic — cần kiểm tra nguồn",
+      "terms": [
+        ".vbs"
+      ],
+      "weight": 15
+    },
+    {
+      "id": "vn-20261105-url-07",
+      "type": "url",
+      "title": "Tệp trình bảo vệ màn hình thực thi — cần kiểm tra nguồn",
+      "terms": [
+        ".scr"
+      ],
+      "weight": 15
+    },
+    {
+      "id": "vn-20261105-url-08",
+      "type": "url",
+      "title": "Đường dẫn yêu cầu cụm từ khôi phục — cần kiểm tra nguồn",
+      "terms": [
+        "/seed-phrase",
+        "/recovery-phrase"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-url-09",
+      "type": "url",
+      "title": "Đường dẫn yêu cầu khóa ví riêng — cần kiểm tra nguồn",
+      "terms": [
+        "/private-key",
+        "/import-private-key"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-url-10",
+      "type": "url",
+      "title": "Đường dẫn nhận airdrop — cần kiểm tra nguồn",
+      "terms": [
+        "/claim-airdrop",
+        "/airdrop-claim"
+      ],
+      "weight": 10
+    },
+    {
+      "id": "vn-20261105-url-11",
+      "type": "url",
+      "title": "Đường dẫn mở khóa khoản rút — cần kiểm tra nguồn",
+      "terms": [
+        "/unlock-withdrawal",
+        "/unfreeze-funds"
+      ],
+      "weight": 20
+    },
+    {
+      "id": "vn-20261105-url-12",
+      "type": "url",
+      "title": "Đường dẫn nhận tiền hoàn thuế — cần kiểm tra nguồn",
+      "terms": [
+        "/nhan-hoan-thue",
+        "/claim-tax-refund"
+      ],
+      "weight": 10
+    },
+    {
+      "id": "vn-20261105-url-13",
+      "type": "url",
+      "title": "Đường dẫn nhận hoàn BHXH — cần kiểm tra nguồn",
+      "terms": [
+        "/hoan-tien-bhxh",
+        "/nhan-tien-bhxh"
+      ],
+      "weight": 10
+    },
+    {
+      "id": "vn-20261105-url-14",
+      "type": "url",
+      "title": "Đường dẫn tải VNeID dạng APK — cần kiểm tra nguồn",
+      "terms": [
+        "/vneid.apk",
+        "/vneid-update.apk"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-url-15",
+      "type": "url",
+      "title": "Đường dẫn tải VssID dạng APK — cần kiểm tra nguồn",
+      "terms": [
+        "/vssid.apk",
+        "/vssid-update.apk"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-url-16",
+      "type": "url",
+      "title": "Đường dẫn tải điện lực dạng APK — cần kiểm tra nguồn",
+      "terms": [
+        "/evn.apk",
+        "/evncskh.apk"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-url-17",
+      "type": "url",
+      "title": "Đường dẫn hủy hội viên giao hàng — cần kiểm tra nguồn",
+      "terms": [
+        "/huy-hoi-vien",
+        "/cancel-shipper-membership"
+      ],
+      "weight": 20
+    },
+    {
+      "id": "vn-20261105-url-18",
+      "type": "url",
+      "title": "Đường dẫn mở khóa tài khoản qua OTP — cần kiểm tra nguồn",
+      "terms": [
+        "/unlock-otp",
+        "/otp-unlock"
+      ],
+      "weight": 20
+    },
+    {
+      "id": "vn-20261105-url-19",
+      "type": "url",
+      "title": "Đường dẫn xác minh thẻ CVV — cần kiểm tra nguồn",
+      "terms": [
+        "/verify-cvv",
+        "/cvv-verification"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-url-20",
+      "type": "url",
+      "title": "Đường dẫn nhận thưởng quay số — cần kiểm tra nguồn",
+      "terms": [
+        "/claim-lottery",
+        "/nhan-thuong-xo-so"
+      ],
+      "weight": 15
+    },
+    {
+      "id": "vn-20261105-url-21",
+      "type": "url",
+      "title": "Đường dẫn hỗ trợ thu hồi tiền — cần kiểm tra nguồn",
+      "terms": [
+        "/thu-hoi-tien-treo",
+        "/lay-lai-tien-bi-lua"
+      ],
+      "weight": 10
+    },
+    {
+      "id": "vn-20261105-url-22",
+      "type": "url",
+      "title": "Đường dẫn đóng phí giải ngân — cần kiểm tra nguồn",
+      "terms": [
+        "/phi-giai-ngan",
+        "/loan-release-fee"
+      ],
+      "weight": 20
+    },
+    {
+      "id": "vn-20261105-url-23",
+      "type": "url",
+      "title": "Đường dẫn phí sửa hồ sơ vay — cần kiểm tra nguồn",
+      "terms": [
+        "/sua-ho-so-vay",
+        "/loan-correction-fee"
+      ],
+      "weight": 20
+    },
+    {
+      "id": "vn-20261105-url-24",
+      "type": "url",
+      "title": "Đường dẫn nộp tiền nhiệm vụ — cần kiểm tra nguồn",
+      "terms": [
+        "/nap-tien-nhiem-vu",
+        "/task-deposit"
+      ],
+      "weight": 20
+    },
+    {
+      "id": "vn-20261105-url-25",
+      "type": "url",
+      "title": "Đường dẫn tắt bảo vệ máy — cần kiểm tra nguồn",
+      "terms": [
+        "/disable-play-protect",
+        "/tat-play-protect"
+      ],
+      "weight": 25
+    },
+    {
+      "id": "vn-20261105-url-26",
+      "type": "url",
+      "title": "Đường dẫn tải ứng dụng thuế ngoài kho — cần kiểm tra nguồn",
+      "terms": [
+        "/etax.apk",
+        "/thuedientu.apk"
+      ],
+      "weight": 25
+    }
+  ],
+  "intel": [
+    {
+      "id": "vn-20261105-alert-01",
+      "title": "Mạo danh Cổng Bộ Công an",
+      "sourceDate": "2024-05-14",
+      "sourceUrl": "https://baochinhphu.vn/canh-bao-mao-danh-cong-ttdt-bo-cong-an-de-lua-dao-102240514094920287.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Trang giả đăng nội dung cảnh báo xen quảng cáo thu hồi tiền để tạo lòng tin.",
+      "terms": [
+        "cong bo cong an",
+        "thu hoi tien lua dao"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-02",
+      "title": "Giả điện lực lợi dụng sáp nhập địa phương",
+      "sourceDate": "2025-07-02",
+      "sourceUrl": "https://baochinhphu.vn/evn-canh-bao-thu-doan-lua-dao-qua-viec-sap-nhap-dia-phuong-102250702095342731.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Kẻ giả nhân viên điện lực vin vào đổi địa giới để yêu cầu dữ liệu cá nhân và mở liên kết lạ.",
+      "terms": [
+        "sap nhap dia phuong",
+        "cap nhat thong tin dien luc"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-03",
+      "title": "Giả Cổng Bộ Tài chính",
+      "sourceDate": "2025-07-04",
+      "sourceUrl": "https://baochinhphu.vn/canh-bao-gia-mao-cong-thong-tin-dien-tu-bo-tai-chinh-de-lua-dao-102250704122449329.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Giả website, văn bản và chữ ký của Bộ Tài chính để tạo uy tín cho hoạt động lừa đảo.",
+      "terms": [
+        "bo tai chinh",
+        "van ban thu hoi tien"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-04",
+      "title": "Giả giao hàng thu tiền đơn hàng",
+      "sourceDate": "2024-06-21",
+      "sourceUrl": "https://thanglong.baochinhphu.vn/canh-bao-thu-doan-gia-danh-nhan-vien-giao-hang-de-lua-dao-chiem-doat-tai-san-103240621134005576.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Thông tin đơn hàng từ livestream bị lợi dụng để giả shipper gọi yêu cầu thanh toán.",
+      "terms": [
+        "nhan vien giao hang",
+        "thanh toan don hang"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-05",
+      "title": "Giả hỗ trợ nhận bảo hiểm trên mạng",
+      "sourceDate": "2022-08-24",
+      "sourceUrl": "https://baochinhphu.vn/canh-bao-lua-dao-nhan-bao-hiem-tren-mang-xa-hoi-102220824153927644.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Tài khoản giả cán bộ bảo hiểm tiếp cận người lao động, nhận hỗ trợ thủ tục trợ cấp để chiếm đoạt tiền.",
+      "terms": [
+        "giai ngan tro cap that nghiep",
+        "ho tro nhan bao hiem"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-06",
+      "title": "Dịch vụ lấy lại tiền bị lừa",
+      "sourceDate": "2024-08-03",
+      "sourceUrl": "https://baochinhphu.vn/canh-bao-lua-dao-lay-lai-tien-bi-lua-102240803193041702.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Quảng cáo hứa thu hồi tiền dẫn nạn nhân tới yêu cầu trả phí rồi mất liên lạc.",
+      "terms": [
+        "lay lai tien bi lua",
+        "cam ket thu hoi tien"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-07",
+      "title": "Giả website chi trả BHXH",
+      "sourceDate": "2026-06-10",
+      "sourceUrl": "https://baochinhphu.vn/canh-bao-hinh-thuc-lua-dao-chi-tra-bhxh-102260609102106772.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Giả nhân viên chi trả, dẫn tới website và mã QR để lấy thông tin hoặc yêu cầu giao dịch ngân hàng.",
+      "terms": [
+        "chi tra bhxh",
+        "nhan tien bao hiem"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-08",
+      "title": "Mã QR dẫn tới trang lấy thông tin thẻ",
+      "sourceDate": "2023-09-07",
+      "sourceUrl": "https://baochinhphu.vn/canh-bao-lua-dao-khi-quet-ma-qr-10223090715050241.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Mã QR có thể dẫn tới trang giả ngân hàng yêu cầu dữ liệu cá nhân và thông tin xác thực.",
+      "terms": [
+        "quet ma qr",
+        "xac thuc the tin dung"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-09",
+      "title": "Giả chuẩn hóa thông tin cá nhân",
+      "sourceDate": "2024-07-08",
+      "sourceUrl": "https://baochinhphu.vn/cam-nang-nhan-biet-va-phong-tranh-lua-dao-chuan-hoa-thong-tin-ca-nhan-102240708154531179.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Giả cơ quan quản lý, gửi liên kết hoặc ứng dụng chứa mã độc dưới cớ chuẩn hóa dữ liệu.",
+      "terms": [
+        "chuan hoa thong tin ca nhan",
+        "cai ung dung chuan hoa"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-10",
+      "title": "Cuộc gọi video giả bằng Deepfake",
+      "sourceDate": "2023-07-11",
+      "sourceUrl": "https://baochinhphu.vn/canh-giac-truoc-cuoc-goi-lua-dao-deepfake-102230711152931189.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Hình ảnh và giọng nói giả có thể được dùng trong cuộc gọi video để mạo danh người quen.",
+      "terms": [
+        "deepfake",
+        "video gia mao"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-11",
+      "title": "Ứng dụng VssID giả để đồng bộ dữ liệu",
+      "sourceDate": "2026-10-12",
+      "sourceUrl": "https://baochinhphu.vn/canh-bao-nhung-thu-doan-lua-dao-moi-lien-quan-den-bhxh-bhyt-102261012160951962.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Kẻ giả cán bộ gửi APK giả VssID, yêu cầu quyền nhạy cảm dưới cớ đồng bộ quyền lợi bảo hiểm.",
+      "terms": [
+        "vssid.apk",
+        "dong bo du lieu bhxh"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-12",
+      "title": "Giả doanh nghiệp lớn tuyển dụng",
+      "sourceDate": "2023-06-23",
+      "sourceUrl": "https://baochinhphu.vn/canh-bao-thu-doan-gia-mao-cac-tap-doan-doanh-nghiep-lon-tuyen-dung-nhan-su-de-lua-dao-truc-loi-102230623155553689.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Trang tuyển dụng giả và phỏng vấn giả được dùng để lấy dữ liệu ứng viên hoặc yêu cầu chuyển phí.",
+      "terms": [
+        "chuyen phi phong van",
+        "tam ung chi phi tuyen dung"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-13",
+      "title": "Tin nhắn OTP giả mạo EVN",
+      "sourceDate": "2026-06-22",
+      "sourceUrl": "https://baochinhphu.vn/xuat-hien-thu-doan-lua-dao-moi-bang-tin-nhan-otp-gia-mao-102260622172928956.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Tin nhắn tự xưng EVN kèm liên kết lạ dụ lấy dữ liệu; nguồn nêu OTP thật của EVN CSKH không kèm link.",
+      "terms": [
+        "evn cskh",
+        "otp dien luc"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-14",
+      "title": "AI giả hình ảnh và giọng nói để vay tiền",
+      "sourceDate": "2024-02-03",
+      "sourceUrl": "https://baochinhphu.vn/canh-bao-lua-tien-thong-qua-ai-tao-hinh-anh-va-giong-noi-gia-mao-gia-tang-102240203130236903.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Giả người quen trên mạng và dùng hình ảnh, giọng nói tổng hợp để củng cố lời đề nghị chuyển tiền.",
+      "terms": [
+        "gia giong noi",
+        "vay tien qua messenger"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-15",
+      "title": "Mạo danh luật sư thu hồi tiền treo",
+      "sourceDate": "2024-04-15",
+      "sourceUrl": "https://baochinhphu.vn/canh-bao-thu-doan-mao-danh-bo-cong-an-cong-ty-luat-van-phong-luat-su-ho-tro-lay-lai-tien-bi-lua-bi-treo-102240415152340808.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Fanpage và website giả công an, luật sư quảng cáo lấy lại tiền khiến nạn nhân tiếp tục bị chiếm đoạt.",
+      "terms": [
+        "thu hoi von treo",
+        "luat su lay lai tien"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-16",
+      "title": "SMS giả tên ngân hàng dẫn tới trang đăng nhập",
+      "sourceDate": "2021-08-02",
+      "sourceUrl": "https://baochinhphu.vn/canh-bao-thu-doan-lua-dao-trong-linh-vuc-tai-chinh-ngan-hang-102297444.htm",
+      "sourceName": "Báo Điện tử Chính phủ",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Tin nhắn giả ngân hàng báo nâng cấp hoặc trúng thưởng, dẫn tới trang lấy tài khoản và OTP.",
+      "terms": [
+        "nang cap he thong ngan hang",
+        "ngan hang thong bao trung thuong"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-17",
+      "title": "SMS phạt nguội giả",
+      "sourceDate": "2026-09-09",
+      "sourceUrl": "https://www.bocongan.gov.vn/bai-viet/canh-bao-thu-doan-gia-danh-co-quan-cong-an-gui-tin-nhan-phat-nguoi-kem-duong-link-gia-mao-de-lua-dao-chiem-doat-tai-san-1788945012",
+      "sourceName": "Cổng thông tin điện tử Bộ Công an",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Tin nhắn báo vi phạm giao thông dẫn tới website giống trang chính thức nhằm lấy thông tin và tiền.",
+      "terms": [
+        "phat nguoi",
+        "nop phat qua link"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-18",
+      "title": "Lợi dụng sự cố CIC để yêu cầu đổi mật khẩu",
+      "sourceDate": "2025-09-16",
+      "sourceUrl": "https://www.mps.gov.vn/bai-viet/canh-bao-lua-dao-chiem-doat-tai-san-tu-su-co-an-ninh-mang-tai-trung-tam-thong-tin-tin-dung-quoc-gia-cic-1757991790",
+      "sourceName": "Cổng thông tin điện tử Bộ Công an",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Kẻ giả ngân hàng hoặc CIC viện cớ lộ dữ liệu để gửi liên kết xác minh và đổi mật khẩu giả.",
+      "terms": [
+        "su co cic",
+        "lo mat khau ngan hang"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-19",
+      "title": "VNeID giả sau sắp xếp hành chính",
+      "sourceDate": "2025-07-05",
+      "sourceUrl": "https://bocongan.gov.vn/bai-viet/canh-bao-thu-doan-lua-dao-cai-ung-dung-vneid-gia-mao-d104-t45880",
+      "sourceName": "Cổng thông tin điện tử Bộ Công an",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Giả cán bộ địa phương hướng dẫn cài VNeID chứa mã độc để điều khiển điện thoại, lấy OTP và dữ liệu sinh trắc học.",
+      "terms": [
+        "vneid gia mao",
+        "cap nhat dia gioi"
+      ],
+      "indicators": []
+    },
+    {
+      "id": "vn-20261105-alert-20",
+      "title": "Các nhóm kịch bản lừa đảo trực tuyến năm 2026",
+      "sourceDate": "2026-09-08",
+      "sourceUrl": "https://www.mps.gov.vn/bai-viet/nang-cao-canh-giac-truoc-25-kich-ban-lua-dao-tren-khong-gian-mang-nam-2026-1788865614",
+      "sourceName": "Cổng thông tin điện tử Bộ Công an",
+      "category": "Cảnh báo thủ đoạn lừa đảo",
+      "summary": "Cảnh báo tổng hợp các nhóm mạo danh tổ chức, dụ đầu tư và việc làm, phát tán liên kết hoặc ứng dụng độc hại.",
+      "terms": [
+        "viec nhe luong cao",
+        "cam ket loi nhuan hap dan"
+      ],
+      "indicators": []
+    }
+  ]
+}

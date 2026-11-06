@@ -1,0 +1,6 @@
+{
+  "name": "CyberAware AI - Nhận diện & phòng tránh lừa đảo trực tuyến",
+  "description": "Nền tảng trí tuệ nhân tạo hỗ trợ xác minh rủi ro, kiểm tra liên kết, tin nhắn, số tài khoản lừa đảo và đào tạo kỹ năng tự vệ số toàn diện cho người Việt.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

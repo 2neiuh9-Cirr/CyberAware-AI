@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberAware AI - Nhận diện & phòng tránh lừa đảo trực tuyến</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] flex flex-col items-center">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 h-[64px] bg-white/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex justify-center">
+        <div class="w-full max-w-[1280px] h-full flex items-center justify-between px-4 md:px-12">
+            <!-- Left: Logo & Name -->
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-[#004AC6]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                </div>
+                <span class="text-[#0F172A] font-semibold text-lg tracking-[-0.45px]">CyberAware AI</span>
+            </div>
+
+            <!-- Center: Nav Links -->
+            <nav class="hidden lg:flex items-center gap-8">
+                <a href="#" class="text-[#434655] font-semibold text-sm hover:text-[#004AC6] transition-colors">Trang chủ</a>
+                <a href="#" class="text-[#434655] font-semibold text-sm hover:text-[#004AC6] transition-colors">Kiểm tra lừa đảo</a>
+                <a href="#" class="text-[#434655] font-semibold text-sm hover:text-[#004AC6] transition-colors">Học tập</a>
+                <a href="#" class="text-[#434655] font-semibold text-sm hover:text-[#004AC6] transition-colors">Giới thiệu</a>
+            </nav>
+
+            <!-- Right: Actions -->
+            <div class="flex items-center gap-4">
+                <button class="bg-[#004AC6] hover:bg-blue-700 text-white font-semibold text-sm py-2 px-4 rounded-lg shadow-[0_1px_3px_rgba(15,23,42,0.05)] transition-colors">
+                    Kiểm tra nhanh
+                </button>
+                <div class="hidden md:flex items-center gap-2">
+                    <a href="#" class="text-[#434655] text-[13px] hover:text-[#004AC6]">Đăng nhập</a>
+                    <span class="text-[#CBD5E1] text-[13px]">/</span>
+                    <a href="#" class="text-[#434655] text-[13px] hover:text-[#004AC6]">Đăng ký</a>
+                </div>
+                <img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="w-8 h-8 rounded-full object-cover">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="w-full flex flex-col items-start overflow-hidden pt-[64px]">
+
+        <!-- Top Notification Pill -->
+        <div class="w-full bg-[#EFF6FF] flex justify-center items-center py-2 px-4">
+            <div class="flex flex-row items-center gap-2 max-w-[1280px] w-full justify-center">
+                <div class="w-2 h-2 bg-[#059669] rounded-full"></div>
+                <span class="text-[#004AC6] font-semibold text-xs tracking-wide">CẬP NHẬT 2026</span>
+                <span class="text-[#565E74] text-base">•</span>
+                <span class="text-[#434655] text-[13px]">Hệ thống AI vừa cập nhật 3.420 mẫu tên miền giả mạo cơ quan công quyền và ngân hàng tuần này.</span>
+            </div>
+        </div>
+
+        <!-- Hero & Quick Check Section -->
+        <section class="relative w-full flex flex-col items-center pt-10 pb-20 px-4 md:px-12 lg:px-48 bg-gradient-to-b from-[#F8FAFC] via-[#F8F9FF] to-[#F1F5F9] overflow-hidden">
+            <!-- Subtle Ambient Graphic Accents -->
+            <div class="absolute w-[720px] h-[360px] left-1/2 -translate-x-1/2 top-12 bg-[#004AC6]/5 blur-[32px] rounded-full z-0 pointer-events-none"></div>
+            <div class="absolute w-[320px] h-[320px] -right-20 top-20 bg-[#68DBA9]/20 blur-[20px] rounded-full z-0 pointer-events-none"></div>
+
+            <div class="flex flex-col items-center max-w-[896px] w-full z-10">
+                
+                <!-- Civic Trust Tag -->
+                <div class="mb-6">
+                    <div class="flex flex-row items-center py-1.5 px-3.5 gap-2 bg-white shadow-sm rounded-full">
+                        <svg class="w-3 h-3 text-[#004AC6]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-1.998A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"></path></svg>
+                        <span class="text-[#0F172A] font-semibold text-xs uppercase tracking-wide">CÔNG CỤ THẨM ĐỊNH AI SỐ 1 VIỆT NAM</span>
+                    </div>
+                </div>
+
+                <!-- Heading 1 - Main Headline -->
+                <div class="mb-10 text-center max-w-[768px]">
+                    <h1 class="text-[#0F172A] font-bold text-4xl md:text-5xl leading-tight tracking-tight mb-4">
+                        Nhận diện & phòng tránh lừa đảo trực tuyến với <span class="text-[#004AC6]">CyberAware AI</span>
+                    </h1>
+                    <p class="text-[#434655] text-base leading-relaxed max-w-[672px] mx-auto">
+                        Bảo vệ bản thân và gia đình trước các đường dẫn độc hại, tin nhắn lừa đảo mạo danh ngân hàng số, giả mạo sàn thương mại điện tử và thủ đoạn thao túng tâm lý tinh vi.
+                    </p>
+                </div>
+
+                <!-- Quick Check Tool Box -->
+                <div class="w-full bg-white rounded-2xl shadow-xl shadow-black/5 p-6 md:p-8 flex flex-col gap-5 relative">
+                    
+                    <!-- Interactive Tabs -->
+                    <div class="flex flex-row items-center gap-3">
+                        <button class="flex flex-row items-center py-2 px-5 gap-2 bg-[#004AC6] shadow-sm rounded-xl">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                            <span class="text-white font-semibold text-sm">Kiểm tra đường dẫn</span>
+                        </button>
+                        <button class="flex flex-row items-center py-2 px-5 gap-2 bg-[#F1F5F9] rounded-xl">
+                            <svg class="w-4 h-4 text-[#434655]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                            <span class="text-[#434655] font-semibold text-sm">Kiểm tra tin nhắn</span>
+                        </button>
+                    </div>
+
+                    <!-- URL Input View -->
+                    <div class="flex flex-col gap-4">
+                        <div class="flex flex-row items-center bg-[#F1F5F9] rounded-xl p-2 w-full">
+                            <div class="px-3">
+                                <svg class="w-5 h-5 text-[#004AC6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </div>
+                            <input type="text" placeholder="https://nhan-qua-tri-an-tet2025.top hoặc tên miền khả nghi..." class="bg-transparent border-none outline-none flex-grow text-[#737686] text-sm py-3 px-2">
+                            <button class="flex flex-row justify-center items-center py-3 px-6 gap-2 bg-[#004AC6] rounded-lg shadow-md">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                <span class="text-white font-semibold text-sm">Kiểm tra ngay</span>
+                            </button>
+                        </div>
+                        
+                        <div class="flex flex-row flex-wrap items-center gap-2 w-full">
+                            <span class="text-[#565E74] font-medium text-[13px]">Gợi ý kiểm tra:</span>
+                            <button class="bg-[#F1F5F9] rounded-md py-1 px-2.5">
+                                <span class="text-[#0F172A] font-mono font-medium text-xs">vcb-digibank-xac-thuc-2025.com</span>
+                            </button>
+                            <button class="bg-[#F1F5F9] rounded-md py-1 px-2.5">
+                                <span class="text-[#0F172A] font-mono font-medium text-xs">shopee-thuong-tet-sieusale.cc</span>
+                            </button>
+                        </div>
+
+                        <!-- Security Privacy Guarantee -->
+                        <div class="flex flex-row justify-between items-center pt-4 w-full border-t border-gray-100">
+                            <div class="flex flex-row items-center gap-2">
+                                <svg class="w-4 h-4 text-[#059669]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                <span class="text-[#434655] text-[13px]">CyberAware AI cam kết bảo vệ dữ liệu cá nhân, không chia sẻ thông tin tra cứu.</span>
+                            </div>
+                            <div class="bg-[#F1F5F9] rounded py-1 px-2.5">
+                                <span class="text-[#565E74] font-mono font-medium text-xs">Mã hóa: AES-256</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Explicit Note Under Tool -->
+                <div class="mt-4 flex flex-row items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-[#565E74]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="text-[#565E74] text-[13px]">Chúng tôi chỉ trả về kết quả phân tích rủi ro, không lưu trữ lịch sử tìm kiếm.</span>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- How It Works Section (3 Steps) -->
+        <section class="w-full bg-white flex flex-col items-center py-20 px-4 md:px-12">
+            <div class="max-w-[1184px] w-full flex flex-col items-center gap-16">
+                
+                <!-- Section Header -->
+                <div class="flex flex-col items-center gap-2.5 max-w-[672px] text-center">
+                    <span class="text-[#004AC6] font-semibold text-xs uppercase tracking-wide">QUY TRÌNH VẬN HÀNH</span>
+                    <h2 class="text-[#0F172A] font-semibold text-3xl md:text-4xl tracking-tight">Quy trình thẩm định chỉ trong 3 bước</h2>
+                    <p class="text-[#434655] text-sm md:text-base mt-1">Công nghệ trí tuệ nhân tạo độc quyền được huấn luyện chuyên sâu trên dữ liệu thực tế tại Việt Nam.</p>
+                </div>
+
+                <!-- Steps Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+                    
+                    <!-- Step 1 -->
+                    <div class="flex flex-col items-start p-8 gap-6 bg-[#F8FAFC] rounded-2xl h-full relative">
+                        <div class="w-14 h-14 bg-[#EFF6FF] rounded-xl flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6 text-[#004AC6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        </div>
+                        <span class="text-[#004AC6] font-mono font-bold text-xs uppercase tracking-wider absolute top-[118px]">BƯỚC 01</span>
+                        <div class="flex flex-col gap-2 mt-8">
+                            <h3 class="text-[#0F172A] font-semibold text-lg">Dán đường dẫn hoặc tin nhắn</h3>
+                            <p class="text-[#434655] text-sm leading-relaxed">Nhập liên kết đáng ngờ, số điện thoại lạ hoặc đoạn văn bản tin nhắn yêu cầu mã OTP, thông báo nhận tiền trúng thưởng.</p>
+                        </div>
+                        <div class="mt-auto pt-6 flex items-center gap-2">
+                            <span class="text-[#004AC6] font-semibold text-xs tracking-wide">Trải nghiệm thử</span>
+                            <svg class="w-3 h-3 text-[#004AC6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="flex flex-col items-start p-8 bg-[#F8FAFC] rounded-2xl h-full relative">
+                        <div class="w-14 h-14 bg-[#E5EEFF] rounded-xl flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6 text-[#004AC6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </div>
+                        <span class="text-[#004AC6] font-mono font-bold text-xs uppercase tracking-wider absolute top-[118px]">BƯỚC 02</span>
+                        <div class="flex flex-col gap-2 mt-8">
+                            <h3 class="text-[#0F172A] font-semibold text-lg">AI phân tích đa tầng</h3>
+                            <p class="text-[#434655] text-sm leading-relaxed">Thuật toán bóc tách cấu trúc, mạo danh thương hiệu, kịch bản lừa đảo và đối chiếu với cơ sở dữ liệu thời gian thực.</p>
+                        </div>
+                        <div class="mt-auto pt-6 flex items-center gap-2">
+                            <span class="text-[#004AC6] font-semibold text-xs tracking-wide">Xem cách AI hoạt động</span>
+                            <svg class="w-3 h-3 text-[#004AC6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="flex flex-col items-start p-8 bg-[#F8FAFC] rounded-2xl h-full relative">
+                        <div class="w-14 h-14 bg-[#D1FAE5] rounded-xl flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-[#059669]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        </div>
+                        <span class="text-[#059669] font-mono font-bold text-xs uppercase tracking-wider absolute top-[118px]">BƯỚC 03</span>
+                        <div class="flex flex-col gap-2 mt-8">
+                            <h3 class="text-[#0F172A] font-semibold text-lg">Nhận khuyến nghị bảo vệ</h3>
+                            <p class="text-[#434655] text-sm leading-relaxed">Cảnh báo mức độ rủi ro, phân tích chi tiết thủ đoạn và hướng dẫn hành động cụ thể để bảo vệ tài sản, thông tin cá nhân.</p>
+                        </div>
+                        <div class="mt-auto pt-6 flex items-center gap-2">
+                            <span class="text-[#059669] font-semibold text-xs tracking-wide">Mẫu báo cáo</span>
+                            <svg class="w-3.5 h-3.5 text-[#059669]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Common Scams Section -->
+        <section class="w-full bg-[#F1F5F9] flex flex-col items-center py-20 px-4 md:px-12">
+            <div class="max-w-[1184px] w-full flex flex-col gap-12">
+                
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row justify-between md:items-end gap-6 w-full">
+                    <div class="flex flex-col gap-2 max-w-[672px]">
+                        <span class="text-[#DC2626] font-semibold text-xs uppercase tracking-wide">CẢNH BÁO THƯỜNG TRỰC</span>
+                        <h2 class="text-[#0F172A] font-semibold text-3xl md:text-4xl tracking-tight mt-1">Các hình thức lừa đảo phổ biến cần cảnh giác</h2>
+                        <p class="text-[#434655] text-sm md:text-base mt-1">Các thủ đoạn tội phạm mạng liên tục thay đổi hình thức tiếp cận, nắm vững các dấu hiệu mấu chốt để không rơi vào cạm bẫy.</p>
+                    </div>
+                    <a href="#" class="flex flex-row items-center gap-2 group pb-2">
+                        <span class="text-[#004AC6] font-semibold text-sm group-hover:underline">Xem biểu đồ cảnh báo dữ liệu toàn quốc</span>
+                        <svg class="w-3 h-3 text-[#004AC6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+
+                <!-- 4 Elegant Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+                    
+                    <!-- Scam 1: Ngân hàng -->
+                    <div class="flex flex-col p-6 bg-white rounded-2xl shadow-sm h-full justify-between">
+                        <div class="flex flex-col gap-3">
+                            <div class="flex flex-row justify-between items-center mb-2">
+                                <div class="w-12 h-12 bg-[#FEE2E2] rounded-xl flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-[#DC2626]" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path><path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"></path></svg>
+                                </div>
+                                <div class="bg-[#FEE2E2] rounded-full px-2.5 py-0.5">
+                                    <span class="text-[#DC2626] font-semibold text-xs tracking-wide">Giả mạo ngân hàng</span>
+                                </div>
+                            </div>
+                            <h3 class="text-[#0F172A] font-semibold text-lg leading-snug">Giả mạo ngân hàng & OTP</h3>
+                            <p class="text-[#434655] text-[13px] leading-relaxed">Kẻ gian gửi tin nhắn SMS thương hiệu Brandname giả mạo thông báo tài khoản bị khóa, yêu cầu click vào link để nhập mật khẩu và mã OTP.</p>
+                            
+                            <div class="bg-[#F8FAFC] rounded-lg p-3 mt-1">
+                                <span class="text-[#565E74] font-semibold text-xs tracking-wide block mb-1">Dấu hiệu nhận diện:</span>
+                                <span class="text-[#0F172A] font-medium text-[13px] leading-snug">Link thường có đuôi lạ như .vip, .cc, .top; thúc ép trong 5 phút.</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-[#F1F5F9] hover:bg-gray-200 transition-colors rounded-lg py-2.5 mt-6 flex justify-center items-center gap-1.5">
+                            <span class="text-[#0F172A] font-semibold text-sm">Xem chi tiết kịch bản</span>
+                            <svg class="w-3.5 h-3.5 text-[#0F172A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Scam 2: Trúng thưởng -->
+                    <div class="flex flex-col p-6 bg-white rounded-2xl shadow-sm h-full justify-between">
+                        <div class="flex flex-col gap-3">
+                            <div class="flex flex-row justify-between items-center mb-2">
+                                <div class="w-12 h-12 bg-[#FEF3C7] rounded-xl flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-[#D97706]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clip-rule="evenodd"></path><path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z"></path></svg>
+                                </div>
+                                <div class="bg-[#FEF3C7] rounded-full px-2.5 py-0.5">
+                                    <span class="text-[#D97706] font-semibold text-xs tracking-wide">Quà tặng ảo</span>
+                                </div>
+                            </div>
+                            <h3 class="text-[#0F172A] font-semibold text-lg leading-snug">Lừa đảo trúng thưởng tri ân</h3>
+                            <p class="text-[#434655] text-[13px] leading-relaxed">Thông báo khách hàng trúng thưởng xe máy, điện thoại hoặc quà kỷ niệm của sàn TMĐT nhưng yêu cầu chuyển trước phí vận chuyển/thuế.</p>
+                            
+                            <div class="bg-[#F8FAFC] rounded-lg p-3 mt-1">
+                                <span class="text-[#565E74] font-semibold text-xs tracking-wide block mb-1">Dấu hiệu nhận diện:</span>
+                                <span class="text-[#0F172A] font-medium text-[13px] leading-snug">Yêu cầu nộp tiền đặt cọc vào tài khoản cá nhân thay vì tổ chức.</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-[#F1F5F9] hover:bg-gray-200 transition-colors rounded-lg py-2.5 mt-6 flex justify-center items-center gap-1.5">
+                            <span class="text-[#0F172A] font-semibold text-sm">Xem chi tiết kịch bản</span>
+                            <svg class="w-3.5 h-3.5 text-[#0F172A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Scam 3: Việc nhẹ lương cao -->
+                    <div class="flex flex-col p-6 bg-white rounded-2xl shadow-sm h-full justify-between">
+                        <div class="flex flex-col gap-3">
+                            <div class="flex flex-row justify-between items-center mb-2">
+                                <div class="w-12 h-12 bg-[#EFF6FF] rounded-xl flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-[#004AC6]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd"></path><path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"></path></svg>
+                                </div>
+                                <div class="bg-[#E5EEFF] rounded-full px-2.5 py-0.5">
+                                    <span class="text-[#004AC6] font-semibold text-xs tracking-wide">Lừa làm CTV</span>
+                                </div>
+                            </div>
+                            <h3 class="text-[#0F172A] font-semibold text-lg leading-snug">Tuyển CTV việc nhẹ lương cao</h3>
+                            <p class="text-[#434655] text-[13px] leading-relaxed">Mời gọi giật đơn hàng Shopee, Lazada, xem video TikTok trả hoa hồng ngay, sau đó mượn cớ hệ thống lỗi để chiếm đoạt tiền nạp.</p>
+                            
+                            <div class="bg-[#F8FAFC] rounded-lg p-3 mt-1">
+                                <span class="text-[#565E74] font-semibold text-xs tracking-wide block mb-1">Dấu hiệu nhận diện:</span>
+                                <span class="text-[#0F172A] font-medium text-[13px] leading-snug">Bắt nạp số tiền tăng dần theo từng nhiệm vụ để rút gốc.</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-[#F1F5F9] hover:bg-gray-200 transition-colors rounded-lg py-2.5 mt-6 flex justify-center items-center gap-1.5">
+                            <span class="text-[#0F172A] font-semibold text-sm">Xem chi tiết kịch bản</span>
+                            <svg class="w-3.5 h-3.5 text-[#0F172A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Scam 4: Công an giả -->
+                    <div class="flex flex-col p-6 bg-white rounded-2xl shadow-sm h-full justify-between">
+                        <div class="flex flex-col gap-3">
+                            <div class="flex flex-row justify-between items-center mb-2">
+                                <div class="w-12 h-12 bg-[#FEE2E2] rounded-xl flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-[#DC2626]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-1.998A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"></path></svg>
+                                </div>
+                                <div class="bg-[#FEE2E2] rounded-full px-2.5 py-0.5">
+                                    <span class="text-[#DC2626] font-semibold text-xs tracking-wide">Giả danh cơ quan nhà nước</span>
+                                </div>
+                            </div>
+                            <h3 class="text-[#0F172A] font-semibold text-lg leading-snug">Mạo danh Công an / Viện kiểm sát</h3>
+                            <p class="text-[#434655] text-[13px] leading-relaxed">Gọi điện thông báo liên quan đường dây rửa tiền, ma túy; gửi lệnh bắt tạm giam giả và đe dọa chuyển tiền vào "tài khoản an toàn".</p>
+                            
+                            <div class="bg-[#F8FAFC] rounded-lg p-3 mt-1">
+                                <span class="text-[#565E74] font-semibold text-xs tracking-wide block mb-1">Dấu hiệu nhận diện:</span>
+                                <span class="text-[#0F172A] font-medium text-[13px] leading-snug">Cơ quan thực thi pháp luật không bao giờ làm việc qua điện thoại.</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-[#F1F5F9] hover:bg-gray-200 transition-colors rounded-lg py-2.5 mt-6 flex justify-center items-center gap-1.5">
+                            <span class="text-[#0F172A] font-semibold text-sm">Xem chi tiết kịch bản</span>
+                            <svg class="w-3.5 h-3.5 text-[#0F172A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Community Learning Hub -->
+        <section class="w-full bg-white flex flex-col items-center py-20 px-4 md:px-12">
+            <!-- Background+Shadow Container -->
+            <div class="max-w-[1184px] w-full bg-gradient-to-r from-[#0F172A] to-[#1E293B] rounded-[24px] shadow-2xl p-8 md:p-14 relative overflow-hidden flex flex-col lg:flex-row justify-between items-center gap-12">
+                
+                <!-- Background aesthetic ring -->
+                <div class="absolute w-[384px] h-[384px] -right-20 -bottom-20 bg-[#004AC6]/20 blur-[32px] rounded-full z-0 pointer-events-none"></div>
+
+                <!-- Left Content -->
+                <div class="flex flex-col gap-4 max-w-[626px] z-10">
+                    <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full py-1 px-3 w-fit">
+                        <svg class="w-4 h-4 text-[#85F8C4]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <span class="text-[#85F8C4] font-semibold text-xs tracking-wide uppercase">KHÓA HỌC TIÊU BIỂU</span>
+                    </div>
+
+                    <h2 class="text-white font-semibold text-3xl md:text-4xl tracking-tight mt-2">Góc học tập kỹ năng tự vệ số CyberAware</h2>
+                    
+                    <p class="text-[#CBDBF5] text-base leading-relaxed mt-2">
+                        Các khóa đào tạo vi mô (Micro-learning) kéo dài 5-10 phút, được biên soạn dễ hiểu với ví dụ thực tiễn dành riêng cho người cao tuổi, phụ huynh và sinh viên học sinh. Tự bảo vệ ví điện tử và thông tin danh tính.
+                    </p>
+
+                    <!-- Features Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 mt-4">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-[#059669]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            <span class="text-white text-sm">Phòng thủ lừa đảo qua mạng xã hội</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-[#059669]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            <span class="text-white text-sm">Cách nhận biết Video Deepfake AI</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-[#059669]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            <span class="text-white text-sm">Bảo mật tài khoản ngân hàng số</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-[#059669]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            <span class="text-white text-sm">Xử lý khủng hoảng khi lỡ click link độc</span>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex flex-row flex-wrap gap-4 mt-6">
+                        <button class="flex items-center justify-center gap-2 py-3 px-8 bg-[#004AC6] text-white font-semibold text-sm rounded-xl shadow-[0_10px_15px_-3px_rgba(0,74,198,0.3)]">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
+                            Khám phá khóa học
+                        </button>
+                        <button class="flex items-center justify-center py-3 px-6 bg-white/10 backdrop-blur-sm text-white font-semibold text-sm rounded-xl hover:bg-white/20 transition-colors">
+                            Tải cẩm nang an toàn PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Visual Learning Card Right -->
+                <div class="w-full max-w-[384px] bg-white rounded-2xl p-6 shadow-2xl z-10 flex flex-col gap-2">
+                    <div class="flex justify-between items-center w-full mb-1">
+                        <span class="text-[#004AC6] font-semibold text-xs tracking-wide uppercase">BÀI HỌC TUẦN NÀY</span>
+                        <div class="bg-[#D1FAE5] rounded px-2 py-0.5">
+                            <span class="text-[#059669] font-semibold text-xs tracking-wide">MỚI CẬP NHẬT</span>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full h-[184px] bg-[#F1F5F9] rounded-xl overflow-hidden relative mb-2">
+                        <!-- Referencing the specific image file requested -->
+                        <img src="image_c900dd.jpg" alt="Video thumbnail" class="w-full h-full object-cover">
+                        <div class="absolute bottom-2 right-2 bg-[#0F172A]/80 backdrop-blur-sm rounded px-2 py-1">
+                            <span class="text-white font-mono font-medium text-xs">04 PHÚT - 3 BÀI TẬP</span>
+                        </div>
+                    </div>
+
+                    <h4 class="text-[#0F172A] font-semibold text-lg leading-snug">Nhận biết cuộc gọi mạo danh bằng giọng nói AI</h4>
+                    <p class="text-[#434655] text-[13px] leading-relaxed mb-3">Hướng dẫn cách đặt câu hỏi thử thách kiểm tra khi có người thân gọi xin chuyển tiền gấp.</p>
+                    
+                    <!-- Progress Bar -->
+                    <div class="w-full h-2 bg-[#F1F5F9] rounded-full overflow-hidden mb-2">
+                        <div class="h-full bg-[#004AC6] w-[75%] rounded-full"></div>
+                    </div>
+                    <div class="flex justify-between items-center w-full">
+                        <span class="text-[#565E74] font-semibold text-xs">3.450 người đã học</span>
+                        <span class="text-[#565E74] font-semibold text-xs">Đánh giá: 4.9/5</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Community Support & Report Banner -->
+        <section class="w-full bg-[#F8FAFC] flex flex-col items-center py-14 px-4 md:px-12">
+            <div class="max-w-[1184px] w-full bg-[#F1F5F9] rounded-2xl p-8 md:p-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                
+                <div class="flex flex-row items-center gap-5">
+                    <div class="w-14 h-14 bg-[#FEF3C7] rounded-full flex items-center justify-center shrink-0">
+                        <svg class="w-7 h-7 text-[#D97706]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-[#0F172A] font-semibold text-xl">Bạn vừa phát hiện một đường link hoặc số điện thoại lừa đảo mới?</h3>
+                        <p class="text-[#434655] text-[13px]">Hãy gửi báo cáo cho CyberAware AI để hỗ trợ cộng đồng ngăn chặn kịp thời các mối đe dọa.</p>
+                    </div>
+                </div>
+
+                <button class="flex items-center justify-center gap-2 py-3 px-6 bg-[#0F172A] text-white font-semibold text-sm rounded-lg shadow-sm shrink-0 whitespace-nowrap hover:bg-[#1E293B] transition-colors">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path></svg>
+                    Báo cáo lừa đảo ngay
+                </button>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full flex justify-center bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] mt-auto z-10">
+        <div class="w-full max-w-[1280px] flex flex-col p-8 md:p-12 gap-10">
+            <!-- Top Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-[1184px] mx-auto w-full">
+                
+                <!-- Col 1 -->
+                <div class="flex flex-col gap-3">
+                    <div class="flex flex-row items-center gap-2">
+                        <div class="w-6 h-6 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-[#004AC6]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        </div>
+                        <span class="text-[#0F172A] font-semibold text-lg">CyberAware AI</span>
+                    </div>
+                    <p class="text-[#434655] text-[13px] leading-relaxed">
+                        Nền tảng trí tuệ nhân tạo hỗ trợ xác minh rủi ro, phát hiện lừa đảo trực tuyến và phổ biến kiến thức an toàn số cho cộng đồng người Việt.
+                    </p>
+                </div>
+                
+                <!-- Col 2 -->
+                <div class="flex flex-col gap-4">
+                    <h4 class="text-[#0F172A] font-semibold text-sm">Tra cứu & Đánh giá</h4>
+                    <ul class="flex flex-col gap-2">
+                        <li><a href="#" class="text-[#434655] text-[13px] hover:text-[#004AC6] hover:underline">Xác minh Website / URL</a></li>
+                        <li><a href="#" class="text-[#434655] text-[13px] hover:text-[#004AC6] hover:underline">Kiểm tra Số điện thoại & STK</a></li>
+                        <li><a href="#" class="text-[#434655] text-[13px] hover:text-[#004AC6] hover:underline">Báo cáo trường hợp lừa đảo</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3 -->
+                <div class="flex flex-col gap-4">
+                    <h4 class="text-[#0F172A] font-semibold text-sm">Nâng cao nhận thức</h4>
+                    <ul class="flex flex-col gap-2">
+                        <li><a href="#" class="text-[#434655] text-[13px] hover:text-[#004AC6] hover:underline">Khóa học tự vệ không gian mạng</a></li>
+                        <li><a href="#" class="text-[#434655] text-[13px] hover:text-[#004AC6] hover:underline">Tình huống cảnh báo thời sự</a></li>
+                        <li><a href="#" class="text-[#434655] text-[13px] hover:text-[#004AC6] hover:underline">Tài liệu hướng dẫn bảo mật</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4 -->
+                <div class="flex flex-col gap-4">
+                    <h4 class="text-[#0F172A] font-semibold text-sm">Thông tin & Hỗ trợ</h4>
+                    <ul class="flex flex-col gap-2">
+                        <li><a href="#" class="text-[#434655] text-[13px] hover:text-[#004AC6] hover:underline">Về dự án CyberAware AI</a></li>
+                        <li><a href="#" class="text-[#434655] text-[13px] hover:text-[#004AC6] hover:underline">Điều khoản sử dụng dữ liệu</a></li>
+                        <li><a href="#" class="text-[#434655] text-[13px] hover:text-[#004AC6] hover:underline">Đường dây nóng phòng chống lừa đảo</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Area -->
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-gray-100 max-w-[1184px] mx-auto w-full">
+                <span class="text-[#434655] text-[13px] text-center md:text-left">
+                    © 2025 CyberAware AI. Phát triển vì an toàn số cộng đồng Việt Nam.
+                </span>
+                <span class="text-[#565E74] font-semibold text-xs text-center md:text-right tracking-wide">
+                    Miễn trừ trách nhiệm: Hệ thống cung cấp chỉ số rủi ro tham khảo dựa trên mô hình máy học và dữ liệu phân tích công khai.
+                </span>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

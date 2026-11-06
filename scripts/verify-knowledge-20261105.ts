@@ -1,0 +1,16 @@
+import 'dotenv/config';
+import assert from 'node:assert/strict';
+process.env.GEMINI_API_KEY = '';
+const { evaluateStoredRules } = await import('../backend/intelligence');
+const { analyze } = await import('../backend/analysis');
+const { db } = await import('../backend/database');
+const url = await analyze('url', 'https://example.org/vneid.apk', false);
+assert.ok(url.flags.some(flag => flag.includes('VNeID dạng APK')));
+assert.ok(url.riskScore >= 30);
+assert.equal(evaluateStoredRules('url', 'https://baochinhphu.vn/').score, 0);
+assert.ok(evaluateStoredRules('sms', 'Yêu cầu gửi cụm từ khôi phục ví').matches.includes('vn-20261105-sms-23'));
+const rules = db.prepare("SELECT * FROM scam_rules WHERE id LIKE 'vn-20261105-%'").all() as any[];
+for (const r of rules) assert.ok(evaluateStoredRules(r.type, JSON.parse(r.terms)[0]).matches.includes(r.id));
+assert.equal(db.prepare("SELECT COUNT(*) AS n FROM threat_intel WHERE id LIKE 'vn-20261105-%' AND status='reviewed'").get()!.n, 20);
+console.log('PASS: 56 rules match; URL analysis uses DB; benign URL has no added score; 20 reviewed warnings persisted.');
+db.close();

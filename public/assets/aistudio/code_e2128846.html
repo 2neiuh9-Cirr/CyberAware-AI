@@ -1,0 +1,384 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_blank" name="shell-type"><title>CyberAware AI</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "border-subtle": "#E2E8F0", "on-tertiary-fixed": "#002114", "tertiary-fixed": "#85f8c4", "surface-dim": "#cbdbf5", "surface-container-high": "#dce9ff", "inverse-primary": "#b4c5ff", "on-secondary-fixed": "#131b2e", "on-error-container": "#93000a", "surface-container-lowest": "#ffffff", "inverse-on-surface": "#eaf1ff", "on-secondary": "#ffffff", "background": "#f8f9ff", "surface-card": "#FFFFFF", "on-tertiary-container": "#bdffdc", "on-background": "#0b1c30", "error-container": "#ffdad6", "status-warning-border": "#FDE68A", "primary-light": "#EFF6FF", "on-primary-fixed-variant": "#003ea8", "surface-subtle": "#F1F5F9", "border-strong": "#CBD5E1", "secondary": "#565e74", "on-primary": "#ffffff", "navy-dark": "#0F172A", "primary-fixed-dim": "#b4c5ff", "primary": "#004ac6", "surface-canvas": "#F8FAFC", "tertiary-fixed-dim": "#68dba9", "primary-hover": "#1D4ED8", "tertiary-container": "#007d57", "on-primary-fixed": "#00174b", "surface-container-low": "#eff4ff", "secondary-fixed": "#dae2fd", "surface-bright": "#f8f9ff", "secondary-fixed-dim": "#bec6e0", "error": "#ba1a1a", "on-secondary-container": "#5c647a", "status-danger-border": "#FECACA", "on-surface": "#0b1c30", "status-danger-bg": "#FEE2E2", "status-safe": "#059669", "on-surface-variant": "#434655", "secondary-container": "#dae2fd", "status-danger": "#DC2626", "status-warning-bg": "#FEF3C7", "status-safe-border": "#A7F3D0", "navy-slate": "#1E293B", "surface": "#f8f9ff", "on-error": "#ffffff", "surface-container-highest": "#d3e4fe", "on-primary-container": "#eeefff", "status-safe-bg": "#D1FAE5", "surface-variant": "#d3e4fe", "outline-variant": "#c3c6d7", "on-tertiary": "#ffffff", "on-secondary-fixed-variant": "#3f465c", "outline": "#737686", "on-tertiary-fixed-variant": "#005137", "inverse-surface": "#213145", "status-warning": "#D97706", "primary-fixed": "#dbe1ff", "surface-tint": "#0053db", "primary-container": "#2563eb", "surface-container": "#e5eeff", "tertiary": "#006243" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-lg": "1.5rem", "space-sm": "0.5rem", "margin": "2rem", "space-xl": "2.5rem", "space-xs": "0.25rem", "gutter-sm": "1rem", "space-md": "1rem", "space-2xl": "4rem", "gutter": "1.5rem", "margin-mobile": "1rem" }, "fontFamily": { "headline-sm": ["Inter"], "label-md": ["Inter"], "headline-md": ["Inter"], "display-hero": ["Inter"], "body-md": ["Inter"], "body-sm": ["Inter"], "body-lg": ["Inter"], "label-lg": ["Inter"], "title-md": ["Inter"], "headline-lg-mobile": ["Inter"], "headline-lg": ["Inter"], "code-sm": ["JetBrains Mono"], "display-hero-mobile": ["Inter"] }, "fontSize": { "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "display-hero": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }], "title-md": ["18px", { "lineHeight": "26px", "fontWeight": "600" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }], "display-hero-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }] } } } };</script></head><body class="bg-surface-canvas font-body-md text-on-surface antialiased"><main class="w-full min-h-screen flex flex-col justify-center items-center p-6"><div class="flex flex-col w-full max-w-[1200px] mx-auto py-8">
+<!-- Top Navigation & Return Link -->
+<div class="flex items-center justify-between mb-8 px-4">
+<a class="inline-flex items-center gap-2 text-primary font-label-lg text-label-lg hover:text-primary-hover transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">arrow_back</span>
+<span>Quay lại màn hình Đăng nhập</span>
+</a>
+<div class="flex items-center gap-2 bg-surface-container-high/60 px-3 py-1.5 rounded-full text-secondary font-code-sm text-code-sm">
+<span class="inline-block w-2 h-2 rounded-full bg-status-safe animate-pulse"></span>
+<span>Hệ thống bảo vệ CyberAware AI • SSL 256-bit</span>
+</div>
+</div>
+<!-- Main Asymmetric Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Left Column: Interactive Step Container -->
+<div class="lg:col-span-7 flex flex-col gap-6">
+<!-- Interactive Step Controller / Progress Tab -->
+<div class="bg-surface-card rounded-xl p-2 shadow-sm flex items-center justify-between gap-1 overflow-x-auto">
+<button class="flex-1 py-2.5 px-3 rounded-lg text-center transition-all flex items-center justify-center gap-2 bg-primary text-on-primary shadow-sm" id="btnStep1" onclick="switchStep(1)">
+<span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center font-label-md text-label-md">1</span>
+<span class="font-label-md text-label-md whitespace-nowrap">Gửi yêu cầu</span>
+</button>
+<button class="flex-1 py-2.5 px-3 rounded-lg text-center transition-all flex items-center justify-center gap-2 text-secondary hover:bg-surface-subtle" id="btnStep2" onclick="switchStep(2)">
+<span class="w-5 h-5 rounded-full bg-surface-subtle flex items-center justify-center font-label-md text-label-md">2</span>
+<span class="font-label-md text-label-md whitespace-nowrap">Kiểm tra hộp thư</span>
+</button>
+<button class="flex-1 py-2.5 px-3 rounded-lg text-center transition-all flex items-center justify-center gap-2 text-secondary hover:bg-surface-subtle" id="btnStep3" onclick="switchStep(3)">
+<span class="w-5 h-5 rounded-full bg-surface-subtle flex items-center justify-center font-label-md text-label-md">3</span>
+<span class="font-label-md text-label-md whitespace-nowrap">Mật khẩu mới</span>
+</button>
+</div>
+<!-- State 1: Request Password Reset Form -->
+<div class="bg-surface-card rounded-xl p-8 shadow-sm flex flex-col transition-all" id="stepPanel1">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">lock_reset</span>
+</div>
+<span class="font-label-md text-label-md text-primary font-semibold uppercase tracking-wider">Xác thực người dùng</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-navy-dark tracking-tight mb-2">Khôi phục mật khẩu</h1>
+<p class="font-body-md text-body-md text-secondary mb-8">
+          Nhập địa chỉ email liên kết với tài khoản của bạn để nhận liên kết đặt lại mật khẩu an toàn theo quy chuẩn bảo mật công dân số.
+        </p>
+<form class="flex flex-col gap-5" onsubmit="handleSendLink(event)">
+<div class="flex flex-col gap-1.5">
+<label class="font-label-lg text-label-lg text-navy-dark flex items-center justify-between" for="recoveryEmail">
+<span>Địa chỉ Email</span>
+<span class="font-body-sm text-body-sm text-secondary">Bắt buộc</span>
+</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3.5 text-secondary pointer-events-none text-xl">alternate_email</span>
+<input class="w-full h-14 pl-11 pr-4 rounded-xl bg-surface-subtle text-navy-dark font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all shadow-inner" id="recoveryEmail" placeholder="vidu@chinhquyen.vn hoặc canhan@gmail.com" required="" type="email" value="nguyen.van.an@cyberaware.vn">
+</div>
+</div>
+<div class="bg-surface-subtle/70 rounded-xl p-4 flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-xl mt-0.5">verified_user</span>
+<p class="font-body-sm text-body-sm text-secondary">
+              CyberAware sẽ tự động phát hiện mã độc tiềm ẩn, tên miền mạo danh và tạo mã Token xác thực dùng một lần (OTP-hash) có hiệu lực trong vòng 15 phút.
+            </p>
+</div>
+<button class="mt-2 w-full h-12 bg-primary hover:bg-primary-hover text-on-primary font-label-lg text-label-lg rounded-xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99]" type="submit">
+<span>Gửi liên kết khôi phục</span>
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</form>
+</div>
+<!-- State 2: Confirmation / Success Card -->
+<div class="hidden bg-surface-card rounded-xl p-8 shadow-sm flex-col transition-all" id="stepPanel2">
+<div class="flex items-center justify-between mb-6">
+<div class="w-12 h-12 rounded-full bg-status-safe-bg text-status-safe flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl">mark_email_read</span>
+</div>
+<span class="bg-status-safe-bg text-status-safe font-label-md text-label-md px-3 py-1 rounded-full flex items-center gap-1.5 font-semibold">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+            Đã gửi thành công
+          </span>
+</div>
+<h2 class="font-headline-md text-headline-md text-navy-dark mb-2">Đã gửi hướng dẫn đến email của bạn</h2>
+<p class="font-body-md text-body-md text-secondary mb-6">
+          Vui lòng kiểm tra hộp thư đến hoặc mục thư rác. Chúng tôi đã gửi một liên kết bảo mật chứa token mã hóa đến hộp thư của bạn.
+        </p>
+<!-- Simulated Mail Preview Box -->
+<div class="bg-surface-subtle rounded-xl p-5 mb-6 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary">Hộp thư nhận:</span>
+<span class="font-code-sm text-code-sm text-navy-dark font-semibold" id="targetEmailDisplay">nguyen.van.an@cyberaware.vn</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary">Thời gian hiệu lực:</span>
+<span class="font-code-sm text-code-sm text-status-danger font-semibold">14 phút 59 giây</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary">Mã định danh yêu cầu:</span>
+<span class="font-code-sm text-code-sm text-secondary">#CA-8829-VN</span>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-center gap-3">
+<button class="w-full sm:flex-1 h-12 bg-primary hover:bg-primary-hover text-on-primary font-label-lg text-label-lg rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all" onclick="switchStep(3)" type="button">
+<span>Giả lập nhấp vào liên kết (Bước 3)</span>
+<span class="material-symbols-outlined text-lg">open_in_new</span>
+</button>
+<button class="w-full sm:w-auto px-5 h-12 bg-surface-subtle hover:bg-border-subtle text-navy-dark font-label-lg text-label-lg rounded-xl flex items-center justify-center gap-2 transition-colors" id="btnResend" onclick="resendCode()" type="button">
+<span class="material-symbols-outlined text-lg">refresh</span>
+<span>Gửi lại mã</span>
+</button>
+</div>
+</div>
+<!-- State 3: Reset Password Form -->
+<div class="hidden bg-surface-card rounded-xl p-8 shadow-sm flex-col transition-all" id="stepPanel3">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">password</span>
+</div>
+<span class="font-label-md text-label-md text-primary font-semibold uppercase tracking-wider">Thiết lập bảo mật</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-navy-dark mb-2">Đặt mật khẩu mới</h2>
+<p class="font-body-md text-body-md text-secondary mb-6">
+          Mật khẩu mới cần đáp ứng các tiêu chuẩn phòng chống tấn công dò quét từ điển và bẻ khóa tự động của CyberAware AI.
+        </p>
+<form class="flex flex-col gap-5" onsubmit="handleUpdatePassword(event)">
+<!-- Password Field -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-lg text-label-lg text-navy-dark" for="newPassword">Mật khẩu mới</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3.5 text-secondary pointer-events-none text-xl">key</span>
+<input class="w-full h-14 pl-11 pr-12 rounded-xl bg-surface-subtle text-navy-dark font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all shadow-inner" id="newPassword" oninput="checkPasswordStrength(this.value)" placeholder="Tối thiểu 8 ký tự..." required="" type="password">
+<button class="absolute right-3.5 text-secondary hover:text-navy-dark" onclick="togglePassVisibility('newPassword', this)" type="button">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+</div>
+</div>
+<!-- Strength Meter Bar & Indicators -->
+<div class="bg-surface-subtle rounded-xl p-4 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary">Độ mạnh mật khẩu:</span>
+<span class="font-label-md text-label-md text-status-warning font-semibold" id="strengthText">Trung bình (60%)</span>
+</div>
+<div class="w-full h-2 rounded-full bg-border-strong/40 overflow-hidden flex">
+<div class="h-full bg-status-warning transition-all duration-300 w-3/5" id="strengthBar"></div>
+</div>
+<!-- Validation Checkpoints -->
+<div class="grid grid-cols-2 gap-2 mt-2">
+<div class="flex items-center gap-1.5 font-body-sm text-body-sm text-status-safe" id="chkLen">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+<span>Tối thiểu 8 ký tự</span>
+</div>
+<div class="flex items-center gap-1.5 font-body-sm text-body-sm text-status-safe" id="chkUpper">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+<span>Có chữ hoa &amp; chữ thường</span>
+</div>
+<div class="flex items-center gap-1.5 font-body-sm text-body-sm text-secondary" id="chkNum">
+<span class="material-symbols-outlined text-sm">radio_button_unchecked</span>
+<span>Có ít nhất 1 chữ số</span>
+</div>
+<div class="flex items-center gap-1.5 font-body-sm text-body-sm text-secondary" id="chkSpecial">
+<span class="material-symbols-outlined text-sm">radio_button_unchecked</span>
+<span>Ký tự đặc biệt (!@#$)</span>
+</div>
+</div>
+</div>
+<!-- Confirm Password Field -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-lg text-label-lg text-navy-dark" for="confirmPassword">Xác nhận mật khẩu mới</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3.5 text-secondary pointer-events-none text-xl">lock</span>
+<input class="w-full h-14 pl-11 pr-12 rounded-xl bg-surface-subtle text-navy-dark font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all shadow-inner" id="confirmPassword" placeholder="Nhập lại mật khẩu..." required="" type="password">
+<button class="absolute right-3.5 text-secondary hover:text-navy-dark" onclick="togglePassVisibility('confirmPassword', this)" type="button">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+</div>
+</div>
+<button class="mt-2 w-full h-12 bg-primary hover:bg-primary-hover text-on-primary font-label-lg text-label-lg rounded-xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99]" type="submit">
+<span class="material-symbols-outlined text-lg">check</span>
+<span>Cập nhật mật khẩu</span>
+</button>
+</form>
+</div>
+<!-- Security Guidance Banner -->
+<div class="bg-surface-card rounded-xl p-5 shadow-sm flex items-start gap-4">
+<div class="w-10 h-10 rounded-lg bg-status-warning-bg text-status-warning flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-2xl">shield_person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-navy-dark mb-1">Cảnh giác với tin nhắn giả mạo</span>
+<p class="font-body-sm text-body-sm text-secondary">
+            Ban Quản Trị CyberAware <strong>không bao giờ</strong> gọi điện thoại hay nhắn tin qua Zalo/Telegram để yêu cầu bạn cung cấp mật khẩu hoặc mã OTP xác thực.
+          </p>
+</div>
+</div>
+</div>
+<!-- Right Column: Verification & Security Context (Editorial Bento) -->
+<div class="lg:col-span-5 flex flex-col gap-6">
+<!-- Visual Editorial Security Card with Photo-Rich Context -->
+<div class="bg-surface-card rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="w-full h-44 bg-cover bg-center relative p-5 flex flex-col justify-between" data-alt="Modern cybersecurity data center facility with clean deep navy and soft cyan server rack ambient illumination, representing state-of-the-art civic digital protection and secure data integrity in Vietnam" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD93sffS70zJvzylAAeG5onsNe5X9io3zwbfp0apVN-yD7yMMnWEFD1idkniFmFsAtzYLgqls5ZbVcQ1ijyS7BcrRS1TLefcLWuR5S5D9oyIFlfaZ2QWgJZvRsFDsT7qOR9smvJ0Y7kjuPgg--0jC6cOpWhWLU6TlNjFDJfHAxouclc3rGzcgpkEDmT4j0rXhgTIFQZhM9TFgm5nbTs9Tnm-8T1O_cxcTEwP-NVLZOGfxIro4O92Hep')">
+<div class="bg-navy-dark/80 backdrop-blur-md self-start px-3 py-1 rounded-full text-white font-code-sm text-code-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-tertiary-fixed">shield</span>
+<span>Zero-Trust Protocol</span>
+</div>
+<div class="text-white">
+<span class="font-label-md text-label-md text-inverse-primary uppercase tracking-wider block">Trực nhật giám sát</span>
+<p class="font-title-md text-title-md font-semibold text-white">Bảo vệ danh tính số Quốc gia</p>
+</div>
+</div>
+<div class="p-6 flex flex-col gap-4">
+<h3 class="font-title-md text-title-md text-navy-dark">Quy trình 3 lớp khôi phục an toàn</h3>
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center font-code-sm text-code-sm font-bold shrink-0">A</span>
+<div>
+<p class="font-label-lg text-label-lg text-navy-dark">Phát hiện địa chỉ IP bất thường</p>
+<p class="font-body-sm text-body-sm text-secondary">Kiểm tra thông số vị trí địa lý của thiết bị gửi yêu cầu để chặn tấn công brute-force từ xa.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center font-code-sm text-code-sm font-bold shrink-0">B</span>
+<div>
+<p class="font-label-lg text-label-lg text-navy-dark">Hủy toàn bộ phiên đăng nhập cũ</p>
+<p class="font-body-sm text-body-sm text-secondary">Sau khi đổi mật khẩu, mọi thiết bị máy tính bảng, điện thoại hoặc trình duyệt lạ sẽ bị đăng xuất ngay lập tức.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center font-code-sm text-code-sm font-bold shrink-0">C</span>
+<div>
+<p class="font-label-lg text-label-lg text-navy-dark">Thông báo đa kênh tức thời</p>
+<p class="font-body-sm text-body-sm text-secondary">Gửi tin nhắn cảnh báo đồng thời qua kênh bảo mật để bạn có thể đóng băng tài khoản trong 60 giây nếu phát hiện dấu hiệu xâm phạm.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Assistance Accordion Box -->
+<div class="bg-surface-card rounded-xl p-6 shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h4 class="font-title-md text-title-md text-navy-dark">Không nhận được email?</h4>
+<span class="material-symbols-outlined text-secondary">help_outline</span>
+</div>
+<div class="flex flex-col gap-3 font-body-sm text-body-sm text-secondary">
+<div class="p-3 rounded-lg bg-surface-subtle">
+<span class="font-semibold text-navy-dark block mb-0.5">1. Kiểm tra thư mục Spam hoặc Quảng cáo</span>
+            Bộ lọc của Google hoặc Outlook đôi khi có thể phân loại nhầm thư chứa liên kết xác thực kỹ thuật số.
+          </div>
+<div class="p-3 rounded-lg bg-surface-subtle">
+<span class="font-semibold text-navy-dark block mb-0.5">2. Kiểm tra lại chính tả địa chỉ email</span>
+            Đảm bảo bạn không nhập thừa khoảng trắng hoặc sai đuôi tên miền cơ quan (.gov.vn / .org.vn).
+          </div>
+</div>
+<a class="inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-surface-subtle text-primary hover:bg-primary-light font-label-lg text-label-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">support_agent</span>
+<span>Liên hệ Trung tâm Hỗ trợ Công dân 24/7</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<script src="./popup.js"></script>
+<script>
+  function switchStep(stepNumber) {
+    const panels = [document.getElementById('stepPanel1'), document.getElementById('stepPanel2'), document.getElementById('stepPanel3')];
+    const buttons = [document.getElementById('btnStep1'), document.getElementById('btnStep2'), document.getElementById('btnStep3')];
+
+    panels.forEach((p, idx) => {
+      if (idx === stepNumber - 1) {
+        p.classList.remove('hidden');
+        p.classList.add('flex');
+      } else {
+        p.classList.add('hidden');
+        p.classList.remove('flex');
+      }
+    });
+
+    buttons.forEach((b, idx) => {
+      if (idx === stepNumber - 1) {
+        b.className = "flex-1 py-2.5 px-3 rounded-lg text-center transition-all flex items-center justify-center gap-2 bg-primary text-on-primary shadow-sm";
+      } else {
+        b.className = "flex-1 py-2.5 px-3 rounded-lg text-center transition-all flex items-center justify-center gap-2 text-secondary hover:bg-surface-subtle";
+      }
+    });
+  }
+
+  function handleSendLink(e) {
+    e.preventDefault();
+    const emailVal = document.getElementById('recoveryEmail').value;
+    if (emailVal) {
+      document.getElementById('targetEmailDisplay').innerText = emailVal;
+    }
+    switchStep(2);
+  }
+
+  function resendCode() {
+    const btn = document.getElementById('btnResend');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-lg">sync</span><span>Đang gửi...</span>`;
+    setTimeout(() => {
+      btn.innerHTML = `<span class="material-symbols-outlined text-status-safe text-lg">check</span><span>Đã gửi lại!</span>`;
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+      }, 2500);
+    }, 1200);
+  }
+
+  function handleUpdatePassword(e) {
+    e.preventDefault();
+    const p1 = document.getElementById('newPassword').value;
+    const p2 = document.getElementById('confirmPassword').value;
+
+    if (p1 !== p2) {
+      showCyberawarePopup("Mật khẩu xác nhận không trùng khớp. Vui lòng kiểm tra lại.", "error");
+      return;
+    }
+    showCyberawarePopup("Mật khẩu của bạn đã được cập nhật an toàn! Bạn có thể đăng nhập ngay.", "success");
+  }
+
+  function togglePassVisibility(inputId, triggerBtn) {
+    const input = document.getElementById(inputId);
+    const icon = triggerBtn.querySelector('.material-symbols-outlined');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.innerText = 'visibility_off';
+    } else {
+      input.type = 'password';
+      icon.innerText = 'visibility';
+    }
+  }
+
+  function checkPasswordStrength(val) {
+    const bar = document.getElementById('strengthBar');
+    const text = document.getElementById('strengthText');
+    const chkLen = document.getElementById('chkLen');
+    const chkUpper = document.getElementById('chkUpper');
+    const chkNum = document.getElementById('chkNum');
+    const chkSpecial = document.getElementById('chkSpecial');
+
+    const hasLen = val.length >= 8;
+    const hasUpper = /[A-Z]/.test(val) && /[a-z]/.test(val);
+    const hasNum = /[0-9]/.test(val);
+    const hasSpec = /[!@#$%^&*(),.?":{}|<>]/.test(val);
+
+    updateCheckItem(chkLen, hasLen);
+    updateCheckItem(chkUpper, hasUpper);
+    updateCheckItem(chkNum, hasNum);
+    updateCheckItem(chkSpecial, hasSpec);
+
+    let score = 0;
+    if (hasLen) score++;
+    if (hasUpper) score++;
+    if (hasNum) score++;
+    if (hasSpec) score++;
+
+    if (score === 0) {
+      bar.style.width = '10%';
+      bar.className = 'h-full bg-status-danger transition-all duration-300';
+      text.innerText = 'Rất yếu (10%)';
+      text.className = 'font-label-md text-label-md text-status-danger font-semibold';
+    } else if (score <= 2) {
+      bar.style.width = '40%';
+      bar.className = 'h-full bg-status-warning transition-all duration-300';
+      text.innerText = 'Trung bình (40%)';
+      text.className = 'font-label-md text-label-md text-status-warning font-semibold';
+    } else if (score === 3) {
+      bar.style.width = '75%';
+      bar.className = 'h-full bg-primary transition-all duration-300';
+      text.innerText = 'Khá mạnh (75%)';
+      text.className = 'font-label-md text-label-md text-primary font-semibold';
+    } else {
+      bar.style.width = '100%';
+      bar.className = 'h-full bg-status-safe transition-all duration-300';
+      text.innerText = 'Rất mạnh (100%)';
+      text.className = 'font-label-md text-label-md text-status-safe font-semibold';
+    }
+  }
+
+  function updateCheckItem(el, passed) {
+    const icon = el.querySelector('.material-symbols-outlined');
+    if (passed) {
+      el.className = 'flex items-center gap-1.5 font-body-sm text-body-sm text-status-safe';
+      icon.innerText = 'check_circle';
+    } else {
+      el.className = 'flex items-center gap-1.5 font-body-sm text-body-sm text-secondary';
+      icon.innerText = 'radio_button_unchecked';
+    }
+  }
+</script></main>
+
+</body></html>
