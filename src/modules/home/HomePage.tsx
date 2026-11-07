@@ -31,6 +31,7 @@ import { ThreatMetricsBar } from '../../components/cyber/ThreatMetricsBar';
 import { CyberScanningOverlay } from '../../components/cyber/CyberScanningOverlay';
 import { DeepfakeWaveformVisualizer } from '../../components/cyber/DeepfakeWaveformVisualizer';
 import { CyberMobileShowcase } from './components/CyberMobileShowcase';
+import { AiChatShowcase } from './components/AiChatShowcase';
 
 export const HomePage: React.FC = () => {
   const {
@@ -603,6 +604,8 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <AiChatShowcase />
 
       {/* Community Learning Hub */}
       <section className="w-full bg-white flex flex-col items-center py-16 md:py-20 px-4 md:px-12 border-b border-slate-100">
