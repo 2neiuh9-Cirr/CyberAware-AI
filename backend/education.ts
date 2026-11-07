@@ -23,36 +23,36 @@ export const lessonExtras: Record<string, string[]> = {
 export const answerDetails: Record<string, [string, string, string, string, string][]> = {
  'course-deepfake': [
   ['Hỏi lại trong cùng tài khoản mạng xã hội', 'Sai: chuyển ngay bỏ qua xác minh người nhận.', 'Đúng: số đã lưu trước là kênh độc lập với cuộc gọi đáng ngờ.', 'Sai: video bổ sung vẫn có thể do cùng đối tượng tạo.', 'Sai: tài khoản nhắn tin có thể đã bị chiếm.'],
-  ['Chỉ đúng nếu gọi trên ứng dụng quen thuộc', 'Sai: hình rõ nét không chứng minh danh tính.', 'Đúng: video và giọng nói có thể bị giả mạo.', 'Sai: ứng dụng quen thuộc vẫn có thể chứa tài khoản bị chiếm.', 'Sai: không thể kết luận bằng vẻ ngoài video.'],
-  ['Chỉ đủ nếu biết địa chỉ nhà', 'Sai: tên gia đình có thể thu thập từ mạng xã hội.', 'Đúng: cần gọi lại hoặc hỏi qua kênh độc lập.', 'Sai: địa chỉ cũng có thể bị lộ.', 'Sai: kiến thức cá nhân không thay được xác minh.'],
+  ['Có nếu người gọi biết biệt danh của bạn', 'Sai: hình rõ nét không chứng minh danh tính.', 'Đúng: video và giọng nói có thể bị giả mạo.', 'Sai: ứng dụng quen thuộc vẫn có thể chứa tài khoản bị chiếm.', 'Sai: biệt danh cũng có thể đã bị lộ.'],
+  ['Có nếu giọng nói rất giống', 'Sai: tên gia đình có thể thu thập từ mạng xã hội.', 'Đúng: cần gọi lại hoặc hỏi qua kênh độc lập.', 'Sai: địa chỉ cũng có thể bị lộ.', 'Sai: giọng nói có thể bị giả mạo.'],
   ['Chắc chắn là cuộc gọi thật', 'Sai: hình giật không chứng minh deepfake.', 'Đúng: lỗi đường truyền cũng gây giật hình.', 'Sai: hình mượt cũng có thể bị giả.', 'Sai: không thể xác minh chỉ bằng chất lượng hình.'],
-  ['Gọi ngay số trong tin nhắn vừa nhận', 'Sai: người gọi có thể kiểm soát số mới.', 'Đúng: số đã lưu trước giảm nguy cơ gọi lại kẻ giả mạo.', 'Sai: chính người lạ cung cấp số nên không độc lập.', 'Sai: cần chủ động dùng kênh đã biết.']
+  ['Chỉ nhắn lại trong tài khoản đang gọi', 'Sai: người gọi có thể kiểm soát số mới.', 'Đúng: số đã lưu trước giảm nguy cơ gọi lại kẻ giả mạo.', 'Sai: chính người lạ cung cấp số nên không độc lập.', 'Sai: tài khoản đang gọi có thể đã bị chiếm.']
  ],
  'course-banking': [
-  ['Có nếu họ nói đang khóa giao dịch', 'Sai: biết tên bạn không chứng minh họ là nhân viên.', 'Đúng: không chia sẻ OTP với bất kỳ người gọi nào.', 'Sai: lời giải thích khẩn cấp không thay đổi mục đích của OTP.', 'Sai: hãy tự gọi ngân hàng qua kênh đã lưu.'],
-  ['Tên miền thuộc ngân hàng', 'Sai: HTTPS không chứng minh uy tín.', 'Đúng: HTTPS mã hóa kết nối.', 'Sai: phải đọc và kiểm tra tên miền riêng.', 'Sai: một trang giả cũng có thể dùng HTTPS.'],
-  ['example.attacker.invalid', 'Sai: bank.example chỉ là phần đầu của tên miền.', 'Đúng: tên miền thuộc attacker.invalid.', 'Sai: example.attacker.invalid vẫn là tên miền con của attacker.invalid.', 'Sai: cần đọc hết tên miền trước dấu gạch chéo.'],
-  ['Chỉ kiểm tra số lượng mã QR', 'Sai: logo có thể bị sao chép.', 'Đúng: tên người nhận và số tiền quyết định nơi tiền đến.', 'Sai: số mã QR không xác minh người nhận.', 'Sai: hãy kiểm tra màn hình xác nhận cuối.'],
-  ['Gửi OTP cho người gọi để hỏi', 'Đúng: từ chối và kiểm tra tài khoản qua kênh chính thức.', 'Sai: xác nhận có thể cho phép giao dịch lạ.', 'Sai: gửi OTP tạo thêm rủi ro mất quyền truy cập.', 'Sai: phải kiểm tra trước khi làm bất cứ xác nhận nào.']
+  ['Có nếu họ gửi ảnh thẻ nhân viên', 'Sai: biết tên bạn không chứng minh họ là nhân viên.', 'Đúng: không chia sẻ OTP với bất kỳ người gọi nào.', 'Sai: lời giải thích khẩn cấp không thay đổi mục đích của OTP.', 'Sai: ảnh thẻ nhân viên cũng có thể bị giả mạo.'],
+  ['Gửi mã OTP theo hướng dẫn trong tin nhắn', 'Sai: liên kết trong tin nhắn có thể dẫn tới trang giả để lấy mật khẩu.', 'Đúng: tự mở ứng dụng ngân hàng là cách kiểm tra độc lập.', 'Sai: trả lời tin nhắn vẫn tương tác với nguồn chưa xác minh.', 'Sai: mã OTP có thể bị dùng để đăng nhập hoặc xác nhận giao dịch.'],
+  ['Đưa mật khẩu ngân hàng cho người gọi để họ hỗ trợ', 'Sai: ứng dụng lạ và quyền điều khiển có thể khiến bạn mất quyền kiểm soát thiết bị.', 'Đúng: tự gọi số hỗ trợ chính thức để kiểm tra yêu cầu.', 'Sai: quyền xem màn hình cũng có thể làm lộ thông tin nhạy cảm.', 'Sai: không chia sẻ mật khẩu cho người gọi tự xưng hỗ trợ.'],
+  ['Chỉ kiểm tra tên ngân hàng', 'Sai: logo có thể bị sao chép.', 'Đúng: tên người nhận và số tiền quyết định nơi tiền đến.', 'Sai: số mã QR không xác minh người nhận.', 'Sai: tên ngân hàng không xác minh đúng người nhận.'],
+  ['Đóng ứng dụng mà không kiểm tra tài khoản', 'Đúng: từ chối và kiểm tra tài khoản qua kênh chính thức.', 'Sai: xác nhận có thể cho phép giao dịch lạ.', 'Sai: gửi OTP tạo thêm rủi ro mất quyền truy cập.', 'Sai: cần kiểm tra tài khoản và liên hệ ngân hàng nếu có dấu hiệu lạ.']
  ],
  'course-parents': [
-  ['Đọc OTP để chứng minh danh tính', 'Sai: chuyển tiền theo đe dọa có thể mất tiền.', 'Đúng: dừng và xác minh độc lập.', 'Sai: OTP không dùng để chứng minh vô tội.', 'Sai: nên hỏi người thân hoặc kênh chính thức.'],
-  ['Chỉ có nếu số bắt đầu bằng 09', 'Sai: đầu số không xác minh người gọi.', 'Đúng: số có thể bị giả hoặc người lạ dùng.', 'Sai: đầu số 09 cũng không bảo đảm uy tín.', 'Sai: cần kiểm tra yêu cầu bằng kênh khác.'],
-  ['Gửi ảnh căn cước để giữ quà', 'Đúng: kiểm tra chương trình qua kênh đã biết.', 'Sai: trả phí vội có thể mất tiền.', 'Sai: ảnh giấy tờ là dữ liệu nhạy cảm.', 'Sai: quà thật không cần làm theo lời người lạ.'],
-  ['Chuyển tiền rồi mới báo gia đình', 'Sai: bí mật tạo điều kiện cô lập nạn nhân.', 'Đúng: người tin cậy giúp kiểm chứng.', 'Sai: chuyển tiền trước khi hỏi có thể không thu hồi được.', 'Sai: nên tạm dừng ngay.'],
-  ['Lưu số do người gọi lạ cung cấp', 'Đúng: danh bạ đã xác minh giúp gọi đúng nơi.', 'Sai: số người lạ gửi có thể dẫn tới đồng phạm.', 'Sai: số do người lạ cung cấp không độc lập.', 'Sai: chuẩn bị trước khi có tình huống khẩn cấp.']
+  ['Chỉ chuyển một phần tiền', 'Sai: chuyển tiền theo đe dọa có thể mất tiền.', 'Đúng: dừng và xác minh độc lập.', 'Sai: OTP không dùng để chứng minh vô tội.', 'Sai: chuyển một phần vẫn có thể mất tiền.'],
+  ['Có nếu số hiện tên cơ quan', 'Sai: đầu số không xác minh người gọi.', 'Đúng: số có thể bị giả hoặc người lạ dùng.', 'Sai: đầu số 09 cũng không bảo đảm uy tín.', 'Sai: tên hiển thị không xác minh danh tính người gọi.'],
+  ['Nhờ người gọi gửi thêm ảnh quà', 'Đúng: kiểm tra chương trình qua kênh đã biết.', 'Sai: trả phí vội có thể mất tiền.', 'Sai: ảnh giấy tờ là dữ liệu nhạy cảm.', 'Sai: ảnh quà không chứng minh chương trình là thật.'],
+  ['Chỉ hỏi người gọi thêm lý do', 'Sai: bí mật tạo điều kiện cô lập nạn nhân.', 'Đúng: người tin cậy giúp kiểm chứng.', 'Sai: chuyển tiền trước khi hỏi có thể không thu hồi được.', 'Sai: hỏi thêm trong cùng cuộc gọi không phải xác minh độc lập.'],
+  ['Chỉ lưu số tổng đài trong tin nhắn lạ', 'Đúng: danh bạ đã xác minh giúp gọi đúng nơi.', 'Sai: số người lạ gửi có thể dẫn tới đồng phạm.', 'Sai: số do người lạ cung cấp không độc lập.', 'Sai: số trong tin nhắn lạ chưa được xác minh.']
  ],
  'course-crisis': [
-  ['Đăng nhập lại cùng trang để kiểm tra', 'Sai: chờ đợi kéo dài thời gian tài khoản bị lộ.', 'Đúng: báo ngân hàng và đổi mật khẩu từ thiết bị an toàn.', 'Sai: trang giả có thể tiếp tục thu mật khẩu.', 'Sai: hãy dùng kênh chính thức.'],
-  ['Chỉ tin nếu họ nhắn trên mạng xã hội', 'Sai: lời hứa chắc chắn và phí trước là dấu hiệu đáng ngờ.', 'Đúng: không thể bảo đảm lấy lại tiền.', 'Sai: tài khoản mạng xã hội cũng có thể giả mạo.', 'Sai: nên làm việc trực tiếp với ngân hàng và nơi tiếp nhận.'],
-  ['Chỉ giữ số tài khoản, xóa nội dung', 'Sai: xóa ngay làm mất chứng cứ.', 'Đúng: giữ tin nhắn, biên lai và thời điểm.', 'Sai: nội dung cũng giúp dựng lại sự việc.', 'Sai: lưu bản sao an toàn trước khi xử lý thiết bị.'],
-  ['Trên thiết bị người lạ hướng dẫn', 'Đúng: thiết bị an toàn giảm nguy cơ lộ mật khẩu mới.', 'Sai: ứng dụng lạ có thể theo dõi thao tác.', 'Sai: không dùng thiết bị người lạ kiểm soát.', 'Sai: cần đổi trên kênh chính thức.'],
-  ['Chỉ có nếu trình duyệt hiện cảnh báo', 'Sai: chỉ bấm link chưa đủ để kết luận nhiễm mã độc.', 'Đúng: cần biết có nhập thông tin hay cài ứng dụng không.', 'Sai: cảnh báo trình duyệt không phải phép thử duy nhất.', 'Sai: đánh giá dựa trên thao tác thực tế.']
+  ['Đổi mật khẩu ngay trên trang giả', 'Sai: chờ đợi kéo dài thời gian tài khoản bị lộ.', 'Đúng: báo ngân hàng qua kênh chính thức và đổi mật khẩu từ thiết bị an toàn.', 'Sai: trang giả có thể tiếp tục thu mật khẩu.', 'Sai: không đổi mật khẩu qua trang đáng ngờ.'],
+  ['Có nếu họ gửi ảnh giấy tờ', 'Sai: lời hứa chắc chắn và phí trước là dấu hiệu đáng ngờ.', 'Đúng: không thể bảo đảm lấy lại tiền.', 'Sai: tài khoản mạng xã hội cũng có thể giả mạo.', 'Sai: ảnh giấy tờ cũng có thể bị giả hoặc bị lấy cắp.'],
+  ['Chỉ nhớ thời điểm, không lưu chứng từ', 'Sai: xóa ngay làm mất chứng cứ.', 'Đúng: giữ tin nhắn, biên lai và thời điểm.', 'Sai: nội dung cũng giúp dựng lại sự việc.', 'Sai: cần giữ chứng từ để đối chiếu và trình báo.'],
+  ['Nhờ người gọi đổi mật khẩu hộ', 'Đúng: thiết bị an toàn giảm nguy cơ lộ mật khẩu mới.', 'Sai: ứng dụng lạ có thể theo dõi thao tác.', 'Sai: không dùng thiết bị người lạ kiểm soát.', 'Sai: không giao quyền đổi mật khẩu cho người lạ.'],
+  ['Chỉ có nếu trang trông đáng ngờ', 'Sai: chỉ bấm link chưa đủ để kết luận nhiễm mã độc.', 'Đúng: cần biết có nhập thông tin hay cài ứng dụng không.', 'Sai: cảnh báo trình duyệt không phải phép thử duy nhất.', 'Sai: vẻ ngoài trang không xác định thiết bị có nhiễm mã độc.']
  ]
 };
 export const thirdChoices: Record<string, string[]> = {
   'course-deepfake': ['', 'Có nếu gọi trên ứng dụng quen thuộc', 'Có nếu biết địa chỉ nhà', 'Có nếu video rất mượt', 'Gọi số trong tin nhắn vừa nhận'],
-  'course-banking': ['Có nếu họ nói đang khóa giao dịch', 'Chứng minh tên miền thuộc ngân hàng', 'example.attacker.invalid', 'Chỉ kiểm tra số lượng mã QR', 'Gửi OTP cho người gọi để hỏi'],
+  'course-banking': ['Có nếu họ nói đang khóa giao dịch', '', '', 'Chỉ kiểm tra số lượng mã QR', 'Gửi OTP cho người gọi để hỏi'],
   'course-parents': ['Đọc OTP để chứng minh danh tính', 'Có nếu số bắt đầu bằng 09', 'Gửi ảnh căn cước để giữ quà', 'Chuyển tiền rồi mới báo gia đình', 'Lưu số do người gọi lạ cung cấp'],
   'course-crisis': ['Đăng nhập lại cùng trang để kiểm tra', 'Có nếu họ nhắn trên mạng xã hội', 'Chỉ giữ số tài khoản, xóa nội dung', 'Đổi trên thiết bị người lạ hướng dẫn', 'Chỉ có nếu trình duyệt hiện cảnh báo'],
 };

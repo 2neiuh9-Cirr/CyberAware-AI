@@ -1,6 +1,7 @@
 import { SCAM_SCENARIOS, COURSES } from './catalog-base';
 import { lessonExtras, answerDetails, thirdChoices } from './education';
 import { extraQuestions } from './education-extra-questions';
+import { newCourses, newQuizzes } from './education-new-courses';
 
 const extraScenarios = [
   ['shipper', 'Mạo danh người giao hàng', 'Quà tặng ảo', 'gift', 'Người gọi báo giao nhầm hàng và yêu cầu quét QR hoàn tiền.', 'Không quét mã hoặc chuyển tiền để nhận khoản hoàn chưa được xác minh.'],
@@ -58,22 +59,22 @@ const questionSets: Record<string, [string, string[], number, string][]> = {
     ['Kênh nào nên dùng để kiểm tra yêu cầu tiền?', ['Số mới do người gọi cung cấp', 'Số người thân đã lưu trước đó'], 1, 'Kẻ gian có thể kiểm soát kênh mới mà họ cung cấp.'],
   ],
   'course-banking': [
-    ['Có nên đọc OTP cho người tự xưng nhân viên hỗ trợ?', ['Có nếu biết tên tôi', 'Không'], 1, 'OTP dùng để xác nhận thao tác, không chia sẻ cho người khác.'],
-    ['HTTPS bảo đảm điều gì?', ['Website luôn uy tín', 'Kết nối được mã hóa'], 1, 'Website lừa đảo cũng có thể có HTTPS.'],
-    ['Tên bank.example.attacker.invalid thuộc tên miền nào?', ['bank.example', 'attacker.invalid'], 1, 'Phải đọc đầy đủ tên miền, không chỉ phần đầu.'],
+    ['Người gọi tự xưng nhân viên ngân hàng yêu cầu đọc OTP để hủy giao dịch lạ. Bạn có nên đọc mã không?', ['Có nếu biết tên tôi', 'Không'], 1, 'Không đọc OTP cho người gọi; tự liên hệ ngân hàng qua ứng dụng hoặc số trên thẻ.'],
+    ['Tin nhắn báo tài khoản ngân hàng sắp bị khóa và yêu cầu bấm liên kết để xác minh. Bạn nên làm gì?', ['Bấm liên kết và đăng nhập ngay', 'Tự mở ứng dụng ngân hàng để kiểm tra thông báo', 'Trả lời tin nhắn để hỏi thêm'], 1, 'Kiểm tra bằng ứng dụng ngân hàng tự mở hoặc số hỗ trợ chính thức, không đăng nhập qua liên kết trong tin nhắn.'],
+    ['Người gọi tự xưng nhân viên ngân hàng gửi liên kết cài ứng dụng “hỗ trợ” và yêu cầu cho phép điều khiển điện thoại. Bạn nên làm gì?', ['Cài ứng dụng và cấp quyền ngay', 'Từ chối, rồi tự gọi ngân hàng qua số trên thẻ hoặc ứng dụng', 'Chỉ cấp quyền xem màn hình'], 1, 'Không cài ứng dụng hay cấp quyền điều khiển theo hướng dẫn của người gọi lạ; tự liên hệ ngân hàng qua kênh chính thức.'],
     ['Trước khi xác nhận QR chuyển tiền cần kiểm tra gì?', ['Chỉ màu logo', 'Tên người nhận và số tiền'], 1, 'QR có thể bị thay thế; đối chiếu thông tin nhận tiền.'],
-    ['Nhận yêu cầu xác nhận giao dịch không do mình tạo?', ['Từ chối và kiểm tra tài khoản', 'Xác nhận để hết thông báo'], 0, 'Không xác nhận giao dịch lạ.'],
+    ['Bạn nhận yêu cầu xác nhận giao dịch không do mình tạo. Nên làm gì?', ['Từ chối và kiểm tra tài khoản', 'Xác nhận để hết thông báo'], 0, 'Không xác nhận giao dịch lạ.'],
   ],
   'course-parents': [
-    ['Cuộc gọi yêu cầu chuyển tiền để chứng minh vô tội?', ['Chuyển ngay', 'Dừng và xác minh độc lập'], 1, 'Không chuyển tiền theo lời đe dọa chưa xác minh.'],
+    ['Người tự xưng cán bộ điều tra yêu cầu chuyển tiền để chứng minh vô tội. Bạn nên làm gì?', ['Chuyển ngay', 'Dừng và xác minh độc lập'], 1, 'Dừng cuộc gọi, hỏi người tin cậy và tự liên hệ cơ quan có thẩm quyền qua kênh chính thức.'],
     ['Đầu số trong nước có chứng minh người gọi uy tín?', ['Có', 'Không'], 1, 'Không thể xác minh danh tính chỉ bằng đầu số.'],
-    ['Trúng quà nhưng phải trả phí trước cho người lạ?', ['Kiểm tra chương trình qua kênh độc lập', 'Nộp nhanh để giữ quà'], 0, 'Yêu cầu phí trước là dấu hiệu cần cảnh giác.'],
+    ['Người lạ báo bạn trúng quà nhưng yêu cầu trả phí trước. Bạn nên làm gì?', ['Kiểm tra chương trình qua kênh độc lập', 'Nộp nhanh để giữ quà'], 0, 'Yêu cầu phí trước là dấu hiệu cần cảnh giác.'],
     ['Bị thúc ép không được nói với gia đình, nên làm gì?', ['Giữ bí mật', 'Dừng lại và hỏi người tin cậy'], 1, 'Cô lập nạn nhân là cách tạo áp lực.'],
     ['Nên chuẩn bị gì trước tình huống khẩn cấp?', ['Danh bạ hỗ trợ đã xác minh', 'Chờ người lạ gửi số hỗ trợ'], 0, 'Kênh có sẵn giúp tránh bị dẫn tới số giả.'],
   ],
   'course-crisis': [
-    ['Đã nhập mật khẩu vào trang giả, bước phù hợp là gì?', ['Chờ xem', 'Liên hệ ngân hàng và đổi mật khẩu từ thiết bị an toàn'], 1, 'Cần xử lý quyền truy cập bị lộ sớm.'],
-    ['Ai bảo đảm lấy lại tiền với phí trước có đáng tin ngay không?', ['Có', 'Không'], 1, 'Lời hứa bảo đảm có thể là một vòng lừa đảo khác.'],
+    ['Bạn đã nhập mật khẩu ngân hàng vào trang giả. Bước phù hợp là gì?', ['Chờ xem', 'Liên hệ ngân hàng và đổi mật khẩu từ thiết bị an toàn'], 1, 'Báo ngân hàng qua kênh chính thức và đổi mật khẩu từ thiết bị an toàn càng sớm càng tốt.'],
+    ['Người lạ hứa chắc chắn lấy lại tiền bị lừa nếu bạn trả phí trước. Có nên tin ngay không?', ['Có', 'Không'], 1, 'Lời hứa bảo đảm lấy lại tiền kèm phí trước có thể là một vụ lừa đảo tiếp theo.'],
     ['Có nên xóa toàn bộ tin nhắn giao dịch ngay?', ['Có', 'Không, lưu bằng chứng'], 1, 'Thông tin giao dịch và thời điểm hỗ trợ việc trình báo.'],
     ['Thiết bị nghi bị điều khiển, nên đổi mật khẩu ở đâu?', ['Thiết bị an toàn khác', 'Ngay trong ứng dụng lạ'], 0, 'Thiết bị bị xâm nhập có thể tiếp tục lộ thông tin.'],
     ['Chỉ bấm một liên kết có chứng minh máy nhiễm mã độc?', ['Chắc chắn có', 'Không, cần đánh giá thêm'], 1, 'Phân biệt việc mở trang, nhập thông tin và cài ứng dụng.'],
@@ -121,16 +122,33 @@ const incidentGuidance: Record<string, { title: string; intro: string; steps: st
     ],
   },
 };
-export const courses = COURSES.map(course => ({
+const updatedDescriptions: Record<string, string> = {
+  'course-deepfake': 'Xác minh cuộc gọi xin tiền bằng kênh độc lập, kể cả khi hình ảnh và giọng nói rất giống người thân.',
+  'course-banking': 'Bảo vệ mã OTP, kiểm tra tên miền và thông tin giao dịch trước khi xác nhận.',
+  'course-parents': 'Các bước dễ nhớ để dừng cuộc gọi gây áp lực, hỏi người tin cậy và kiểm tra qua kênh chính thức.',
+  'course-crisis': 'Phân biệt việc mở liên kết, nhập thông tin và cài ứng dụng lạ để xử lý đúng mức rủi ro.',
+};
+const updatedModuleTitles: Record<string, string> = {
+  l1: 'Vì sao giọng nói và video quen thuộc vẫn cần xác minh',
+  l2: 'Gọi lại qua kênh độc lập khi có yêu cầu chuyển tiền',
+  b2: 'HTTPS và cách kiểm tra tên miền đầy đủ',
+  p1: 'Dừng lại, hỏi người tin cậy và kiểm tra',
+  p2: 'Kiểm tra người gọi qua kênh chính thức',
+  c1: 'Phân biệt mở liên kết, nhập thông tin và cài ứng dụng',
+  c2: 'Liên hệ ngân hàng khi lộ thông tin hoặc mất tiền',
+  c3: 'Bảo vệ lại tài khoản và lưu bằng chứng',
+};
+export const courses = [...COURSES.map(course => ({
   ...course, incidentGuidance: incidentGuidance[course.id], title: course.title.replace('an toàn tuyệt đối', 'an toàn'), rating: 0, learnersCount: 0,
+  description: updatedDescriptions[course.id],
   modules: [
-    ...course.modules.filter(m => m.type !== 'quiz').map((m, i) => ({ ...m, type: 'interactive' as const, content: `${lessons[course.id][i]}\n\n${lessonExtras[course.id][i]}` })),
+    ...course.modules.filter(m => m.type !== 'quiz').map((m, i) => ({ ...m, title: updatedModuleTitles[m.id] || m.title, type: 'interactive' as const, content: `${lessons[course.id][i]}\n\n${lessonExtras[course.id][i]}` })),
     { id: `${course.id}-quiz`, title: 'Kiểm tra cuối khóa', duration: '8 phút', type: 'quiz' as const, content: '10 câu hỏi tình huống. Đạt ít nhất 80% để hoàn thành khóa học.', quizId: `${course.id}-quiz` },
   ],
-})).map(course => ({ ...course, lessonsCount: course.modules.length }));
-export const quizzes = courses.map(course => ({ id: `${course.id}-quiz`, courseId: course.id,
+})).map(course => ({ ...course, lessonsCount: course.modules.length })), ...newCourses];
+export const quizzes = [...COURSES.map(course => ({ id: `${course.id}-quiz`, courseId: course.id,
   questions: [...questionSets[course.id].map(([question, options, correctIndex, explanation], i) => {
     const [fourth, ...optionExplanations] = answerDetails[course.id][i];
     return { id: `${course.id}-q${i + 1}`, question, options: [...options, ...(options.length === 2 ? [thirdChoices[course.id][i]] : []), fourth], correctIndex, explanation, optionExplanations };
   }), ...extraQuestions[course.id]],
-}));
+})), ...newQuizzes];

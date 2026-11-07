@@ -274,8 +274,8 @@ test('catalog has 20 scenarios, filters, lesson content and no leaked quiz solut
   const scenarios=await request('/scenarios');assert.equal(scenarios.data.total,20);
   assert.equal((await request('/scenarios/'+scenarios.data.items[0].id)).status,200);
   assert.ok((await request('/scenarios?q=OTP')).data.total>0);
-  const courses=await request('/courses');assert.equal(courses.data.total,4);
-  assert.equal(new Set(courses.data.items.map((course:any)=>course.incidentGuidance?.title)).size,4);
+  const courses=await request('/courses');assert.equal(courses.data.total,6);
+  assert.equal(new Set(courses.data.items.map((course:any)=>course.incidentGuidance?.title)).size,6);
   assert.ok(courses.data.items.every((course:any)=>course.incidentGuidance?.intro && course.incidentGuidance.steps.length>=3));
   assert.ok(!JSON.stringify(courses.data).includes('correctIndex'));
   let count=0;
@@ -283,7 +283,19 @@ test('catalog has 20 scenarios, filters, lesson content and no leaked quiz solut
     assert.equal((await request('/courses/'+course.id)).status,200);
     for(const lesson of course.modules){ const detail=await request(`/courses/${course.id}/lessons/${lesson.id}`); assert.ok(detail.data.content); assert.ok(!JSON.stringify(detail.data).includes('correctIndex'));assert.ok(!JSON.stringify(detail.data).includes('explanation')); for(const question of detail.data.quiz?.questions||[]) assert.equal(question.options.length,4); count+=detail.data.quiz?.questions.length||0; }
   }
-  assert.equal(count,40);
+  assert.equal(count,60);
+  for (const quiz of catalogItems('quiz').filter((item:any)=>['course-deepfake','course-banking','course-parents','course-crisis'].includes(item.courseId))) {
+    for (const question of quiz.questions) {
+      assert.equal(new Set(question.options).size, 4, `${question.id} has repeated choices`);
+      assert.equal(question.optionExplanations.length, 4);
+      assert.ok(question.optionExplanations[question.correctIndex].startsWith('Đúng:'));
+    }
+  }
+  const bankingQuiz=catalogItems('quiz').find((item:any)=>item.courseId==='course-banking');
+  assert.match(bankingQuiz.questions[1].question,/Tin nhắn báo tài khoản ngân hàng/);
+  assert.match(bankingQuiz.questions[2].question,/cài ứng dụng/);
+  assert.equal(bankingQuiz.questions[1].correctIndex,1);
+  assert.equal(bankingQuiz.questions[2].correctIndex,1);
   assert.equal((await request('/courses/missing/lessons/l1')).status,404);
 });
 test('server grading and completion requirements cannot be bypassed', async () => {

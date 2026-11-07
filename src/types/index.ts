@@ -53,6 +53,8 @@ export interface CourseLesson {
   title: string;
   duration: string;
   type: 'video' | 'interactive' | 'quiz';
+  content?: string;
+  quizId?: string;
   completed?: boolean;
 }
 
