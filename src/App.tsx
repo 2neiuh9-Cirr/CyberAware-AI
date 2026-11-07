@@ -43,7 +43,7 @@ const AppView: React.FC = () => {
       {!isAdminPage && <Footer />}
       {!isAdminPage && <ReportScamModal />}
       {!isAdminPage && <ScenarioDetailModal />}
-      {!isAdminPage && <Chatbot />}
+      {!isAdminPage && <Chatbot key={useAppStore.getState().currentUser?.id || 'guest'} />}
     </div>
   </>;
 };

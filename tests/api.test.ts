@@ -580,3 +580,60 @@ test('scan and auth rate limits return 429 with Retry-After', async () => {
   let authLimited=false;for(let i=0;i<25;i++){const res=await request('/auth/login','POST',{email:'missing@example.test',password});if(res.status===429){authLimited=true;break;}}
   assert.ok(authLimited);
 });
+
+test('chat: quotas, images, grounded sources, history ownership and deletion', async t => {
+  const { GoogleGenAI } = await import('@google/genai');
+  const { randomUUID } = await import('node:crypto');
+  const sharp = (await import('sharp')).default;
+  const key = process.env.GEMINI_API_KEY;
+  process.env.GEMINI_API_KEY = 'mock-key';
+  t.after(()=>{process.env.GEMINI_API_KEY = key});
+  const provider = new GoogleGenAI({ apiKey:'mock-key' }).models;
+  const { chatProvider } = await import('../backend/chat');
+  t.mock.method(chatProvider,'models',()=>provider);
+  let calls = 0;
+  let failCount = true;
+  let failGenerate = false;
+  t.mock.method(provider,'countTokens',async()=>{
+    if(failCount){failCount=false;throw Object.assign(new Error('model unavailable'),{status:503})}
+    return {totalTokens:90};
+  });
+  t.mock.method(provider,'generateContent',async (params:any)=>{
+    calls++;
+    if(failGenerate){failGenerate=false;throw Object.assign(new Error('model unavailable'),{status:503})}
+    const payload=JSON.parse(params.contents[0].parts[0].text);
+    assert.doesNotMatch(JSON.stringify(payload),/correctIndex|optionExplanations|123456/);
+    return {text:JSON.stringify({answer:'Hãy xác minh đơn hàng qua kênh đã biết.',sourceIds:[payload.sources[0]?.id,'invented']}),usageMetadata:{promptTokenCount:90,candidatesTokenCount:12,totalTokenCount:102}};
+  });
+  const cfg = await request('/chat/capabilities');
+  assert.equal(cfg.data.enabled,true);
+  const guest = {Cookie:cfg.response.headers.getSetCookie()[0].split(';')[0]};
+  const body = {requestId:randomUUID(),message:'Shipper giả mạo hỏi OTP 123456'};
+  const g = await request('/chat/messages','POST',body,undefined,guest);
+  assert.equal(g.status,200);assert.equal(g.data.conversationId,null);
+  assert.ok(g.data.assistantMessage.sources.length);
+  assert.ok(g.data.assistantMessage.sources.every((s:any)=>s.id!=='invented'));
+  assert.equal((await request('/chat/messages','POST',body,undefined,guest)).status,409);
+  assert.equal(calls,1);
+  failGenerate=true;
+  const m=await request('/chat/messages','POST',{...body,requestId:randomUUID()},adminToken);
+  assert.equal(m.status,200);
+  assert.equal(calls,3);
+  const route='/chat/conversations/'+m.data.conversationId;
+  const outsider=await registerAndVerify({fullname:'Chat Test',email:'chat-test@example.test',password});
+  assert.equal((await request(route,'GET',undefined,outsider.data.token)).status,404);
+  assert.equal((await request(route,'GET',undefined,adminToken)).data.messages.length,2);
+  assert.equal((await request('/chat/conversations','GET',undefined,adminToken)).data.items.length,1);
+  const deleted=await fetch(base+route,{method:'DELETE',headers:{Authorization:'Bearer '+adminToken}});
+  assert.equal(deleted.status,204);
+  assert.equal((await request(route,'GET',undefined,adminToken)).status,404);
+  const form=new FormData();form.set('message','');form.set('requestId',randomUUID());
+  form.set('image',new Blob([new Uint8Array(await sharp({create:{width:16,height:16,channels:3,background:'white'}}).png().toBuffer())],{type:'image/png'}),'test.png');
+  assert.equal((await fetch(base+'/chat/messages',{method:'POST',body:form,headers:guest})).status,200);
+  form.set('image',new Blob(['oops'],{type:'text/html'}),'test.html');
+  assert.equal((await fetch(base+'/chat/messages',{method:'POST',body:form,headers:guest})).status,415);
+  assert.equal((await request('/admin/chat/settings','PATCH',{guestTurns:2},adminToken)).status,200);
+  assert.equal((await request('/chat/messages','POST',{...body,requestId:randomUUID()},undefined,guest)).status,429);
+  assert.equal((await request('/admin/chat/settings','PATCH',{enabled:false},adminToken)).status,200);
+  assert.equal((await request('/chat/messages','POST',body)).status,503);
+});

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { authRouter, refreshRememberedSession } from './auth';
 import { apiRouter, apiError } from './backend/api';
 import { adminRouter } from './backend/admin';
+import { chatRouter } from './backend/chat';
 import { db } from './backend/database';
 import { rateLimit } from './backend/http';
 
@@ -34,6 +35,7 @@ export function createApp() {
     if (!limit) { limit = rateLimit(req.path === '/forgot-password' ? 10 : 20, 15 * 60_000); authLimits.set(req.path, limit); }
     return limit(req, res, next);
   }, authRouter);
+  app.use('/api/chat', chatRouter);
   app.use('/api/admin', adminRouter);
   app.use('/api', apiRouter);
   app.use('/api', (_req, res) => res.status(404).json({ success: false, error: 'API không tồn tại.' }));

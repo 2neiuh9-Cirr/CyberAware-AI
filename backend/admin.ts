@@ -1,3 +1,4 @@
+import { adminChatSettings, updateChatSettings } from './chat';
 import { Router, type Request } from 'express';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { currentUser, hashPassword, sendAccountSetupCode } from '../auth';
@@ -117,6 +118,12 @@ function csv(rows: Record<string, unknown>[], keys: string[]) {
 }
 adminRouter.use((req, _res, next) => { try { admin(req); next(); } catch (error) { next(error); } });
 
+adminRouter.get('/chat/settings', (_req,res) => res.json(adminChatSettings()));
+adminRouter.patch('/chat/settings', (req,res) => {
+  const config = updateChatSettings(req.body);
+  audit(req,'chat.settings','chat','1',JSON.stringify(req.body));
+  res.json(config);
+});
 adminRouter.get('/overview', (_req, res) => {
   const since = new Date(Date.now() - 30 * 86400_000).toISOString();
   const recent = db.prepare('SELECT result FROM scans WHERE created_at >= ?').all(since).map(row => JSON.parse(String(row.result)));

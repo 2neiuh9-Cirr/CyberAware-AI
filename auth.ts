@@ -92,6 +92,7 @@ function getJwtSecret(): Buffer {
   return Buffer.from(readFileSync(secretFile, 'utf8').trim());
 }
 const jwtSecret = getJwtSecret();
+export const chatDigest = (value: string) => createHmac('sha256',jwtSecret).update('chat-guest:'+value).digest('hex');
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RESET_MS = 5 * 60 * 1000;
