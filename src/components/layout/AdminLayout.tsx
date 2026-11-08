@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { Moon, Sun } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
+import { setSiteLanguage, toggleSiteTheme, tr, useSitePreferences } from '../../sitePreferences';
+import { prepareBrowserTranslator } from '../../siteTranslationService';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -10,6 +13,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const currentUser = useAppStore(state => state.currentUser);
+  const { language, theme } = useSitePreferences();
 
   const navItems = [
     {
@@ -67,7 +71,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           </div>
 
           {/* Admin User Info */}
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-2 sm:gap-3.5">
+            <div className="flex items-center gap-1.5 border-r border-slate-200 pr-2 sm:pr-3" aria-label={tr(language, 'Tùy chọn giao diện', 'Display options')}>
+              <button type="button" onClick={() => { if (language === 'vi') prepareBrowserTranslator(); setSiteLanguage(language === 'vi' ? 'en' : 'vi'); }} aria-label={tr(language, 'Chuyển sang tiếng Anh', 'Switch to Vietnamese')} title={tr(language, 'Chuyển sang tiếng Anh', 'Switch to Vietnamese')} className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700 transition-colors hover:bg-blue-50 sm:h-10 sm:w-10">{language === 'vi' ? 'VI' : 'EN'}</button>
+              <button type="button" onClick={toggleSiteTheme} aria-label={theme === 'light' ? tr(language, 'Bật giao diện tối', 'Switch to dark mode') : tr(language, 'Bật giao diện sáng', 'Switch to light mode')} title={theme === 'light' ? tr(language, 'Giao diện tối', 'Dark mode') : tr(language, 'Giao diện sáng', 'Light mode')} aria-pressed={theme === 'dark'} className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-blue-50 sm:h-10 sm:w-10">{theme === 'light' ? <Moon className="h-[18px] w-[18px]" /> : <Sun className="h-[18px] w-[18px]" />}</button>
+            </div>
             <div className="text-right hidden sm:block">
               <p className="text-sm font-semibold text-slate-900 leading-tight">{currentUser?.name || 'Quản trị viên'}</p>
               <p className="text-xs text-slate-500 font-mono">{currentUser?.email}</p>

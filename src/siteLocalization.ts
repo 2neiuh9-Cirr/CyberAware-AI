@@ -1,5 +1,6 @@
 import type { SiteLanguage } from './sitePreferences';
 import { prepareBrowserTranslator, translatedText, translateVisibleTexts } from './siteTranslationService';
+import { adminUiPhrases } from './adminUiPhrases';
 
 // Known UI labels translate instantly. Other visible text is translated in
 // batches, with private content restricted to the browser's local translator.
@@ -302,6 +303,7 @@ const english: Record<string, string> = {
 
 const originals = new WeakMap<Text, string>();
 const attributes = new WeakMap<Element, Map<string, string>>();
+const adminPhraseSet = new Set<string>(adminUiPhrases);
 
 type Queue = (value: string, element: Element | null) => void;
 
@@ -354,6 +356,7 @@ function translateAttributes(element: Element, language: SiteLanguage, queue: Qu
 }
 
 export function installSiteLocalization(root: Element, language: SiteLanguage, path: string, allowCloud: boolean) {
+  const isAdminPage = path.startsWith('/quan-tri-');
   const pending = new Map<string, boolean>();
   const attempted = new Set<string>();
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -362,9 +365,10 @@ export function installSiteLocalization(root: Element, language: SiteLanguage, p
 
   const queue: Queue = (value, element) => {
     const text = value.trim();
-    if (!active || language !== 'en' || !/[\u00c0-\u1ef9\u0111\u0110]/u.test(text) ||
+    if (!active || language !== 'en' || (isAdminPage && !adminPhraseSet.has(text)) || !/[\u00c0-\u1ef9\u0111\u0110]/u.test(text) ||
       text.length < 2 || text.length > 1800 || attempted.has(text) || translatedText(text)) return;
-    const cloudEligible = allowCloud && !!element?.closest('main') && !element?.closest('[data-no-auto-translate]');
+    const cloudEligible = allowCloud && !element?.closest('[data-no-auto-translate]') &&
+      (isAdminPage ? adminPhraseSet.has(text) : !!element?.closest('main'));
     pending.set(text, Boolean(pending.get(text) || cloudEligible));
     if (!timer && !busy) timer = setTimeout(() => { timer = undefined; void flush(); }, 100);
   };

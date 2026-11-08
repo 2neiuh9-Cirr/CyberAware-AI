@@ -1,10 +1,14 @@
 import { Router } from 'express';
 import { GoogleGenAI } from '@google/genai';
 import { ApiError, rateLimit } from './http';
+import { currentUser } from '../auth';
+import { adminUiPhrases } from '../src/adminUiPhrases';
 
 export const siteTranslationRouter = Router();
 
 const publicPaths = new Set(['/', '/kiem-tra', '/canh-bao', '/hoc-tap', '/gioi-thieu']);
+const adminPaths = new Set(['/quan-tri-tong-quan', '/quan-tri-nguoi-dung', '/quan-tri-khoa-hoc', '/quan-tri-ngan-hang-cau-hoi', '/quan-tri-kho-tri-thuc']);
+const adminPhraseSet = new Set<string>(adminUiPhrases);
 const cache = new Map<string, string>();
 let dailyCalls = 0;
 let callDay = '';
@@ -16,13 +20,18 @@ function dailyAllowance() {
   dailyCalls += 1;
 }
 
-siteTranslationRouter.post('/', rateLimit(12, 60_000), async (req, res, next) => {
+siteTranslationRouter.post('/', rateLimit(40, 60_000), async (req, res, next) => {
   try {
     const { path, texts } = req.body || {};
-    if (typeof path !== 'string' || !publicPaths.has(path) || !Array.isArray(texts) || texts.length < 1 || texts.length > 40 ||
+    if (typeof path !== 'string' || (!publicPaths.has(path) && !adminPaths.has(path)) || !Array.isArray(texts) || texts.length < 1 || texts.length > 40 ||
       texts.some((value: unknown) => typeof value !== 'string' || value.length < 2 || value.length > 1800) ||
       texts.reduce((sum: number, value: string) => sum + value.length, 0) > 8000) {
       throw new ApiError(400, 'Yêu cầu dịch không hợp lệ.');
+    }
+    if (adminPaths.has(path)) {
+      const account = currentUser(req);
+      if (!account || account.role !== 'admin') throw new ApiError(403, 'Chỉ quản trị viên được dịch giao diện quản trị.');
+      if (texts.some((value: string) => !adminPhraseSet.has(value))) throw new ApiError(400, 'Nội dung không thuộc giao diện quản trị.');
     }
     if (!process.env.GEMINI_API_KEY?.trim()) throw new ApiError(503, 'Dịch tự động chưa được cấu hình.');
 

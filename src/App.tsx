@@ -36,15 +36,16 @@ const AppView: React.FC = () => {
   const { language } = useSitePreferences();
   const { initialize, error, setError, loading } = useAppStore();
   useEffect(() => {
-    if (isAdminPage) return;
     const root = document.querySelector('.site-shell');
     if (!root) return;
-    document.title = language === 'en' ? 'CyberAware AI — Online scam prevention' : 'CyberAware AI - Nhận diện & phòng tránh lừa đảo trực tuyến';
-    return installSiteLocalization(root, language, pathname, ['/', '/kiem-tra', '/canh-bao', '/hoc-tap', '/gioi-thieu'].includes(pathname));
+    document.title = isAdminPage
+      ? (language === 'en' ? 'CyberAware AI — Administration' : 'CyberAware AI - Quản trị hệ thống')
+      : (language === 'en' ? 'CyberAware AI — Online scam prevention' : 'CyberAware AI - Nhận diện & phòng tránh lừa đảo trực tuyến');
+    return installSiteLocalization(root, language, pathname, isAdminPage || ['/', '/kiem-tra', '/canh-bao', '/hoc-tap', '/gioi-thieu'].includes(pathname));
   }, [language, isAdminPage, pathname]);
   return <>
     <ScrollToTop />
-    <div className={`min-h-screen bg-[#F8FAFC] flex flex-col text-[#0F172A] selection:bg-[#004AC6] selection:text-white ${isAdminPage ? '' : 'site-shell'}`}>
+    <div className="site-shell min-h-screen bg-[#F8FAFC] flex flex-col text-[#0F172A] selection:bg-[#004AC6] selection:text-white">
       {!isAdminPage && <Header />}
       <main className={`flex w-full min-w-0 flex-grow flex-col items-start ${isAdminPage ? '' : 'pt-[64px]'}`}>
         {!isAdminPage && <NotificationBanner />}

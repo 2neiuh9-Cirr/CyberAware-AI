@@ -522,7 +522,7 @@ export const HomePage: React.FC = () => {
       <CyberMobileShowcase />
 
       {/* Common Scams Section */}
-      <section className="relative isolate w-full overflow-hidden bg-[linear-gradient(160deg,#F8FAFF_0%,#EEF4FB_52%,#F8FAFC_100%)] flex flex-col items-center py-16 md:py-24 px-4 md:px-12" aria-labelledby="common-scams-title">
+      <section className="common-scams-section relative isolate w-full overflow-hidden bg-[linear-gradient(160deg,#F8FAFF_0%,#EEF4FB_52%,#F8FAFC_100%)] flex flex-col items-center py-16 md:py-24 px-4 md:px-12" aria-labelledby="common-scams-title">
         <div aria-hidden="true" className="pointer-events-none absolute -top-32 right-[-10%] h-96 w-96 rounded-full bg-blue-200/35 blur-3xl" />
         <div aria-hidden="true" className="pointer-events-none absolute -bottom-40 left-[-8%] h-96 w-96 rounded-full bg-rose-100/60 blur-3xl" />
         <div className="relative max-w-[1184px] w-full flex flex-col gap-9 md:gap-11">
