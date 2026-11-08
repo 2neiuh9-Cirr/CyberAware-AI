@@ -6,6 +6,7 @@ import { authRouter, refreshRememberedSession } from './auth';
 import { apiRouter, apiError } from './backend/api';
 import { adminRouter } from './backend/admin';
 import { chatRouter } from './backend/chat';
+import { siteTranslationRouter } from './backend/siteTranslation';
 import { db } from './backend/database';
 import { rateLimit } from './backend/http';
 
@@ -36,6 +37,7 @@ export function createApp() {
     return limit(req, res, next);
   }, authRouter);
   app.use('/api/chat', chatRouter);
+  app.use('/api/site-translate', siteTranslationRouter);
   app.use('/api/admin', adminRouter);
   app.use('/api', apiRouter);
   app.use('/api', (_req, res) => res.status(404).json({ success: false, error: 'API không tồn tại.' }));

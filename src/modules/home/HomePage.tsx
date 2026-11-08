@@ -151,7 +151,7 @@ export const HomePage: React.FC = () => {
           <CyberRadarShield />
 
           {/* Quick Check Tool Box */}
-          <div className="relative flex w-full flex-col gap-5 overflow-hidden rounded-[2rem] border border-blue-100 bg-white/95 p-5 shadow-[0_24px_70px_-34px_rgba(0,74,198,0.28)] ring-1 ring-white md:p-7">
+          <div data-no-auto-translate className="relative flex w-full flex-col gap-5 overflow-hidden rounded-[2rem] border border-blue-100 bg-white/95 p-5 shadow-[0_24px_70px_-34px_rgba(0,74,198,0.28)] ring-1 ring-white md:p-7">
             <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#004AC6] via-cyan-400 to-indigo-500" />
             {/* Live Engine Status Indicator */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-5">

@@ -14,6 +14,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
+import { useSearchParams } from 'react-router-dom';
 
 const iconThemes = {
   bank: {
@@ -67,9 +68,10 @@ const iconThemes = {
 } as const;
 
 export const ScamsLibraryPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const { setSelectedScenario, scenarios: SCAM_SCENARIOS } = useAppStore();
   const [filterCategory, setFilterCategory] = useState<string>('all');
-  const [searchWord, setSearchWord] = useState('');
+  const [searchWord, setSearchWord] = useState(searchParams.get('q') || '');
 
   const categories = [
     { id: 'all', label: 'Tất cả hình thức' },

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AlertOctagon, Award, CheckCircle2, ChevronLeft, ChevronRight, Clock, GraduationCap, HelpCircle, LockKeyhole, Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
 import { api, json } from '../../api';
 import { notify } from '../../components/common/toast';
@@ -13,6 +13,8 @@ type QuizResult = { score: number; correctCount: number; total: number; passed: 
 const letter = (index: number) => 'ABCD'[index];
 
 export const LearningPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const requestedCourseId = searchParams.get('course');
   const { courses, currentUser, completedCourseIds, lessonProgress, completeLesson, personalStats } = useAppStore();
   const [course, setCourse] = useState<Course | null>(null);
   const [lesson, setLesson] = useState<Lesson | null>(null);
@@ -26,7 +28,11 @@ export const LearningPage: React.FC = () => {
   const [lessonId, setLessonId] = useState('');
   const [questionIndex, setQuestionIndex] = useState(0);
 
-  useEffect(() => { if (!courseId && courses.length) setCourseId(courses[0].id); }, [courses, courseId]);
+  useEffect(() => {
+    if (!courses.length) return;
+    setCourseId(current => requestedCourseId && courses.some(item => item.id === requestedCourseId)
+      ? requestedCourseId : current || courses[0].id);
+  }, [courses, requestedCourseId]);
   useEffect(() => {
     if (!courseId) return;
     const controller = new AbortController();

@@ -14,6 +14,9 @@ import { ScenarioDetailModal } from './components/common/ScenarioDetailModal';
 import { Chatbot } from './components/chat/Chatbot';
 import { ToastViewport } from './components/common/ToastViewport';
 import { useAppStore } from './store/useAppStore';
+import { useSitePreferences } from './sitePreferences';
+import { installSiteLocalization } from './siteLocalization';
+import './siteTheme.css';
 
 // Helper to scroll to top on page navigation
 const ScrollToTop: React.FC = () => {
@@ -30,10 +33,18 @@ const AppView: React.FC = () => {
   const { pathname } = useLocation();
   const isAdminPage = /^\/(?:quan-tri-(?:tong-quan|nguoi-dung|khoa-hoc|ngan-hang-cau-hoi|kho-tri-thuc)|admin(?:\/|$))/.test(pathname);
   const isLearningPage = pathname === '/hoc-tap';
+  const { language } = useSitePreferences();
   const { initialize, error, setError, loading } = useAppStore();
+  useEffect(() => {
+    if (isAdminPage) return;
+    const root = document.querySelector('.site-shell');
+    if (!root) return;
+    document.title = language === 'en' ? 'CyberAware AI — Online scam prevention' : 'CyberAware AI - Nhận diện & phòng tránh lừa đảo trực tuyến';
+    return installSiteLocalization(root, language, pathname, ['/', '/kiem-tra', '/canh-bao', '/hoc-tap', '/gioi-thieu'].includes(pathname));
+  }, [language, isAdminPage, pathname]);
   return <>
     <ScrollToTop />
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col text-[#0F172A] selection:bg-[#004AC6] selection:text-white">
+    <div className={`min-h-screen bg-[#F8FAFC] flex flex-col text-[#0F172A] selection:bg-[#004AC6] selection:text-white ${isAdminPage ? '' : 'site-shell'}`}>
       {!isAdminPage && <Header />}
       <main className={`flex w-full min-w-0 flex-grow flex-col items-start ${isAdminPage ? '' : 'pt-[64px]'}`}>
         {!isAdminPage && <NotificationBanner />}

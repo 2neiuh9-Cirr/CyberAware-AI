@@ -1,13 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShieldCheck, Menu, X, AlertTriangle, ChevronDown, Sparkles, LogOut, BookOpen, ShieldAlert, LayoutDashboard, Settings } from 'lucide-react';
+import { ShieldCheck, Menu, X, AlertTriangle, ChevronDown, Sparkles, LogOut, BookOpen, ShieldAlert, LayoutDashboard, Settings, Search, Moon, Sun } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
+import { setSiteLanguage, toggleSiteTheme, tr, useSitePreferences } from '../../sitePreferences';
+import { SiteSearchDialog } from './SiteSearchDialog';
+import { prepareBrowserTranslator } from '../../siteTranslationService';
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isMobileMenuOpen, setMobileMenuOpen, setReportModalOpen, currentUser, logout } = useAppStore();
+  const { language, theme } = useSitePreferences();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const closeSearch = useCallback(() => setSearchOpen(false), []);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Close user dropdown when clicking outside
@@ -25,15 +31,16 @@ export const Header: React.FC = () => {
   useEffect(() => {
     setShowUserMenu(false);
     setMobileMenuOpen(false);
+    setSearchOpen(false);
   }, [location.pathname, setMobileMenuOpen]);
 
   const navItems = [
-    { name: 'Trang chủ', path: '/' },
-    { name: 'Kiểm tra lừa đảo', path: '/kiem-tra' },
-    { name: 'Học tập', path: '/hoc-tap' },
-    { name: 'Cảnh báo', path: '/canh-bao' },
-    { name: 'Báo cáo', path: '/bao-cao' },
-    { name: 'Giới thiệu', path: '/gioi-thieu' },
+    { name: tr(language, 'Trang chủ', 'Home'), path: '/' },
+    { name: tr(language, 'Kiểm tra lừa đảo', 'Scam check'), path: '/kiem-tra' },
+    { name: tr(language, 'Học tập', 'Learning'), path: '/hoc-tap' },
+    { name: tr(language, 'Cảnh báo', 'Warnings'), path: '/canh-bao' },
+    { name: tr(language, 'Báo cáo', 'Reports'), path: '/bao-cao' },
+    { name: tr(language, 'Giới thiệu', 'About'), path: '/gioi-thieu' },
   ];
 
   const handleLogout = async () => {
@@ -45,38 +52,27 @@ export const Header: React.FC = () => {
     }
   };
 
-  const handleQuickCheck = () => {
-    navigate('/kiem-tra');
-    setTimeout(() => {
-      const searchEl = document.getElementById('search-input-box');
-      if (searchEl) {
-        searchEl.focus();
-        searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 100);
-  };
-
   return (
     <>
       {/* SaaS High-End Navigation Bar */}
       <header className="fixed top-0 left-0 right-0 h-[64px] bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] z-50 transition-all">
-        <div className="w-full max-w-[1360px] h-full mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-[1360px] h-full mx-auto flex items-center justify-between gap-2 px-3 sm:px-6 lg:px-8">
           
           {/* 1. Left Zone: Brand Identity & Logo */}
           <div className="flex items-center shrink-0">
             <Link 
               to="/" 
               className="flex items-center gap-2.5 group select-none focus:outline-none"
-              aria-label="CyberAware AI Trang chủ"
+              aria-label={tr(language, 'CyberAware AI Trang chủ', 'CyberAware AI Home')}
             >
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#004AC6] to-[#003896] text-white flex items-center justify-center shadow-xs group-hover:shadow-sm group-hover:scale-102 transition-all duration-200">
                 <ShieldCheck className="w-5 h-5 text-white" strokeWidth={2.2} />
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col max-[430px]:hidden">
                 <span className="text-[#0F172A] font-extrabold text-[17px] tracking-[-0.03em] leading-tight">
                   CyberAware <span className="text-[#004AC6]">AI</span>
                 </span>
-                <span className="text-[10px] font-mono font-medium text-slate-400 tracking-wider uppercase leading-none">
+                <span className="hidden text-[10px] font-mono font-medium text-slate-400 tracking-wider uppercase leading-none sm:block">
                   Cyber Defense
                 </span>
               </div>
@@ -86,7 +82,7 @@ export const Header: React.FC = () => {
           {/* 2. Center Zone: Clean SaaS Navigation Menu (Desktop) */}
           <nav 
             className="hidden xl:flex items-center justify-center gap-1 xl:gap-2"
-            aria-label="Menu chính"
+            aria-label={tr(language, 'Menu chính', 'Main navigation')}
           >
             {navItems.map((item) => (
               <NavLink
@@ -107,7 +103,7 @@ export const Header: React.FC = () => {
           </nav>
 
           {/* 3. Right Zone: Action CTA & Account Controls */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             
             {/* Quick Report Button (Desktop subtle pill) */}
             <button
@@ -120,16 +116,11 @@ export const Header: React.FC = () => {
               <span>Báo cáo</span>
             </button>
 
-            {/* Prominent Primary CTA: "Kiểm tra nhanh" */}
-            <button
-              onClick={handleQuickCheck}
-              className="hidden bg-[#004AC6] hover:bg-[#003EA8] active:scale-[0.98] text-white font-semibold text-xs sm:text-sm px-3.5 sm:px-4 py-2 rounded-xl shadow-xs hover:shadow-md transition-all duration-150 sm:flex items-center gap-1.5 cursor-pointer"
-              title="Kiểm tra đường link hoặc tin nhắn khả nghi"
-              type="button"
-            >
-              <ShieldCheck className="w-4 h-4 text-white" strokeWidth={2.2} />
-              <span className="whitespace-nowrap">Kiểm tra nhanh</span>
-            </button>
+            <div className="flex items-center gap-1 sm:gap-1.5" aria-label={tr(language, 'Công cụ giao diện', 'Site tools')}>
+              <button type="button" onClick={() => setSearchOpen(true)} aria-label={tr(language, 'Tìm kiếm', 'Search')} title={tr(language, 'Tìm kiếm', 'Search')} className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-[#004AC6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] sm:h-10 sm:w-10"><Search className="h-[18px] w-[18px]" /></button>
+              <button type="button" onClick={() => { if (language === 'vi') prepareBrowserTranslator(); setSiteLanguage(language === 'vi' ? 'en' : 'vi'); }} aria-label={tr(language, 'Chuyển sang tiếng Anh', 'Switch to Vietnamese')} title={tr(language, 'Chuyển sang tiếng Anh', 'Switch to Vietnamese')} className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-[11px] font-extrabold tracking-tight text-slate-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-[#004AC6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] sm:h-10 sm:w-10">{language === 'vi' ? 'VI' : 'EN'}</button>
+              <button type="button" onClick={toggleSiteTheme} aria-label={theme === 'light' ? tr(language, 'Bật giao diện tối', 'Switch to dark mode') : tr(language, 'Bật giao diện sáng', 'Switch to light mode')} title={theme === 'light' ? tr(language, 'Giao diện tối', 'Dark mode') : tr(language, 'Giao diện sáng', 'Light mode')} aria-pressed={theme === 'dark'} className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-[#004AC6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] sm:h-10 sm:w-10">{theme === 'light' ? <Moon className="h-[18px] w-[18px]" /> : <Sun className="h-[18px] w-[18px]" />}</button>
+            </div>
 
             {/* Vertical Separator for Visual Clarity */}
             <div className="hidden md:block w-px h-5 bg-slate-200 mx-0.5" aria-hidden="true" />
@@ -137,7 +128,7 @@ export const Header: React.FC = () => {
             {/* Authentication Group */}
             {currentUser ? (
               <div className="hidden md:flex items-center gap-2 text-xs font-medium text-slate-600">
-                <Link to="/tong-quan" className="truncate max-w-[110px] xl:max-w-[140px] text-slate-800 font-semibold hover:text-[#004AC6] transition-colors" title="Đi đến tổng quan cá nhân">
+                <Link to="/tong-quan" className="truncate max-w-[90px] 2xl:max-w-[140px] text-slate-800 font-semibold hover:text-[#004AC6] transition-colors" title={tr(language, 'Đi đến tổng quan cá nhân', 'Open your dashboard')}>
                   {currentUser.name}
                 </Link>
                 <span className="text-slate-300">/</span>
@@ -262,6 +253,8 @@ export const Header: React.FC = () => {
 
         </div>
       </header>
+
+      <SiteSearchDialog open={searchOpen} onClose={closeSearch} />
 
       {/* Mobile Responsive Navigation Drawer */}
       {isMobileMenuOpen && (

@@ -222,7 +222,7 @@ export const ScannerPage: React.FC = () => {
 
         {/* Scan Result Container */}
         {scanResult && (
-          <div className="mt-4 p-6 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col gap-5 animate-in fade-in duration-200">
+          <div data-no-auto-translate className="mt-4 p-6 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col gap-5 animate-in fade-in duration-200">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-200">
               <div>
                 <span className="text-xs font-mono font-semibold text-slate-500 uppercase">Kết quả kiểm tra</span>
@@ -328,7 +328,7 @@ export const ScannerPage: React.FC = () => {
           </div>
         )}
       </div>
-      <ScanHistory onSelect={handleHistorySelect} />
+      <div data-no-auto-translate className="w-full"><ScanHistory onSelect={handleHistorySelect} /></div>
       <ComingSoonDialog
         open={comingSoonType !== null}
         description={`Tính năng kiểm tra ${comingSoonType === 'phone' ? 'số điện thoại' : 'tài khoản ngân hàng'} sẽ sớm ra mắt.`}
