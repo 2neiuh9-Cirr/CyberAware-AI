@@ -516,46 +516,50 @@ export const HomePage: React.FC = () => {
       <CyberMobileShowcase />
 
       {/* Common Scams Section */}
-      <section className="w-full bg-[#F1F5F9] flex flex-col items-center py-16 md:py-20 px-4 md:px-12">
-        <div className="max-w-[1184px] w-full flex flex-col gap-10 md:gap-12">
+      <section className="relative isolate w-full overflow-hidden bg-[linear-gradient(160deg,#F8FAFF_0%,#EEF4FB_52%,#F8FAFC_100%)] flex flex-col items-center py-16 md:py-24 px-4 md:px-12" aria-labelledby="common-scams-title">
+        <div aria-hidden="true" className="pointer-events-none absolute -top-32 right-[-10%] h-96 w-96 rounded-full bg-blue-200/35 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-40 left-[-8%] h-96 w-96 rounded-full bg-rose-100/60 blur-3xl" />
+        <div className="relative max-w-[1184px] w-full flex flex-col gap-9 md:gap-11">
           {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between md:items-end gap-6 w-full">
-            <div className="flex flex-col gap-2 max-w-[672px]">
-              <span className="text-[#DC2626] font-bold text-xs uppercase tracking-wider">
-                CẢNH BÁO THƯỜNG TRỰC
+          <div className="flex flex-col lg:flex-row justify-between lg:items-end gap-6 w-full">
+            <div className="flex flex-col items-start max-w-[720px]">
+              <span className="inline-flex items-center gap-2 rounded-full border border-rose-200/80 bg-white/80 px-3 py-1.5 text-rose-600 shadow-sm text-[11px] font-bold uppercase tracking-[0.14em]">
+                <span aria-hidden="true" className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-50" /><span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" /></span>
+                Cảnh báo thường trực
               </span>
-              <h2 className="text-[#0F172A] font-bold text-2xl md:text-4xl tracking-tight mt-1">
-                Các hình thức lừa đảo phổ biến cần cảnh giác
+              <h2 id="common-scams-title" className="mt-5 text-[#0F172A] font-extrabold text-3xl md:text-[40px] leading-[1.15] tracking-tight">
+                Các hình thức lừa đảo phổ biến <span className="text-[#004AC6]">cần cảnh giác</span>
               </h2>
-              <p className="text-[#434655] text-sm md:text-base mt-1">
+              <p className="mt-4 max-w-[650px] text-[#475569] text-sm md:text-base leading-relaxed">
                 Các thủ đoạn tội phạm mạng liên tục thay đổi hình thức tiếp cận, nắm vững các dấu hiệu mấu chốt để không rơi vào cạm bẫy.
               </p>
             </div>
             <Link
               to="/canh-bao"
-              className="flex flex-row items-center gap-2 group pb-2 text-[#004AC6] font-semibold text-sm hover:underline"
+              className="group inline-flex w-fit shrink-0 items-center gap-2 rounded-full border border-blue-200 bg-white/85 px-4 py-2.5 text-[#004AC6] font-semibold text-sm shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-300 hover:bg-white hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             >
               <span>Xem biểu đồ cảnh báo dữ liệu toàn quốc</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
 
-          {/* 4 Elegant Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
-            {SCAM_SCENARIOS.slice(0, 4).map((scam) => (
+          {/* Common scam cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 w-full">
+            {SCAM_SCENARIOS.slice(0, 4).map((scam, index) => (
               <div
                 key={scam.id}
-                className="flex flex-col p-6 bg-white rounded-2xl shadow-sm border border-slate-200/70 h-full justify-between hover:shadow-md transition-all group"
+                className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-white/90 bg-white/95 p-5 lg:p-6 shadow-[0_8px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_44px_rgba(15,23,42,0.13)] focus-within:-translate-y-1 focus-within:ring-blue-300"
               >
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-row justify-between items-center mb-2">
+                <div aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 transition-all duration-300 group-hover:h-1.5 ${scam.badgeColor === 'red' ? 'bg-gradient-to-r from-rose-500 to-orange-400' : scam.badgeColor === 'amber' ? 'bg-gradient-to-r from-amber-400 to-orange-400' : 'bg-gradient-to-r from-blue-600 to-cyan-400'}`} />
+                <div className="flex flex-1 flex-col">
+                  <div className="mb-5 flex items-start justify-between gap-3">
                     <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                      className={`w-12 h-12 rounded-2xl flex shrink-0 items-center justify-center ring-1 ring-inset transition-transform duration-300 group-hover:rotate-[-5deg] group-hover:scale-110 ${
                         scam.badgeColor === 'red'
-                          ? 'bg-[#FEE2E2] text-[#DC2626]'
+                          ? 'bg-rose-50 text-rose-600 ring-rose-100'
                           : scam.badgeColor === 'amber'
-                          ? 'bg-[#FEF3C7] text-[#D97706]'
-                          : 'bg-[#EFF6FF] text-[#004AC6]'
+                          ? 'bg-amber-50 text-amber-600 ring-amber-100'
+                          : 'bg-blue-50 text-[#004AC6] ring-blue-100'
                       }`}
                     >
                       {scam.iconType === 'bank' && <CreditCard className="w-5 h-5" />}
@@ -563,42 +567,36 @@ export const HomePage: React.FC = () => {
                       {scam.iconType === 'job' && <FileText className="w-5 h-5" />}
                       {scam.iconType === 'police' && <ShieldCheck className="w-5 h-5" />}
                     </div>
-                    <div
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-wide ${
-                        scam.badgeColor === 'red'
-                          ? 'bg-[#FEE2E2] text-[#DC2626]'
-                          : scam.badgeColor === 'amber'
-                          ? 'bg-[#FEF3C7] text-[#D97706]'
-                          : 'bg-[#E5EEFF] text-[#004AC6]'
-                      }`}
-                    >
-                      {scam.category}
-                    </div>
+                    <span aria-hidden="true" className="pt-1 text-xs font-bold tracking-[0.15em] text-slate-300">0{index + 1}</span>
                   </div>
 
-                  <h3 className="text-[#0F172A] font-bold text-lg leading-snug group-hover:text-[#004AC6] transition-colors">
+                  <span className={`mb-3 w-fit max-w-full rounded-full px-2.5 py-1 text-[11px] font-bold leading-tight ${scam.badgeColor === 'red' ? 'bg-rose-50 text-rose-700' : scam.badgeColor === 'amber' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>
+                    {scam.category}
+                  </span>
+                  <h3 className="min-h-[3.25rem] text-[#0F172A] font-bold text-lg leading-snug transition-colors group-hover:text-[#004AC6]">
                     {scam.title}
                   </h3>
-                  <p className="text-[#434655] text-[13px] leading-relaxed line-clamp-3">
+                  <p className="mt-3 text-[#475569] text-[13px] leading-relaxed line-clamp-3">
                     {scam.summary}
                   </p>
 
-                  <div className="bg-[#F8FAFC] rounded-lg p-3 mt-1 border border-slate-100">
-                    <span className="text-[#565E74] font-semibold text-xs tracking-wide block mb-1">
+                  <div className="mt-5 rounded-xl border border-slate-100 bg-slate-50/80 p-3.5 transition-colors duration-300 group-hover:border-blue-100 group-hover:bg-blue-50/40">
+                    <span className="text-[#64748B] font-bold text-[11px] uppercase tracking-wider block mb-1.5">
                       Dấu hiệu nhận diện:
                     </span>
-                    <span className="text-[#0F172A] font-medium text-[13px] leading-snug">
+                    <span className="text-[#0F172A] font-medium text-[13px] leading-relaxed">
                       {scam.signs}
                     </span>
                   </div>
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => setSelectedScenario(scam)}
-                  className="w-full bg-[#F1F5F9] hover:bg-slate-200 transition-colors rounded-lg py-2.5 mt-6 flex justify-center items-center gap-1.5 cursor-pointer text-[#0F172A] font-semibold text-sm"
+                  className="mt-6 flex w-full cursor-pointer items-center justify-between rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3 text-[#004AC6] text-sm font-semibold transition-all duration-300 hover:border-[#004AC6] hover:bg-[#004AC6] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                 >
                   <span>Xem chi tiết kịch bản</span>
-                  <ChevronRight className="w-4 h-4 text-[#0F172A]" />
+                  <ChevronRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </button>
               </div>
             ))}

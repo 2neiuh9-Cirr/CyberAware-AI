@@ -15,6 +15,57 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 
+const iconThemes = {
+  bank: {
+    accent: 'bg-gradient-to-r from-rose-500 to-red-400',
+    icon: 'bg-rose-50 text-rose-600 ring-rose-100',
+    label: 'bg-rose-50 text-rose-700',
+    title: 'group-hover:text-rose-700',
+    signs: 'group-hover:border-rose-100 group-hover:bg-rose-50/40',
+    action: 'border-rose-100 bg-rose-50/70 text-rose-700 hover:border-rose-600 hover:bg-rose-600',
+  },
+  gift: {
+    accent: 'bg-gradient-to-r from-amber-400 to-orange-400',
+    icon: 'bg-amber-50 text-amber-600 ring-amber-100',
+    label: 'bg-amber-50 text-amber-700',
+    title: 'group-hover:text-amber-700',
+    signs: 'group-hover:border-amber-100 group-hover:bg-amber-50/40',
+    action: 'border-amber-100 bg-amber-50/70 text-amber-700 hover:border-amber-600 hover:bg-amber-600',
+  },
+  job: {
+    accent: 'bg-gradient-to-r from-blue-600 to-cyan-400',
+    icon: 'bg-blue-50 text-blue-600 ring-blue-100',
+    label: 'bg-blue-50 text-blue-700',
+    title: 'group-hover:text-blue-700',
+    signs: 'group-hover:border-blue-100 group-hover:bg-blue-50/40',
+    action: 'border-blue-100 bg-blue-50/70 text-blue-700 hover:border-blue-600 hover:bg-blue-600',
+  },
+  police: {
+    accent: 'bg-gradient-to-r from-emerald-500 to-teal-400',
+    icon: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
+    label: 'bg-emerald-50 text-emerald-700',
+    title: 'group-hover:text-emerald-700',
+    signs: 'group-hover:border-emerald-100 group-hover:bg-emerald-50/40',
+    action: 'border-emerald-100 bg-emerald-50/70 text-emerald-700 hover:border-emerald-600 hover:bg-emerald-600',
+  },
+  phone: {
+    accent: 'bg-gradient-to-r from-cyan-500 to-sky-400',
+    icon: 'bg-cyan-50 text-cyan-700 ring-cyan-100',
+    label: 'bg-cyan-50 text-cyan-800',
+    title: 'group-hover:text-cyan-800',
+    signs: 'group-hover:border-cyan-100 group-hover:bg-cyan-50/40',
+    action: 'border-cyan-100 bg-cyan-50/70 text-cyan-800 hover:border-cyan-700 hover:bg-cyan-700',
+  },
+  deepfake: {
+    accent: 'bg-gradient-to-r from-violet-600 to-fuchsia-400',
+    icon: 'bg-violet-50 text-violet-600 ring-violet-100',
+    label: 'bg-violet-50 text-violet-700',
+    title: 'group-hover:text-violet-700',
+    signs: 'group-hover:border-violet-100 group-hover:bg-violet-50/40',
+    action: 'border-violet-100 bg-violet-50/70 text-violet-700 hover:border-violet-600 hover:bg-violet-600',
+  },
+} as const;
+
 export const ScamsLibraryPage: React.FC = () => {
   const { setSelectedScenario, scenarios: SCAM_SCENARIOS } = useAppStore();
   const [filterCategory, setFilterCategory] = useState<string>('all');
@@ -106,23 +157,18 @@ export const ScamsLibraryPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-          {filtered.map((scam) => (
+          {filtered.map((scam) => {
+            const theme = iconThemes[scam.iconType];
+            return (
             <div
               key={scam.id}
-              className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between hover:shadow-lg transition-all group"
+              className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-white/90 bg-white p-6 shadow-[0_8px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_44px_rgba(15,23,42,0.13)] focus-within:-translate-y-1 focus-within:ring-blue-300"
             >
-              <div className="flex flex-col gap-3">
-                <div className="flex justify-between items-center">
+              <div aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 transition-all duration-300 group-hover:h-1.5 ${theme.accent}`} />
+              <div className="flex flex-1 flex-col">
+                <div className="mb-5 flex items-start justify-between gap-3">
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-                      scam.badgeColor === 'red'
-                        ? 'bg-red-50 text-red-600'
-                        : scam.badgeColor === 'purple'
-                        ? 'bg-purple-50 text-purple-600'
-                        : scam.badgeColor === 'amber'
-                        ? 'bg-amber-50 text-amber-600'
-                        : 'bg-blue-50 text-[#004AC6]'
-                    }`}
+                    className={`w-12 h-12 rounded-2xl flex shrink-0 items-center justify-center ring-1 ring-inset transition-transform duration-300 group-hover:rotate-[-5deg] group-hover:scale-110 ${theme.icon}`}
                   >
                     {scam.iconType === 'bank' && <CreditCard className="w-5 h-5" />}
                     {scam.iconType === 'gift' && <Sparkles className="w-5 h-5" />}
@@ -133,46 +179,39 @@ export const ScamsLibraryPage: React.FC = () => {
                   </div>
 
                   <span
-                    className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                      scam.badgeColor === 'red'
-                        ? 'bg-red-100 text-red-700'
-                        : scam.badgeColor === 'purple'
-                        ? 'bg-purple-100 text-purple-700'
-                        : scam.badgeColor === 'amber'
-                        ? 'bg-amber-100 text-amber-700'
-                        : 'bg-blue-100 text-[#004AC6]'
-                    }`}
+                    className={`max-w-[70%] rounded-full px-3 py-1 text-right text-[11px] font-bold leading-tight ${theme.label}`}
                   >
                     {scam.category}
                   </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-slate-900 group-hover:text-[#004AC6] transition-colors">
+                <h3 className={`text-lg font-bold leading-snug text-slate-900 transition-colors ${theme.title}`}>
                   {scam.title}
                 </h3>
-                <p className="text-slate-600 text-xs md:text-sm leading-relaxed line-clamp-3">
+                <p className="mt-3 text-slate-600 text-sm leading-relaxed line-clamp-3">
                   {scam.summary}
                 </p>
 
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 mt-1">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide block mb-1">
+                <div className={`mt-5 rounded-xl border border-slate-100 bg-slate-50/80 p-3.5 transition-colors duration-300 ${theme.signs}`}>
+                  <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     Dấu hiệu lật tẩy:
                   </span>
-                  <span className="text-xs text-slate-800 font-medium leading-snug">
+                  <span className="text-[13px] font-medium leading-relaxed text-slate-800">
                     {scam.signs}
                   </span>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={() => setSelectedScenario(scam)}
-                className="w-full mt-6 py-2.5 px-4 bg-slate-100 hover:bg-[#004AC6] hover:text-white text-slate-800 font-semibold text-xs md:text-sm rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className={`mt-6 flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-all duration-300 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${theme.action}`}
               >
                 <span>Xem chi tiết kịch bản & Cách phòng chống</span>
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:translate-x-1" />
               </button>
             </div>
-          ))}
+          ); })}
         </div>
       )}
     </div>
