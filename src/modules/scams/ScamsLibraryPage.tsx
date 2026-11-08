@@ -96,9 +96,9 @@ export const ScamsLibraryPage: React.FC = () => {
       {/* Top Banner */}
       <div className="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-8 border-b border-slate-200">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-700 text-xs font-bold mb-2 border border-red-200">
+          <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700 mb-2">
             <ShieldAlert className="w-4 h-4" />
-            <span>RADAR CẢNH BÁO LỪA ĐẢO TOÀN QUỐC 2026</span>
+            <span className="min-w-0">RADAR CẢNH BÁO LỪA ĐẢO TOÀN QUỐC 2026</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
             Thư viện Kịch bản & Thủ đoạn tội phạm mạng
@@ -138,7 +138,7 @@ export const ScamsLibraryPage: React.FC = () => {
           ))}
         </div>
 
-        <div className="relative min-w-[260px]">
+        <div className="relative w-full min-w-0 md:w-auto md:min-w-[260px]">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"

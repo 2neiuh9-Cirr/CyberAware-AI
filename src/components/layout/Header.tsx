@@ -85,7 +85,7 @@ export const Header: React.FC = () => {
 
           {/* 2. Center Zone: Clean SaaS Navigation Menu (Desktop) */}
           <nav 
-            className="hidden lg:flex items-center justify-center gap-1 xl:gap-2"
+            className="hidden xl:flex items-center justify-center gap-1 xl:gap-2"
             aria-label="Menu chính"
           >
             {navItems.map((item) => (
@@ -123,7 +123,7 @@ export const Header: React.FC = () => {
             {/* Prominent Primary CTA: "Kiểm tra nhanh" */}
             <button
               onClick={handleQuickCheck}
-              className="bg-[#004AC6] hover:bg-[#003EA8] active:scale-[0.98] text-white font-semibold text-xs sm:text-sm px-3.5 sm:px-4 py-2 rounded-xl shadow-xs hover:shadow-md transition-all duration-150 flex items-center gap-1.5 cursor-pointer"
+              className="hidden bg-[#004AC6] hover:bg-[#003EA8] active:scale-[0.98] text-white font-semibold text-xs sm:text-sm px-3.5 sm:px-4 py-2 rounded-xl shadow-xs hover:shadow-md transition-all duration-150 sm:flex items-center gap-1.5 cursor-pointer"
               title="Kiểm tra đường link hoặc tin nhắn khả nghi"
               type="button"
             >
@@ -196,7 +196,7 @@ export const Header: React.FC = () => {
 
               {/* User Popover Menu */}
               {showUserMenu && currentUser && (
-                <div className="absolute right-0 mt-2.5 w-64 bg-white rounded-2xl shadow-xl border border-slate-200/80 py-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute right-0 mt-2.5 w-[min(16rem,calc(100vw-2rem))] bg-white rounded-2xl shadow-xl border border-slate-200/80 py-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="px-4 py-2 border-b border-slate-100">
                     <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Tài khoản thành viên</p>
                     <Link to="/tong-quan" onClick={() => setShowUserMenu(false)} className="block text-sm font-bold text-slate-900 hover:text-[#004AC6] transition-colors truncate mt-0.5">{currentUser.name}</Link>
@@ -252,7 +252,7 @@ export const Header: React.FC = () => {
             {/* Mobile Menu Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/70 transition-colors cursor-pointer"
+              className="xl:hidden p-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/70 transition-colors cursor-pointer"
               aria-label={isMobileMenuOpen ? 'Đóng menu' : 'Mở menu điều hướng'}
               type="button"
             >
@@ -265,7 +265,7 @@ export const Header: React.FC = () => {
 
       {/* Mobile Responsive Navigation Drawer */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 top-[64px] z-40 lg:hidden">
+        <div className="fixed inset-0 top-[64px] z-40 xl:hidden">
           {/* Backdrop */}
           <div
             className="fixed inset-0 bg-slate-900/30 backdrop-blur-xs transition-opacity"
@@ -274,7 +274,7 @@ export const Header: React.FC = () => {
           />
 
           {/* Drawer Body */}
-          <div className="relative bg-white border-b border-slate-200 shadow-xl px-5 py-5 flex flex-col gap-4 animate-in slide-in-from-top-3 duration-200 max-h-[calc(100vh-64px)] overflow-y-auto">
+          <div className="relative bg-white border-b border-slate-200 shadow-xl px-5 py-5 flex flex-col gap-4 animate-in slide-in-from-top-3 duration-200 max-h-[calc(100dvh-64px)] overflow-y-auto">
             {/* Nav links */}
             <nav className="flex flex-col gap-1" aria-label="Menu di động">
               {navItems.map((item) => (
@@ -352,7 +352,7 @@ export const Header: React.FC = () => {
                 <span>Báo cáo lừa đảo ngay</span>
               </button>
 
-              <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 px-1">
+              <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] text-slate-400 pt-1 px-1">
                 <span>Hotline Cục ATTT: 156 / 5656</span>
                 <span className="text-emerald-600 font-medium">Không nhập OTP</span>
               </div>

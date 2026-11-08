@@ -102,10 +102,10 @@ export const LearningPage: React.FC = () => {
               <img src={course.thumbnail} alt="" className="h-full w-full object-cover opacity-75" />
               <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/25 to-transparent p-6 md:p-8">
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">{course.category} · {course.duration}</span>
-                <h2 className="mt-2 text-xl md:text-2xl font-bold leading-tight text-white">{course.title}</h2>
+                <h2 className="mt-2 line-clamp-3 text-lg font-bold leading-tight text-white sm:text-xl md:text-2xl">{course.title}</h2>
               </div>
             </div>
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4"><h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">Nội dung bài học ({course.modules.length} phần)</h3>{course.rating > 0 && <span className="inline-flex items-center gap-1 text-xs text-slate-500"><Star className="w-4 h-4 fill-amber-400 text-amber-400" /> {course.rating}</span>}</div>
               <p className="my-4 text-sm leading-relaxed text-slate-600">{course.description}</p>
               <div className="flex flex-col gap-2.5">{course.modules.map((mod, index) => {
@@ -119,8 +119,8 @@ export const LearningPage: React.FC = () => {
           </> : <div className="p-8 text-sm text-slate-500">{busy ? 'Đang tải khóa học…' : 'Chưa có khóa học để hiển thị.'}</div>}
         </section>
 
-        {lesson && <section className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-xl">
-          <div className="mb-5 flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-700"><HelpCircle className="h-5 w-5" /></span><div><h3 className="text-lg font-bold text-slate-900">{lesson.title}</h3><p className="text-xs text-slate-500">{questions.length ? `Câu hỏi ${questionIndex + 1}/${questions.length} · Đã chọn ${answeredCount}/${questions.length}` : lesson.type === 'quiz' ? 'Chưa có câu hỏi kiểm tra' : 'Đọc nội dung bài học'}</p></div></div>
+        {lesson && <section className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl sm:p-6 md:p-8">
+          <div className="mb-5 flex items-center gap-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-700"><HelpCircle className="h-5 w-5" /></span><div className="min-w-0"><h3 className="break-words text-lg font-bold text-slate-900">{lesson.title}</h3><p className="text-xs text-slate-500">{questions.length ? `Câu hỏi ${questionIndex + 1}/${questions.length} · Đã chọn ${answeredCount}/${questions.length}` : lesson.type === 'quiz' ? 'Chưa có câu hỏi kiểm tra' : 'Đọc nội dung bài học'}</p></div></div>
           {lesson.type !== 'quiz' && <div className="space-y-4">{lesson.content.split(/\n\n/).map((paragraph, index) => <p key={index} className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm leading-7 text-slate-700">{paragraph}</p>)}</div>}
           {lesson.quiz && !questions.length && <p className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Phần kiểm tra này chưa có câu hỏi đang dùng. Vui lòng liên hệ quản trị viên.</p>}
           {lesson.quiz && currentQuestion && <div className={lesson.type === 'quiz' ? '' : 'mt-6 border-t border-slate-200 pt-6'}>

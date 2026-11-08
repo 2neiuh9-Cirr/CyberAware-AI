@@ -209,7 +209,7 @@ export const AdminQuestionsPage: React.FC = () => {
           </div>
 
           {/* Quick Stats Bento Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div role="region" aria-label="Thống kê câu hỏi" tabIndex={0} className="no-scrollbar grid w-full grid-flow-col grid-rows-2 auto-cols-[calc(100%_-_2.5rem)] gap-4 overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory pb-2 sm:grid-flow-row sm:grid-rows-none sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:snap-none sm:pb-0 lg:grid-cols-4">
             {/* Stat 1 */}
             <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between">
               <div className="flex items-center justify-between">

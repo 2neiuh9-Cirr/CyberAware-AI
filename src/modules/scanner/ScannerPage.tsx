@@ -20,6 +20,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { RiskGauge } from '../../components/common/RiskGauge';
 import { ScanType } from '../../types';
 import { ScanHistory } from '../../components/common/ScanHistory';
+import { ComingSoonDialog } from '../../components/common/ComingSoonDialog';
 
 export const ScannerPage: React.FC = () => {
   const {
@@ -34,9 +35,14 @@ export const ScannerPage: React.FC = () => {
 
   const [inputVal, setInputVal] = useState('');
   const [qrFile, setQrFile] = useState<string | null>(null);
+  const [comingSoonType, setComingSoonType] = useState<'phone' | 'bank' | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (activeTab === 'phone' || activeTab === 'bank') {
+      setComingSoonType(activeTab);
+      return;
+    }
     if (!inputVal.trim()) return;
     runScan(inputVal.trim(), activeTab);
   };
@@ -56,11 +62,19 @@ export const ScannerPage: React.FC = () => {
   };
 
   const handleSampleClick = (val: string) => {
+    if (activeTab === 'phone' || activeTab === 'bank') {
+      setComingSoonType(activeTab);
+      return;
+    }
     setInputVal(val);
     runScan(val, activeTab);
   };
 
   const handleHistorySelect = (scan: import('../../types').ScanResult) => {
+    if (scan.type === 'phone' || scan.type === 'bank') {
+      setComingSoonType(scan.type);
+      return;
+    }
     setActiveTab(scan.type);
     setInputVal(scan.query);
     void runScan(scan.query, scan.type);
@@ -86,7 +100,7 @@ export const ScannerPage: React.FC = () => {
       {/* Main Tool Container */}
       <div id="scanner-tool" className="w-full max-w-[896px] bg-white rounded-2xl shadow-xl border border-slate-200/80 p-6 md:p-8 flex flex-col gap-6 scroll-mt-24">
         {/* Navigation Tabs */}
-        <div className="flex flex-nowrap items-center gap-2 overflow-x-auto border-b border-slate-100 pb-4 no-scrollbar">
+        <div className="grid grid-cols-2 gap-2 border-b border-slate-100 pb-4 lg:flex lg:flex-nowrap lg:items-center lg:overflow-x-auto">
           {[
             { id: 'url', label: 'Website / URL', icon: Search },
             { id: 'sms', label: 'Tin nhắn SMS / Chat', icon: MessageSquare },
@@ -98,12 +112,17 @@ export const ScannerPage: React.FC = () => {
             return (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => {
+                  if (tab.id === 'phone' || tab.id === 'bank') {
+                    setComingSoonType(tab.id);
+                    return;
+                  }
                   setActiveTab(tab.id as ScanType);
                   setInputVal('');
                   clearScan();
                 }}
-                className={`flex shrink-0 items-center gap-2 whitespace-nowrap py-2.5 px-4 rounded-xl font-semibold text-xs md:text-sm transition-all cursor-pointer ${
+                className={`flex min-w-0 items-center justify-center gap-2 rounded-xl px-2 py-2.5 text-center text-xs font-semibold transition-all cursor-pointer lg:shrink-0 lg:whitespace-nowrap lg:px-4 md:text-sm ${
                   isActive
                     ? 'bg-[#004AC6] text-white shadow-sm'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -150,7 +169,7 @@ export const ScannerPage: React.FC = () => {
                       ? '+84 987 654 321'
                       : '19038291028301 - TECHCOMBANK'
                   }
-                  className="bg-transparent border-none outline-none flex-grow text-slate-900 placeholder:text-slate-400 text-sm py-2 px-3"
+                  className="min-w-0 w-full bg-transparent border-none outline-none flex-grow text-slate-900 placeholder:text-slate-400 text-sm py-2 px-3"
                 />
                 <button
                   type="submit"
@@ -310,6 +329,11 @@ export const ScannerPage: React.FC = () => {
         )}
       </div>
       <ScanHistory onSelect={handleHistorySelect} />
+      <ComingSoonDialog
+        open={comingSoonType !== null}
+        description={`Tính năng kiểm tra ${comingSoonType === 'phone' ? 'số điện thoại' : 'tài khoản ngân hàng'} sẽ sớm ra mắt.`}
+        onClose={() => setComingSoonType(null)}
+      />
     </div>
   );
 };

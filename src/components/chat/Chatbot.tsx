@@ -166,7 +166,7 @@ export const Chatbot: React.FC = () => {
         <button type="button" disabled={busy || !caps?.imagesEnabled || !caps.enabled} onClick={() => fileRef.current?.click()} className="rounded-xl p-2 text-slate-500 hover:bg-white hover:text-[#003EA8]" aria-label="Đính kèm ảnh"><ImagePlus size={22} /></button>
         <textarea disabled={busy} ref={inputRef} value={draft} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); submitMessage(); } }}
           rows={1} maxLength={2000} placeholder={compact ? 'Nhập tin nhắn…' : 'Nhập câu hỏi hoặc dán tin nhắn nghi ngờ…'} aria-label="Tin nhắn cho trợ lý"
-          className="max-h-28 min-h-10 flex-1 resize-none bg-transparent px-1 py-2.5 text-sm text-slate-800 outline-none placeholder:text-slate-400" />
+          className="max-h-28 min-h-10 min-w-0 flex-1 resize-none bg-transparent px-1 py-2.5 text-sm text-slate-800 outline-none placeholder:text-slate-400" />
         <button type="button" onClick={submitMessage} disabled={busy || !caps?.enabled || (!draft.trim() && !file)} className="rounded-xl bg-[#004AC6] p-2.5 text-white transition hover:bg-[#003EA8] disabled:bg-slate-200 disabled:text-slate-400" aria-label="Gửi tin nhắn">{busy?<span aria-label="Đang xử lý">…</span>:<Send size={19} />}</button>
       </div>
       {!compact && <p className="mt-2 text-center text-[11px] text-slate-400">Trợ lý AI có thể mắc sai sót. Hãy kiểm chứng thông tin quan trọng.</p>}

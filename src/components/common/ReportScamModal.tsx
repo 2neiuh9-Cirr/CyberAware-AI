@@ -40,7 +40,7 @@ export const ReportScamModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
@@ -48,7 +48,7 @@ export const ReportScamModal: React.FC = () => {
       />
 
       {/* Modal Dialog */}
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 md:p-8 z-10 animate-in fade-in zoom-in-95 duration-150">
+      <div role="dialog" aria-modal="true" aria-label="Báo cáo trường hợp lừa đảo" className="relative z-10 max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150 sm:p-6 md:p-8">
         <button
           onClick={() => setReportModalOpen(false)}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
@@ -83,7 +83,7 @@ export const ReportScamModal: React.FC = () => {
             {/* Select Type */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">Loại mục tiêu</label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {[
                   { id: 'url', label: 'Website / Link' },
                   { id: 'phone', label: 'Số điện thoại' },

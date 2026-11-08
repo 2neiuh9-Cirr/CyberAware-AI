@@ -16,7 +16,7 @@ export const ScenarioDetailModal: React.FC = () => {
       />
 
       {/* Modal Dialog */}
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 md:p-8 z-10 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
+      <div role="dialog" aria-modal="true" aria-label="Chi tiết kịch bản lừa đảo" className="relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150 sm:p-6 md:p-8">
         <button
           onClick={() => setSelectedScenario(null)}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"

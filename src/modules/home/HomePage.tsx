@@ -33,6 +33,7 @@ import { DeepfakeWaveformVisualizer } from '../../components/cyber/DeepfakeWavef
 import { CyberMobileShowcase } from './components/CyberMobileShowcase';
 import { AiChatShowcase } from './components/AiChatShowcase';
 import { FeaturedWarnings } from './components/FeaturedWarnings';
+import { ComingSoonDialog } from '../../components/common/ComingSoonDialog';
 
 export const HomePage: React.FC = () => {
   const {
@@ -50,6 +51,7 @@ export const HomePage: React.FC = () => {
   } = useAppStore();
 
   const [inputVal, setInputVal] = useState(searchQuery);
+  const [comingSoonType, setComingSoonType] = useState<'phone' | 'bank' | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoError, setVideoError] = useState('');
@@ -79,6 +81,10 @@ export const HomePage: React.FC = () => {
   };
 
   const handleTabChange = (tab: ScanType) => {
+    if (tab === 'phone' || tab === 'bank') {
+      setComingSoonType(tab);
+      return;
+    }
     setActiveTab(tab);
     setInputVal('');
     clearScan();
@@ -86,11 +92,19 @@ export const HomePage: React.FC = () => {
 
   const handleScanSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (activeTab === 'phone' || activeTab === 'bank') {
+      setComingSoonType(activeTab);
+      return;
+    }
     if (!inputVal.trim()) return;
     runScan(inputVal.trim(), activeTab);
   };
 
   const handleSuggestionClick = (suggestion: string) => {
+    if (activeTab === 'phone' || activeTab === 'bank') {
+      setComingSoonType(activeTab);
+      return;
+    }
     setInputVal(suggestion);
     runScan(suggestion, activeTab);
   };
@@ -149,11 +163,11 @@ export const HomePage: React.FC = () => {
             </div>
 
             {/* Interactive Tabs */}
-            <div className="flex flex-row items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+            <div className="grid grid-cols-2 gap-2 lg:flex lg:flex-row lg:items-center lg:overflow-x-auto lg:pb-1">
               <button
                 type="button"
                 onClick={() => handleTabChange('url')}
-                className={`flex flex-row items-center py-2.5 px-4 md:px-5 gap-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                className={`flex min-w-0 flex-row items-center justify-center py-2.5 px-2 lg:px-5 gap-2 rounded-xl text-center text-xs sm:text-sm font-semibold transition-all lg:whitespace-nowrap cursor-pointer ${
                   activeTab === 'url'
                     ? 'bg-[#004AC6] text-white shadow-sm'
                     : 'bg-[#F1F5F9] text-[#434655] hover:bg-slate-200/80'
@@ -166,7 +180,7 @@ export const HomePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleTabChange('sms')}
-                className={`flex flex-row items-center py-2.5 px-4 md:px-5 gap-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                className={`flex min-w-0 flex-row items-center justify-center py-2.5 px-2 lg:px-5 gap-2 rounded-xl text-center text-xs sm:text-sm font-semibold transition-all lg:whitespace-nowrap cursor-pointer ${
                   activeTab === 'sms'
                     ? 'bg-[#004AC6] text-white shadow-sm'
                     : 'bg-[#F1F5F9] text-[#434655] hover:bg-slate-200/80'
@@ -179,7 +193,7 @@ export const HomePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleTabChange('phone')}
-                className={`flex flex-row items-center py-2.5 px-4 md:px-5 gap-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                className={`flex min-w-0 flex-row items-center justify-center py-2.5 px-2 lg:px-5 gap-2 rounded-xl text-center text-xs sm:text-sm font-semibold transition-all lg:whitespace-nowrap cursor-pointer ${
                   activeTab === 'phone'
                     ? 'bg-[#004AC6] text-white shadow-sm'
                     : 'bg-[#F1F5F9] text-[#434655] hover:bg-slate-200/80'
@@ -192,7 +206,7 @@ export const HomePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleTabChange('bank')}
-                className={`flex flex-row items-center py-2.5 px-4 md:px-5 gap-2 rounded-xl text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                className={`flex min-w-0 flex-row items-center justify-center py-2.5 px-2 lg:px-5 gap-2 rounded-xl text-center text-xs sm:text-sm font-semibold transition-all lg:whitespace-nowrap cursor-pointer ${
                   activeTab === 'bank'
                     ? 'bg-[#004AC6] text-white shadow-sm'
                     : 'bg-[#F1F5F9] text-[#434655] hover:bg-slate-200/80'
@@ -216,7 +230,7 @@ export const HomePage: React.FC = () => {
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   placeholder={currentPlaceholder}
-                  className="bg-transparent border-none outline-none flex-grow text-slate-900 placeholder:text-slate-400 text-sm py-2.5 px-3 sm:px-2"
+                  className="min-w-0 w-full bg-transparent border-none outline-none flex-grow text-slate-900 placeholder:text-slate-400 text-sm py-2.5 px-3 sm:px-2"
                 />
                 <button
                   type="submit"
@@ -412,10 +426,10 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Steps Grid with Animated Data Flow Lines */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 w-full relative">
+          <div role="region" aria-label="Ba bước thẩm định" tabIndex={0} className="no-scrollbar relative grid w-full grid-flow-col auto-cols-[calc(100%_-_2.5rem)] gap-5 overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory pb-2 pt-1 md:grid-flow-row md:auto-cols-auto md:grid-cols-3 md:gap-8 md:overflow-visible md:snap-none md:pb-0 md:pt-0">
             
             {/* Step 1 */}
-            <div className="flex flex-col items-start p-8 gap-5 bg-[#F8FAFC] rounded-2xl h-full relative border border-slate-200/70 hover:border-[#004AC6]/40 hover:shadow-lg transition-all duration-300 group">
+            <div className="group relative flex h-full min-w-0 snap-start flex-col items-start gap-5 rounded-2xl border border-slate-200/70 bg-[#F8FAFC] p-6 transition-all duration-300 hover:border-[#004AC6]/40 hover:shadow-lg md:p-8">
               <div className="relative">
                 <div className="w-14 h-14 bg-[#EFF6FF] rounded-xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform duration-200">
                   <FileText className="w-6 h-6 text-[#004AC6]" />
@@ -449,7 +463,7 @@ export const HomePage: React.FC = () => {
             </div>
 
             {/* Step 2 */}
-            <div className="flex flex-col items-start p-8 gap-5 bg-[#F8FAFC] rounded-2xl h-full relative border border-slate-200/70 hover:border-[#004AC6]/40 hover:shadow-lg transition-all duration-300 group">
+            <div className="group relative flex h-full min-w-0 snap-start flex-col items-start gap-5 rounded-2xl border border-slate-200/70 bg-[#F8FAFC] p-6 transition-all duration-300 hover:border-[#004AC6]/40 hover:shadow-lg md:p-8">
               <div className="relative">
                 <div className="w-14 h-14 bg-[#E5EEFF] rounded-xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform duration-200">
                   <Layers className="w-6 h-6 text-[#004AC6]" />
@@ -479,7 +493,7 @@ export const HomePage: React.FC = () => {
             </div>
 
             {/* Step 3 */}
-            <div className="flex flex-col items-start p-8 gap-5 bg-[#F8FAFC] rounded-2xl h-full relative border border-slate-200/70 hover:border-emerald-500/40 hover:shadow-lg transition-all duration-300 group">
+            <div className="group relative flex h-full min-w-0 snap-start flex-col items-start gap-5 rounded-2xl border border-slate-200/70 bg-[#F8FAFC] p-6 transition-all duration-300 hover:border-emerald-500/40 hover:shadow-lg md:p-8">
               <div className="relative">
                 <div className="w-14 h-14 bg-[#D1FAE5] rounded-xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform duration-200">
                   <ShieldCheck className="w-8 h-8 text-[#059669]" />
@@ -544,11 +558,16 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Common scam cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 w-full">
+          <div
+            role="region"
+            aria-label="Các hình thức lừa đảo phổ biến"
+            tabIndex={0}
+            className="no-scrollbar grid w-full grid-flow-col grid-rows-1 auto-cols-[calc(100%_-_2.5rem)] gap-5 overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory pb-2 pt-1 sm:grid-flow-row sm:grid-rows-none sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:snap-none sm:pb-0 sm:pt-0 lg:grid-cols-4 lg:gap-6"
+          >
             {SCAM_SCENARIOS.slice(0, 4).map((scam, index) => (
               <div
                 key={scam.id}
-                className="group relative flex h-full flex-col overflow-hidden rounded-[22px] border border-white/90 bg-white/95 p-5 lg:p-6 shadow-[0_8px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_44px_rgba(15,23,42,0.13)] focus-within:-translate-y-1 focus-within:ring-blue-300"
+                className="group relative flex h-full min-w-0 snap-start flex-col overflow-hidden rounded-[22px] border border-white/90 bg-white/95 p-5 lg:p-6 shadow-[0_8px_28px_rgba(15,23,42,0.06)] ring-1 ring-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_44px_rgba(15,23,42,0.13)] focus-within:-translate-y-1 focus-within:ring-blue-300"
               >
                 <div aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 transition-all duration-300 group-hover:h-1.5 ${scam.badgeColor === 'red' ? 'bg-gradient-to-r from-rose-500 to-orange-400' : scam.badgeColor === 'amber' ? 'bg-gradient-to-r from-amber-400 to-orange-400' : 'bg-gradient-to-r from-blue-600 to-cyan-400'}`} />
                 <div className="flex flex-1 flex-col">
@@ -735,7 +754,7 @@ export const HomePage: React.FC = () => {
       {/* Community Support & Report Banner */}
       <section className="w-full bg-[#F8FAFC] flex flex-col items-center py-12 md:py-16 px-4 md:px-12">
         <div className="max-w-[1184px] w-full bg-[#F1F5F9] rounded-2xl p-6 md:p-10 flex flex-col md:flex-row justify-between items-center gap-6 border border-slate-200/80">
-          <div className="flex flex-row items-center gap-5">
+          <div className="flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-5">
             <div className="w-14 h-14 bg-[#FEF3C7] rounded-full flex items-center justify-center shrink-0">
               <AlertTriangle className="w-7 h-7 text-[#D97706]" />
             </div>
@@ -751,13 +770,18 @@ export const HomePage: React.FC = () => {
 
           <button
             onClick={() => setReportModalOpen(true)}
-            className="flex items-center justify-center gap-2 py-3 px-6 bg-[#0F172A] hover:bg-[#1E293B] active:scale-98 text-white font-semibold text-sm rounded-lg shadow-sm shrink-0 whitespace-nowrap transition-all cursor-pointer"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#0F172A] px-4 py-3 text-center text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#1E293B] active:scale-98 cursor-pointer sm:w-auto sm:shrink-0 sm:px-6"
           >
             <AlertTriangle className="w-4 h-4 text-amber-400" />
             <span>Báo cáo lừa đảo ngay</span>
           </button>
         </div>
       </section>
+      <ComingSoonDialog
+        open={comingSoonType !== null}
+        description={`Tính năng kiểm tra ${comingSoonType === 'phone' ? 'số điện thoại' : 'tài khoản ngân hàng'} sẽ sớm ra mắt.`}
+        onClose={() => setComingSoonType(null)}
+      />
     </div>
   );
 };

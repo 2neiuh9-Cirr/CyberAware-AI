@@ -199,7 +199,7 @@ export const AdminUsersPage: React.FC = () => {
         </div>
 
         {/* 2. Thống kê 4 thẻ (Đồng bộ SCREEN_20) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+        <div role="region" aria-label="Thống kê người dùng" tabIndex={0} className="no-scrollbar grid w-full grid-flow-col grid-rows-2 auto-cols-[calc(100%_-_2.5rem)] gap-5 overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory pb-2 sm:grid-flow-row sm:grid-rows-none sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:snap-none sm:pb-0 xl:grid-cols-4">
           {/* Card 1 */}
           <div className="rounded-xl bg-white p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-4">
             <div className="flex items-center justify-between">
@@ -273,7 +273,7 @@ export const AdminUsersPage: React.FC = () => {
         <div className="rounded-xl bg-white p-5 border border-slate-200/80 shadow-xs space-y-4">
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
             {/* Search Input */}
-            <div className="relative flex-1 min-w-[280px]">
+            <div className="relative min-w-0 flex-1">
               <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">
                 search
               </span>

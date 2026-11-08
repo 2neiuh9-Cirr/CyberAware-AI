@@ -137,11 +137,31 @@
   animation: scan-line 2.8s ease-in-out infinite;
 }
 
+/* Scrollable card groups remain swipeable without a visible track. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Accessibility: Respect Reduced Motion Preference */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Keep administrator forms and their action buttons reachable on short screens. */
+@media (max-width: 639px), (max-height: 600px) {
+  .admin-shell .fixed.inset-0.z-50 > :is(form, div) {
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }

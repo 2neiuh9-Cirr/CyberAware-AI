@@ -188,7 +188,7 @@ export const CyberMobileShowcase: React.FC = () => {
             <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/10 via-emerald-500/10 to-indigo-500/10 rounded-[48px] blur-2xl -z-10" />
 
             {/* Mobile Device Chassis */}
-            <div className="w-[310px] sm:w-[340px] bg-slate-900 rounded-[44px] p-3.5 shadow-2xl border-[5px] border-slate-800 relative overflow-hidden transition-all duration-300">
+            <div className="w-full max-w-[310px] sm:max-w-[340px] bg-slate-900 rounded-[44px] p-3.5 shadow-2xl border-[5px] border-slate-800 relative overflow-hidden transition-all duration-300">
               
               {/* Device Notch / Dynamic Island */}
               <div className="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-full z-40 flex items-center justify-center gap-2">
@@ -206,7 +206,7 @@ export const CyberMobileShowcase: React.FC = () => {
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
 
                 {/* Top Status inside Phone */}
-                <div className="relative z-10 flex items-center justify-between text-[11px] font-mono text-slate-400 pt-1 pb-3 border-b border-slate-800/80">
+                <div className="relative z-10 flex flex-wrap items-center justify-between gap-1 text-[10px] sm:text-[11px] font-mono text-slate-400 pt-1 pb-3 border-b border-slate-800/80">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                     <span>CYBER SHIELD ACTIVE</span>
@@ -218,7 +218,7 @@ export const CyberMobileShowcase: React.FC = () => {
                 <div className="relative z-10 flex flex-col gap-3 my-auto">
                   
                   {/* Alert Header Pill */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold tracking-wider uppercase bg-red-500/20 text-red-400 border border-red-500/40">
                       <ShieldAlert className="w-3 h-3 text-red-400" />
                       {current.riskLevel}
@@ -266,7 +266,7 @@ export const CyberMobileShowcase: React.FC = () => {
                 </div>
 
                 {/* Bottom Bar inside Phone */}
-                <div className="relative z-10 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+                <div className="relative z-10 flex flex-wrap items-center justify-between gap-1 border-t border-slate-800/80 pt-2 text-[11px] text-slate-400">
                   <span className="flex items-center gap-1">
                     <Lock className="w-3 h-3 text-emerald-400" /> Dữ liệu tình huống mẫu
                   </span>

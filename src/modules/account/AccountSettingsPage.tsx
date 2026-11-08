@@ -235,7 +235,7 @@ export const AccountSettingsPage: React.FC = () => {
 
               {/* Trust & Privacy Score Meter */}
               <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex flex-col gap-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-base text-[#004AC6]">shield_lock</span>
                     Chỉ số an toàn bảo mật
@@ -377,7 +377,7 @@ export const AccountSettingsPage: React.FC = () => {
 
                 {/* Email (with verification badge) */}
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <label className="text-xs sm:text-sm font-bold text-slate-900" htmlFor="emailInput">
                       Email đăng nhập
                     </label>
@@ -407,7 +407,7 @@ export const AccountSettingsPage: React.FC = () => {
 
                 {/* Safe Contact Phone */}
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <label className="text-xs sm:text-sm font-bold text-slate-900" htmlFor="phoneNumber">
                       Số điện thoại liên hệ an toàn <span className="text-slate-400 font-normal">(tùy chọn)</span>
                     </label>

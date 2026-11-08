@@ -35,10 +35,10 @@ const AppView: React.FC = () => {
     <ScrollToTop />
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col text-[#0F172A] selection:bg-[#004AC6] selection:text-white">
       {!isAdminPage && <Header />}
-      <main className={`w-full flex-grow flex flex-col items-start overflow-hidden ${isAdminPage ? '' : 'pt-[64px]'}`}>
+      <main className={`flex w-full min-w-0 flex-grow flex-col items-start ${isAdminPage ? '' : 'pt-[64px]'}`}>
         {!isAdminPage && <NotificationBanner />}
         {loading && <p role="status" className="p-4 text-slate-600">Đang tải dữ liệu từ máy chủ…</p>}
-        {error && !isLearningPage && <div role="alert" className="w-full p-4 bg-red-50 text-red-800 flex gap-4"><span>{error}</span><button onClick={() => void initialize()} className="underline">Tải lại dữ liệu</button><button onClick={() => setError(null)} className="underline">Đóng</button></div>}
+        {error && !isLearningPage && <div role="alert" className="flex w-full flex-wrap gap-4 bg-red-50 p-4 text-red-800"><span className="min-w-0 break-words">{error}</span><button onClick={() => void initialize()} className="underline">Tải lại dữ liệu</button><button onClick={() => setError(null)} className="underline">Đóng</button></div>}
         <AppRoutes />
       </main>
       {!isAdminPage && <Footer />}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, CalendarDays, Clock3, Megaphone, TrendingUp, TriangleAlert, X } from 'lucide-react';
+import { ArrowRight, CalendarDays, Clock3, Megaphone, TrendingUp, TriangleAlert } from 'lucide-react';
 import { api } from '../../../api';
+import { ComingSoonDialog } from '../../../components/common/ComingSoonDialog';
 
 type Warning = {
   id: string;
@@ -58,13 +59,6 @@ export function FeaturedWarnings() {
     return () => { mounted = false; };
   }, []);
 
-  useEffect(() => {
-    if (!noticeOpen) return;
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === 'Escape') setNoticeOpen(false); };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [noticeOpen]);
-
   const featured = items[0];
   return (
     <section className="w-full bg-[#F8FAFC] px-4 py-16 md:px-12 md:py-20" aria-labelledby="featured-warnings-title">
@@ -110,15 +104,7 @@ export function FeaturedWarnings() {
           </div>
         )}
       </div>
-      {noticeOpen && <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 px-4" onMouseDown={event => { if (event.target === event.currentTarget) setNoticeOpen(false); }}>
-        <div role="dialog" aria-modal="true" aria-labelledby="news-notice-title" className="relative w-full max-w-sm rounded-2xl bg-white p-7 text-center shadow-2xl">
-          <button type="button" onClick={() => setNoticeOpen(false)} aria-label="Đóng thông báo" className="absolute right-4 top-4 rounded-lg p-1 text-slate-500 hover:bg-slate-100"><X className="h-5 w-5" /></button>
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50"><Megaphone className="h-7 w-7 text-emerald-600" /></div>
-          <h3 id="news-notice-title" className="text-xl font-bold text-slate-950">Tính năng đang phát triển</h3>
-          <p className="mt-2 text-sm text-slate-600">Trang xem tất cả tin tức sẽ sớm ra mắt.</p>
-          <button type="button" onClick={() => setNoticeOpen(false)} className="mt-6 rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700">Đã hiểu</button>
-        </div>
-      </div>}
+      <ComingSoonDialog open={noticeOpen} description="Trang xem tất cả tin tức sẽ sớm ra mắt." onClose={() => setNoticeOpen(false)} />
     </section>
   );
 }

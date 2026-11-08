@@ -107,7 +107,7 @@ export const AdminOverviewPage: React.FC = () => {
           </div>
 
           {/* Core 4 Useful Metric Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+          <div role="region" aria-label="Thống kê quản trị" tabIndex={0} className="no-scrollbar grid w-full grid-flow-col grid-rows-2 auto-cols-[calc(100%_-_2.5rem)] gap-5 overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory pb-2 sm:grid-flow-row sm:grid-rows-none sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:snap-none sm:pb-0 xl:grid-cols-4">
             {/* Metric 1 */}
             <div className="bg-white p-6 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-md">
               <div className="flex items-start justify-between">

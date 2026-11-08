@@ -40,11 +40,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans antialiased">
+    <div className="admin-shell min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans antialiased">
       {/* Top Admin Header */}
       <header className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200/80 shadow-[0_1px_8px_rgba(0,0,0,0.03)] h-16">
         <div className="h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between lg:pl-72">
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             {/* Mobile Sidebar Toggle Button */}
             <button
               type="button"
@@ -58,10 +58,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             </button>
 
             {/* System Status Pill */}
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
+            <div className="min-w-0 flex items-center gap-2">
+              <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold sm:px-3 sm:text-xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Giao diện quản trị
+                <span className="truncate">Giao diện quản trị</span>
               </span>
             </div>
           </div>

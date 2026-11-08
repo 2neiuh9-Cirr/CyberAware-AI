@@ -255,7 +255,7 @@ export const AdminCoursesPage: React.FC = () => {
           </div>
 
           {/* 4 Compact Stat Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div role="region" aria-label="Thống kê khóa học" tabIndex={0} className="no-scrollbar grid w-full grid-flow-col grid-rows-2 auto-cols-[calc(100%_-_2.5rem)] gap-4 overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory pb-2 sm:grid-flow-row sm:grid-rows-none sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:snap-none sm:pb-0 lg:grid-cols-4">
             {/* Card 1 */}
             <div className="p-5 bg-white rounded-xl border border-slate-200/80 shadow-xs flex items-center justify-between">
               <div className="space-y-1">
