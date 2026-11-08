@@ -59,7 +59,7 @@ export const ScanHistory: React.FC<{ onSelect: (scan: ScanResult) => void }> = (
     }
   };
 
-  return <section className="relative mt-8 w-full max-w-[1024px] overflow-hidden rounded-[2rem] border border-blue-100 bg-white/95 p-5 shadow-[0_24px_70px_-38px_rgba(0,74,198,0.24)] ring-1 ring-white md:p-8">
+  return <section className="relative mx-auto mt-8 w-full max-w-[1024px] overflow-hidden rounded-[2rem] border border-blue-100 bg-white/95 p-5 shadow-[0_24px_70px_-38px_rgba(0,74,198,0.24)] ring-1 ring-white md:p-8">
     <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-cyan-400 via-[#004AC6] to-indigo-500" />
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="flex items-center gap-3">
