@@ -32,6 +32,7 @@ import { CyberScanningOverlay } from '../../components/cyber/CyberScanningOverla
 import { DeepfakeWaveformVisualizer } from '../../components/cyber/DeepfakeWaveformVisualizer';
 import { CyberMobileShowcase } from './components/CyberMobileShowcase';
 import { AiChatShowcase } from './components/AiChatShowcase';
+import { FeaturedWarnings } from './components/FeaturedWarnings';
 
 export const HomePage: React.FC = () => {
   const {
@@ -604,6 +605,8 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      <FeaturedWarnings />
 
       <AiChatShowcase />
 
