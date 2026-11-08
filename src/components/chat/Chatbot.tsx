@@ -10,6 +10,9 @@ import { api, json } from '../../api';
 import { useAppStore } from '../../store/useAppStore';
 import type { ChatMessage, ChatConversation, ChatCapabilities } from '../../types';
 import { OPEN_CHAT_FULL_EVENT } from './chatEvents';
+import { ChatAnswer } from './ChatAnswer';
+import { ConfirmDialog } from '../common/ConfirmDialog';
+import { notify } from '../common/toast';
 
 type ChatMode = 'closed' | 'compact' | 'full';
 type Conversation = ChatConversation;
@@ -37,6 +40,7 @@ export const Chatbot: React.FC = () => {
   const [showDelivery,setShowDelivery] = useState(false);
   const [notice,setNotice] = useState('');
   const [listCursor,setListCursor] = useState<string|null>(null);
+  const [pendingDelete,setPendingDelete] = useState<Conversation | null>(null);
   const opened = mode !== 'closed';
   useEffect(() => {
     const openFullScreen = () => setMode('full');
@@ -102,10 +106,13 @@ export const Chatbot: React.FC = () => {
     }catch(e){setNotice((e as Error).message)}finally{setBusy(false)}
   }
   async function deleteCurrent(){
-    if(!active || busy || !window.confirm('Xóa hội thoại này?'))return;
+    if(!pendingDelete || busy)return;
     setBusy(true);
-    try{if(member)await api('/chat/conversations/'+active.id,{method:'DELETE'});
-      setConversations(rows=>rows.filter(r=>r.id!==active.id));newConversation();
+    try{if(member)await api('/chat/conversations/'+pendingDelete.id,{method:'DELETE'});
+      setConversations(rows=>rows.filter(r=>r.id!==pendingDelete.id));
+      if(activeId===pendingDelete.id){setActiveId(null);setDraft('');setFile(null);setNotice('');}
+      setPendingDelete(null);
+      notify('Hội thoại đã được xóa.', 'success');
     }catch(e){setNotice((e as Error).message)}finally{setBusy(false)}
   }
   async function submitMessage(){
@@ -155,7 +162,7 @@ export const Chatbot: React.FC = () => {
       {file && <p className="mb-1 text-xs">Khi gửi, ảnh được chuyển đến Gemini. Hãy che OTP và thông tin cá nhân.</p>}
       {imageName && <div className="mb-2 flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-[#003896]"><ImagePlus size={15} /><span className="min-w-0 flex-1 truncate">{imageName}</span><button type="button" onClick={() => setFile(null)} aria-label="Bỏ ảnh đã chọn"><X size={15} /></button></div>}
       <div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-sm focus-within:border-[#004AC6]">
-        <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={event=>{const f=event.target.files?.[0];if(f && f.size<=2097152)setFile(f);else if(f)setNotice('Ảnh vượt 2 MiB.');event.target.value=''}} aria-label="Chọn ảnh" />
+        <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={event=>{const f=event.target.files?.[0];if(f && f.size<=2097152)setFile(f);else if(f){setNotice('Ảnh vượt 2 MiB.');notify('Ảnh vượt 2 MiB.', 'error');}event.target.value=''}} aria-label="Chọn ảnh" />
         <button type="button" disabled={busy || !caps?.imagesEnabled || !caps.enabled} onClick={() => fileRef.current?.click()} className="rounded-xl p-2 text-slate-500 hover:bg-white hover:text-[#003EA8]" aria-label="Đính kèm ảnh"><ImagePlus size={22} /></button>
         <textarea disabled={busy} ref={inputRef} value={draft} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); submitMessage(); } }}
           rows={1} maxLength={2000} placeholder={compact ? 'Nhập tin nhắn…' : 'Nhập câu hỏi hoặc dán tin nhắn nghi ngờ…'} aria-label="Tin nhắn cho trợ lý"
@@ -168,7 +175,17 @@ export const Chatbot: React.FC = () => {
 
   const messages = (compact: boolean) => (
     <div className="mx-auto flex w-full max-w-[980px] flex-col gap-4 px-4 py-5 sm:px-8" aria-live="polite">
-      {active?.messages.map(m=><div key={m.id} className={m.role==='user'?'self-end rounded-xl bg-[#004AC6] p-3 text-sm text-white':'self-start rounded-xl bg-blue-50 p-3 text-sm'}><p className="whitespace-pre-wrap break-words">{m.content}</p>{m.sources?.map(s=><a key={s.id} className="block underline" href={s.url} target="_blank" rel="noreferrer">{s.title}</a>)}{m.role==='assistant' && <div className="mt-2 flex gap-3 text-xs"><button className="underline" onClick={()=>closeAndNavigate('/kiem-tra')}>Kiểm tra dấu hiệu</button><button className="underline" onClick={()=>closeAndNavigate('/bao-cao')}>Báo cáo</button></div>}<small>{new Date(m.createdAt).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})}</small></div>)}
+      {active?.messages.map(m => (
+        <div key={m.id} className={m.role === 'user' ? 'self-end rounded-xl bg-[#004AC6] p-3 text-sm text-white' : 'self-start rounded-xl bg-blue-50 p-3 text-sm'}>
+          {m.role === 'assistant' ? <ChatAnswer content={m.content} /> : <p className="whitespace-pre-wrap break-words">{m.content}</p>}
+          {m.sources?.length > 0 && <div className="mt-3 space-y-1 border-t border-blue-100 pt-2 text-xs">
+            <p className="font-semibold text-slate-600">Nguồn tham khảo</p>
+            {m.sources.map(s => <a key={`${s.kind}:${s.url}:${s.title}`} className="block text-[#004AC6] underline underline-offset-2" href={s.url} target="_blank" rel="noreferrer">{s.title}</a>)}
+          </div>}
+          {m.role === 'assistant' && <div className="mt-3 flex gap-3 text-xs"><button className="underline" onClick={() => closeAndNavigate('/kiem-tra')}>Kiểm tra dấu hiệu</button><button className="underline" onClick={() => closeAndNavigate('/bao-cao')}>Báo cáo</button></div>}
+          <small className="mt-2 block text-[11px] opacity-70">{new Date(m.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</small>
+        </div>
+      ))}
       {!compact && <div className="h-2" />}
       <div ref={endRef} />
     </div>
@@ -196,10 +213,11 @@ export const Chatbot: React.FC = () => {
       <div className="flex min-w-0 flex-1 flex-col"><header className="shrink-0 border-b border-slate-100 bg-white px-4 py-4 sm:px-6"><div className="flex items-center gap-3"><div className="flex min-w-0 flex-1 items-center gap-3">{!showSidebar && <button type="button" onClick={() => setShowSidebar(true)} className="hidden rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:block" aria-label="Hiện thanh bên"><MessageSquare size={20} /></button>}<h2 className="truncate text-lg font-bold sm:text-xl">Trợ lý AI CyberAware</h2></div><button type="button" onClick={newConversation} className="rounded-lg p-2 text-[#003EA8] hover:bg-blue-50 lg:hidden" aria-label="Hội thoại mới"><Plus size={22} /></button><button type="button" onClick={() => setMode('compact')} className="flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-sm font-semibold hover:bg-slate-200"><Minus size={18} /><span className="hidden sm:inline">Thu nhỏ</span></button><button type="button" onClick={() => setMode('closed')} className="flex items-center gap-2 rounded-xl bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-100"><LogOut size={18} /><span className="hidden sm:inline">Thoát</span></button></div><div className="mt-4 flex items-center gap-2 overflow-x-auto pb-1">
         {conversations.length>0 && <select disabled={busy} aria-label="Hội thoại gần đây" value={activeId || ''} onChange={e=>void openConversation(e.target.value)} className="max-w-44 lg:hidden"><option value="" disabled>Gần đây</option>{conversations.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select>}
         {listCursor && <button onClick={async()=>{try{const p=await api('/chat/conversations?cursor='+encodeURIComponent(listCursor));setListCursor(p.nextCursor);setConversations(rows=>[...rows,...p.items.filter((c:Conversation)=>!rows.some(r=>r.id===c.id)).map((c:Conversation)=>({...c,messages:[]}))])}catch(e){setNotice((e as Error).message)}}}>Tải thêm</button>}
-        {active && <button disabled={busy} className="shrink-0 text-xs text-rose-700" onClick={()=>void deleteCurrent()}>Xóa hội thoại</button>}<span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-semibold text-[#003EA8]"><Bot size={18} /> AI</span><span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-600">Phòng tránh lừa đảo</span><span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-600">Hướng dẫn xử lý</span></div></header>
+        {active && <button disabled={busy} className="shrink-0 text-xs text-rose-700" onClick={()=>setPendingDelete(active)}>Xóa hội thoại</button>}<span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-semibold text-[#003EA8]"><Bot size={18} /> AI</span><span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-600">Phòng tránh lừa đảo</span><span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-600">Hướng dẫn xử lý</span></div></header>
         <div className="min-h-0 flex-1 overflow-y-auto bg-[#F8FAFC]">{active?.messages.length ? messages(false) : <div className="mx-auto flex min-h-full w-full max-w-[1020px] flex-col justify-center px-5 py-10 sm:px-8"><div className="mb-8"><span className="mb-4 flex h-20 w-20 items-center justify-center rounded-[26px] bg-blue-50 text-[#004AC6] shadow-sm"><Bot size={34} /></span><h1 className="text-2xl font-bold leading-tight text-slate-950 sm:text-4xl">Chào bạn, Trợ lý AI có thể giúp gì?</h1><p className="mt-3 text-base text-slate-500 sm:text-xl">Hỗ trợ nhận biết rủi ro và tìm hiểu cách phòng chống lừa đảo trực tuyến.</p></div>{suggestionButtons(false)}{deliveryQuestions}{showNotice && <div className="mt-8 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-medium text-slate-600"><ShieldAlert size={20} className="shrink-0 text-slate-400" /><span className="flex-1">Không gửi mã OTP, mật khẩu hoặc thông tin thẻ ngân hàng tại đây.</span><button type="button" onClick={() => setShowNotice(false)} aria-label="Đóng lưu ý" className="text-slate-400 hover:text-slate-700"><X size={19} /></button></div>}</div>}</div>
         <div className="mx-auto w-full max-w-[1040px]">{composer(false)}</div>
       </div>
     </section>}
+    {pendingDelete && <ConfirmDialog title="Xóa hội thoại?" description={`Hội thoại “${pendingDelete.title}” sẽ bị xóa vĩnh viễn và không thể khôi phục.`} confirmLabel="Xóa hội thoại" busy={busy} onConfirm={() => void deleteCurrent()} onCancel={() => setPendingDelete(null)} />}
   </>;
 };

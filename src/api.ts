@@ -1,3 +1,5 @@
+import { notify } from './components/common/toast';
+
 export class HttpError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
@@ -6,13 +8,17 @@ export async function api<T = any>(path: string, options: RequestInit = {}): Pro
   try {
     response = await fetch(`/api${path}`, { ...options, credentials: 'same-origin', headers: { ...(options.body && !(options.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}), ...options.headers }, signal: options.signal || AbortSignal.timeout(20_000) });
   } catch (error) {
-    if (options.signal?.aborted) throw error;
-    throw new Error('Không kết nối được máy chủ hoặc yêu cầu quá thời gian. Vui lòng thử lại.');
+    if (options.signal?.aborted && options.signal.reason?.name !== 'TimeoutError') throw error;
+    const failure = new Error('Không kết nối được máy chủ hoặc yêu cầu quá thời gian. Vui lòng thử lại.');
+    notify(failure.message, 'error');
+    throw failure;
   }
   const data = await response.json().catch(() => ({ error: 'Phản hồi máy chủ không hợp lệ.' }));
   if (!response.ok) {
     if (response.status === 401 && !path.startsWith('/auth/')) window.dispatchEvent(new Event('cyberaware-session-expired'));
-    throw new HttpError(response.status, data.error || 'Yêu cầu không thành công.');
+    const failure = new HttpError(response.status, data.error || 'Yêu cầu không thành công.');
+    if (!(response.status === 401 && path === '/me')) notify(failure.message, 'error');
+    throw failure;
   }
   return data as T;
 }

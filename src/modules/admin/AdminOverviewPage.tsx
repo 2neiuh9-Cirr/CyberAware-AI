@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/layout/AdminLayout';
 import { api, json } from '../../api';
+import { notify } from '../../components/common/toast';
 
 export const AdminOverviewPage: React.FC = () => {
   const navigate = useNavigate();
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [overview, setOverview] = useState<{ users: number; activeUsers: number; scansLast30Days: number; highRiskScansLast30Days: number; courses: number; questions: number; reportsPending: number } | null>(null);
   const [audit, setAudit] = useState<Array<{ id: string; actorName: string; action: string; targetId: string; detail: string; createdAt: string }>>([]);
@@ -17,10 +17,7 @@ export const AdminOverviewPage: React.FC = () => {
   const [logs, setLogs] = useState<Array<{ id: number; method: string; path: string; status: number; durationMs: number; createdAt: string }> | null>(null);
   const [showAllAudit, setShowAllAudit] = useState(false);
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
+  const showToast = (msg: string) => notify(msg, 'success');
   const load = async () => {
     try {
       const [numbers, events, topThreats, service, ai] = await Promise.all([
@@ -303,13 +300,6 @@ export const AdminOverviewPage: React.FC = () => {
 
       {logs && <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" onMouseDown={event => { if (event.target === event.currentTarget) setLogs(null); }}><div role="dialog" aria-modal="true" aria-label="Nhật ký yêu cầu API gần đây" className="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-xl border border-slate-200 max-h-[80vh] overflow-auto"><div className="flex justify-between items-center mb-4"><h2 className="text-lg font-bold">Nhật ký yêu cầu API gần đây</h2><button type="button" aria-label="Đóng nhật ký API" onClick={() => setLogs(null)} className="text-slate-500"><span className="material-symbols-outlined">close</span></button></div><div className="space-y-2">{logs.map(log => <div key={log.id} className="p-3 rounded-lg bg-slate-50 border border-slate-100 flex flex-wrap gap-3 text-xs"><strong>{log.method}</strong><span className="font-mono">{log.path}</span><span className={log.status >= 400 ? 'text-red-600' : 'text-emerald-600'}>{log.status}</span><span>{log.durationMs} ms</span><span className="ml-auto">{new Date(log.createdAt).toLocaleString('vi-VN')}</span></div>)}{!logs.length && <p className="text-sm text-slate-500">Chưa có yêu cầu nào được ghi nhận.</p>}</div></div></div>}
 
-      {/* Interactive Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 text-xs animate-fade-in border border-slate-700">
-          <span className="material-symbols-outlined text-emerald-400 text-base">info</span>
-          <span>{toastMessage}</span>
-        </div>
-      )}
     </AdminLayout>
   );
 };

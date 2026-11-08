@@ -95,7 +95,7 @@ export interface User {
   gmailShieldActive: boolean;
 }
 
-export interface ChatSource { id: string; kind: string; title: string; url: string; sourceDate?: string }
+export interface ChatSource { kind: string; title: string; url: string; sourceDate?: string }
 export interface ChatMessage { id: string; role: 'user' | 'assistant'; content: string; createdAt: string; sources: ChatSource[] }
 export interface ChatConversation { id: string; title: string; messageCount: number; messages: ChatMessage[] }
 export interface ChatCapabilities { enabled: boolean; imagesEnabled: boolean; limits: { maxImageBytes: number; maxMessageChars: number }; usage: { turnsRemainingToday: number; tokensRemainingToday: number; imagesRemainingToday: number } }

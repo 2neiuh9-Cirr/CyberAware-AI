@@ -3,6 +3,7 @@ import { AlertOctagon, Award, CheckCircle2, ChevronLeft, ChevronRight, Clock, Gr
 import { Link } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
 import { api, json } from '../../api';
+import { notify } from '../../components/common/toast';
 import type { Course } from '../../types';
 
 type QuizQuestion = { id: string; question: string; options: string[] };
@@ -71,8 +72,11 @@ export const LearningPage: React.FC = () => {
     if (!course || !lesson) return;
     setBusy(true); setError(''); setNotice('');
     const saved = await completeLesson(course.id, lesson.id);
-    if (saved.ok) setNotice(lesson.type === 'quiz' ? 'Đã hoàn thành khóa học.' : 'Đã lưu tiến độ bài học.');
-    else setError(saved.error || 'Không lưu được tiến độ.');
+    if (saved.ok) {
+      const message = lesson.type === 'quiz' ? 'Đã hoàn thành khóa học.' : 'Đã lưu tiến độ bài học.';
+      setNotice(message);
+      notify(message, 'success');
+    } else setError(saved.error || 'Không lưu được tiến độ.');
     setBusy(false);
   };
   const isComplete = !!course && !!lesson && lessonProgress.some(p => p.courseId === course.id && p.lessonId === lesson.id);

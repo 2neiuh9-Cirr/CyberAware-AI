@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AlertTriangle, CheckCircle2, Clock, ExternalLink, PlusCircle, RefreshCw, Search, ThumbsUp, X } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { api, json } from '../../api';
+import { notify } from '../../components/common/toast';
 import type { ScamReport } from '../../types';
 
 const reportTypes = [
@@ -62,6 +63,7 @@ export const ReportPage: React.FC = () => {
     try {
       const data = await api<{ report: ScamReport }>(`/admin/reports/${detail.id}/status`, json('PATCH', { status, reason: moderationReason }));
       setDetail(data.report); setRevision(r => r + 1); await refreshOverview();
+      notify('Đã cập nhật trạng thái báo cáo.', 'success');
     } catch (e) { setError((e as Error).message); } finally { setSaving(false); }
   };
   const toggleVote = async (id: string) => {

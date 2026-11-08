@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { api, json } from '../../api';
+import { notify } from '../../components/common/toast';
 import { AdminLayout } from '../../components/layout/AdminLayout';
 
 interface CourseAdminItem {
@@ -73,12 +74,7 @@ export const AdminCoursesPage: React.FC = () => {
   const [newLessonContent, setNewLessonContent] = useState('');
   const draggingLessonId = useRef<string | null>(null);
 
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
+  const showToast = (msg: string) => notify(msg, 'success');
   const displayLessons = (items: MicroLessonItem[], courseQuizCount: number) => items.map((lesson, index) => ({ ...lesson, order: index + 1, status: lesson.content?.trim() ? 'Hoàn tất nội dung' : 'Chưa có nội dung', quizCount: lesson.type === 'quiz' && !items.some(item => Array.isArray(item.questionIds)) ? courseQuizCount : lesson.questionIds?.length || 0 }));
   const load = async (preferredId?: string) => {
     try {
@@ -906,13 +902,6 @@ export const AdminCoursesPage: React.FC = () => {
 
       {pendingDelete && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs" role="presentation"><div role="alertdialog" aria-modal="true" aria-labelledby="delete-heading" aria-describedby="delete-description" onKeyDown={event => { if (event.key === 'Escape' && !busy) setPendingDelete(null); }} className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl"><div className="flex items-start gap-4"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600"><span className="material-symbols-outlined text-[24px]">delete</span></span><div><h3 id="delete-heading" className="text-lg font-bold text-slate-900">Xóa {pendingDelete.type === 'quiz' ? 'bài kiểm tra' : 'bài học'}?</h3><p id="delete-description" className="mt-1 text-sm leading-6 text-slate-600">Bạn sắp xóa “{pendingDelete.title}” khỏi khóa học.{pendingDelete.type === 'quiz' && selectedCourse.status === 'published' ? ' Khóa học sẽ chuyển về bản nháp và tạm ẩn với học viên cho đến khi có bài kiểm tra hợp lệ và được phát hành lại.' : ''}</p></div></div>{error && <p role="alert" className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}<div className="mt-6 flex justify-end gap-3"><button type="button" autoFocus disabled={busy} onClick={() => { setPendingDelete(null); setError(''); }} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">Hủy</button><button type="button" disabled={busy} onClick={() => void confirmDelete()} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50">{busy ? 'Đang xóa…' : 'Xóa mục này'}</button></div></div></div>}
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 text-xs border border-slate-700">
-          <span className="material-symbols-outlined text-emerald-400 text-base">info</span>
-          <span>{toastMessage}</span>
-        </div>
-      )}
     </AdminLayout>
   );
 };

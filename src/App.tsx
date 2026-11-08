@@ -12,6 +12,7 @@ import { AppRoutes } from './routes/AppRoutes';
 import { ReportScamModal } from './components/common/ReportScamModal';
 import { ScenarioDetailModal } from './components/common/ScenarioDetailModal';
 import { Chatbot } from './components/chat/Chatbot';
+import { ToastViewport } from './components/common/ToastViewport';
 import { useAppStore } from './store/useAppStore';
 
 // Helper to scroll to top on page navigation
@@ -44,6 +45,7 @@ const AppView: React.FC = () => {
       {!isAdminPage && <ReportScamModal />}
       {!isAdminPage && <ScenarioDetailModal />}
       {!isAdminPage && <Chatbot key={useAppStore.getState().currentUser?.id || 'guest'} />}
+      <ToastViewport />
     </div>
   </>;
 };

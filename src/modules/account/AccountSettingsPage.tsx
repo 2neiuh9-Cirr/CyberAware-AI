@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
 import { api, json } from '../../api';
+import { notify } from '../../components/common/toast';
 import type { User } from '../../types';
 
 type PrivacySettings = { autoDelete30Days: boolean; anonymousScamSharing: boolean; emailBankAlerts: boolean };
@@ -42,19 +43,7 @@ export const AccountSettingsPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
 
-  // Toast notification state
-  const [toast, setToast] = useState<{ visible: boolean; title: string; message: string }>({
-    visible: false,
-    title: '',
-    message: '',
-  });
-
-  const showToast = (title: string, message: string) => {
-    setToast({ visible: true, title, message });
-    setTimeout(() => {
-      setToast((prev) => ({ ...prev, visible: false }));
-    }, 3800);
-  };
+  const showToast = (title: string, message: string) => notify(message, title.startsWith('Không thể') ? 'error' : 'success', title);
 
   // Password strength calculation
   const hasMinLength = newPassword.length >= 8;
@@ -167,32 +156,6 @@ export const AccountSettingsPage: React.FC = () => {
   return (
     <div className="w-full bg-[#F8FAFC] min-h-screen pt-20 pb-16">
       
-      {/* Floating Interactive Toast Notification */}
-      <div
-        className={`fixed top-20 right-4 sm:right-8 z-50 transition-all duration-300 ease-out flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-white shadow-xl border border-slate-100 max-w-md ${
-          toast.visible ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'
-        }`}
-        role="alert"
-      >
-        <div className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
-          <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-            check_circle
-          </span>
-        </div>
-        <div className="flex flex-col min-w-0">
-          <span className="text-xs sm:text-sm font-bold text-slate-900">{toast.title}</span>
-          <span className="text-xs text-slate-500 leading-snug">{toast.message}</span>
-        </div>
-        <button
-          onClick={() => setToast((prev) => ({ ...prev, visible: false }))}
-          className="ml-3 text-slate-400 hover:text-slate-700 transition-colors p-1"
-          aria-label="Đóng thông báo"
-          type="button"
-        >
-          <span className="material-symbols-outlined text-base">close</span>
-        </button>
-      </div>
-
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {loadingSettings && <p role="status" className="mb-6 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">Đang tải cài đặt tài khoản…</p>}
         

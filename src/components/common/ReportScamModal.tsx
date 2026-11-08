@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, AlertTriangle, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { ScanType } from '../../types';
+import { notify } from './toast';
 
 export const ReportScamModal: React.FC = () => {
   const { isReportModalOpen, setReportModalOpen, submitReport, error } = useAppStore();
@@ -29,6 +30,7 @@ export const ReportScamModal: React.FC = () => {
     setIsSubmitting(false);
     if (!sent) return;
     setSuccess(true);
+    notify('Báo cáo đã được gửi và đang chờ duyệt.', 'success');
     setTimeout(() => {
       setSuccess(false);
       setTarget('');

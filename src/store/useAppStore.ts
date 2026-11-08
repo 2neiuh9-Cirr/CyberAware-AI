@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { ScanType, ScanResult, ScamReport, ScamScenario, Course, User } from '../types';
 import { api, json, HttpError } from '../api';
+import { notify } from '../components/common/toast';
 
 interface AppStore {
   activeTab: ScanType; searchQuery: string; isScanning: boolean; scanResult: ScanResult | null;
@@ -85,7 +86,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     catch (error) { set({ error: message(error) }); return false; }
   },
   voteReport: async id => {
-    try { await api(`/reports/${encodeURIComponent(id)}/votes`, json('POST')); window.dispatchEvent(new Event('cyberaware-reports-changed')); }
+    try { await api(`/reports/${encodeURIComponent(id)}/votes`, json('POST')); window.dispatchEvent(new Event('cyberaware-reports-changed')); notify('Đã ghi nhận bình chọn.', 'success'); }
     catch (error) { set({ error: message(error) }); }
   },
   completeLesson: async (courseId, lessonId) => {
@@ -101,7 +102,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     catch (error) { return { success: false, error: message(error) }; }
   },
   logout: async () => {
-    try { await api('/auth/logout', json('POST')); get().expireSession(); set({ error: null }); }
+    try { await api('/auth/logout', json('POST')); get().expireSession(); set({ error: null }); notify('Đã đăng xuất.', 'success'); }
     catch (error) { set({ error: message(error) }); }
   },
 }));

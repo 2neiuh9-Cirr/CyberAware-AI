@@ -1,0 +1,11 @@
+@media (prefers-reduced-motion: no-preference) {
+  .toast-life {
+    animation: toast-life 3s ease-in-out forwards;
+  }
+}
+
+@keyframes toast-life {
+  0% { opacity: 0; transform: translateY(12px); }
+  8%, 88% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(8px); }
+}

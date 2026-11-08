@@ -7,6 +7,7 @@ import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
 import { DatabaseSync } from 'node:sqlite';
 import { passwordChangedMail, resetCodeMail, verificationCodeMail } from '../backend/securityMail';
+import { formatChatAnswer } from '../shared/chatAnswer';
 process.env.AUTH_DATA_DIR = mkdtempSync(path.join(tmpdir(), 'cyberaware-api-'));
 process.env.AUTH_JWT_SECRET = 'isolated-test-secret-at-least-32-bytes-long';
 process.env.NODE_ENV = 'test';
@@ -61,6 +62,14 @@ test('security emails include clear recovery guidance and escape account names i
   assert.match(verification.text, /10 phút/);
   assert.match(verification.html, /&lt;Tên &amp; thử&gt;/);
   assert.doesNotMatch(verification.html, /<Tên & thử>/);
+});
+
+test('chat answer separates inline numbered ideas without forcing a single point into a list', () => {
+  assert.equal(
+    formatChatAnswer('Tôi có thể giúp bạn: 1. Kiểm tra tin nhắn. 2. Hướng dẫn xử lý. 3. Gợi ý phòng tránh.'),
+    'Tôi có thể giúp bạn:\n\n1. Kiểm tra tin nhắn.\n2. Hướng dẫn xử lý.\n3. Gợi ý phòng tránh.',
+  );
+  assert.equal(formatChatAnswer('Bước 1. Hãy kiểm tra nguồn gửi.'), 'Bước 1. Hãy kiểm tra nguồn gửi.');
 });
 
 test('health, safe error contract and anonymous access', async () => {
@@ -602,6 +611,9 @@ test('chat: quotas, images, grounded sources, history ownership and deletion', a
   t.after(()=>{process.env.GEMINI_API_KEY = key});
   const provider = new GoogleGenAI({ apiKey:'mock-key' }).models;
   const { chatProvider } = await import('../backend/chat');
+  const { chatKnowledge } = await import('../backend/chatKnowledge');
+  const privateSource = chatKnowledge('Shipper giả mạo hỏi OTP [ĐÃ ẨN]')[0];
+  assert.ok(privateSource?.id);
   t.mock.method(chatProvider,'models',()=>provider);
   let calls = 0;
   let failCount = true;
@@ -615,7 +627,11 @@ test('chat: quotas, images, grounded sources, history ownership and deletion', a
     if(failGenerate){failGenerate=false;throw Object.assign(new Error('model unavailable'),{status:503})}
     const payload=JSON.parse(params.contents[0].parts[0].text);
     assert.doesNotMatch(JSON.stringify(payload),/correctIndex|optionExplanations|123456/);
-    return {text:JSON.stringify({answer:'Hãy xác minh đơn hàng qua kênh đã biết.',sourceIds:[payload.sources[0]?.id,'invented']}),usageMetadata:{promptTokenCount:90,candidatesTokenCount:12,totalTokenCount:102}};
+    if (payload.question.includes('Shipper')) assert.equal(payload.sources[0]?.title,privateSource.title);
+    assert.equal(payload.sources[0]?.ref,undefined);
+    assert.equal(payload.sources[0]?.id,undefined);
+    assert.doesNotMatch(JSON.stringify(payload.sources),new RegExp(privateSource.id));
+    return {text:JSON.stringify({answer:`Theo [${privateSource.id}], hãy kiểm tra: 1. Xác minh đơn hàng qua kênh chính thức. 2. Không cung cấp OTP.`,sourceTitles:[payload.sources[0]?.title,'invented']}),usageMetadata:{promptTokenCount:90,candidatesTokenCount:12,totalTokenCount:102}};
   });
   const cfg = await request('/chat/capabilities');
   assert.equal(cfg.data.enabled,true);
@@ -624,7 +640,11 @@ test('chat: quotas, images, grounded sources, history ownership and deletion', a
   const g = await request('/chat/messages','POST',body,undefined,guest);
   assert.equal(g.status,200);assert.equal(g.data.conversationId,null);
   assert.ok(g.data.assistantMessage.sources.length);
-  assert.ok(g.data.assistantMessage.sources.every((s:any)=>s.id!=='invented'));
+  assert.ok(g.data.assistantMessage.sources.every((s:any)=>!('id' in s)));
+  assert.doesNotMatch(g.data.assistantMessage.content,new RegExp(privateSource.id));
+  assert.match(g.data.assistantMessage.content,/\n1\./);
+  assert.match(g.data.assistantMessage.content,/\n2\./);
+  assert.ok(g.data.assistantMessage.content.includes(privateSource.title));
   assert.equal((await request('/chat/messages','POST',body,undefined,guest)).status,409);
   assert.equal(calls,1);
   failGenerate=true;
@@ -634,7 +654,13 @@ test('chat: quotas, images, grounded sources, history ownership and deletion', a
   const route='/chat/conversations/'+m.data.conversationId;
   const outsider=await registerAndVerify({fullname:'Chat Test',email:'chat-test@example.test',password});
   assert.equal((await request(route,'GET',undefined,outsider.data.token)).status,404);
-  assert.equal((await request(route,'GET',undefined,adminToken)).data.messages.length,2);
+  const storedHistory=await request(route,'GET',undefined,adminToken);
+  assert.equal(storedHistory.data.messages.length,2);
+  assert.ok(storedHistory.data.messages[1].sources.every((s:any)=>!('id' in s)));
+  db.prepare("UPDATE chat_messages SET content=?,sources=? WHERE conversation_id=? AND role='assistant'").run(`Xem [${privateSource.id}].`,JSON.stringify([privateSource]),m.data.conversationId);
+  const oldHistory=await request(route,'GET',undefined,adminToken);
+  assert.equal(oldHistory.data.messages[1].content,`Xem ${privateSource.title}.`);
+  assert.ok(oldHistory.data.messages[1].sources.every((s:any)=>!('id' in s)));
   assert.equal((await request('/chat/conversations','GET',undefined,adminToken)).data.items.length,1);
   const deleted=await fetch(base+route,{method:'DELETE',headers:{Authorization:'Bearer '+adminToken}});
   assert.equal(deleted.status,204);

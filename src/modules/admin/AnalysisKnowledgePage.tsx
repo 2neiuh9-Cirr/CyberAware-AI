@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api, json } from '../../api';
 import { AdminLayout } from '../../components/layout/AdminLayout';
+import { notify } from '../../components/common/toast';
 
 type Rule = { id: string; type: string; title: string; terms: string[]; weight: number; enabled: boolean | number };
 type Intel = { id: string; title: string; category: string; summary: string; sourceName: string; sourceUrl: string; sourceDate: string; terms: string[]; status: string };
@@ -23,6 +24,7 @@ export const AnalysisKnowledgePage: React.FC = () => {
   const [intel, setIntel] = useState<Intel[]>([]);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState('');
+  const showSaved = (message: string) => { setSaved(message); notify(message, 'success'); };
   const [busy, setBusy] = useState(false);
   const [showRuleForm, setShowRuleForm] = useState(false);
   const [showIntelForm, setShowIntelForm] = useState(false);
@@ -44,32 +46,32 @@ export const AnalysisKnowledgePage: React.FC = () => {
   };
   useEffect(() => { void load(); }, []);
   const toggleRule = async (rule: Rule) => {
-    try { await api(`/admin/analysis/rules/${encodeURIComponent(rule.id)}`, json('PATCH', { enabled: !rule.enabled })); await load(); }
+    try { await api(`/admin/analysis/rules/${encodeURIComponent(rule.id)}`, json('PATCH', { enabled: !rule.enabled })); await load(); notify('Đã cập nhật quy tắc.', 'success'); }
     catch (cause) { setError((cause as Error).message); }
   };
   const toggleIntel = async (item: Intel) => {
-    try { await api(`/admin/analysis/intel/${encodeURIComponent(item.id)}/status`, json('PATCH', { status: item.status === 'reviewed' ? 'inactive' : 'reviewed' })); await load(); }
+    try { await api(`/admin/analysis/intel/${encodeURIComponent(item.id)}/status`, json('PATCH', { status: item.status === 'reviewed' ? 'inactive' : 'reviewed' })); await load(); notify('Đã cập nhật cảnh báo.', 'success'); }
     catch (cause) { setError((cause as Error).message); }
   };
   const updateSelectedRules = async (enabled: boolean) => {
     setBusy(true); setError('');
     try {
       await Promise.all(selectedRuleIds.map(id => api(`/admin/analysis/rules/${encodeURIComponent(id)}`, json('PATCH', { enabled }))));
-      setSelectedRuleIds([]); setSaved(enabled ? 'Đã bật các quy tắc đã chọn.' : 'Đã tắt các quy tắc đã chọn.'); await load();
+      setSelectedRuleIds([]); showSaved(enabled ? 'Đã bật các quy tắc đã chọn.' : 'Đã tắt các quy tắc đã chọn.'); await load();
     } catch (cause) { setError((cause as Error).message); } finally { setBusy(false); }
   };
   const updateSelectedIntel = async (reviewed: boolean) => {
     setBusy(true); setError('');
     try {
       await Promise.all(selectedIntelIds.map(id => api(`/admin/analysis/intel/${encodeURIComponent(id)}/status`, json('PATCH', { status: reviewed ? 'reviewed' : 'inactive' }))));
-      setSelectedIntelIds([]); setSaved(reviewed ? 'Đã hiện các cảnh báo đã chọn.' : 'Đã ẩn các cảnh báo đã chọn.'); await load();
+      setSelectedIntelIds([]); showSaved(reviewed ? 'Đã hiện các cảnh báo đã chọn.' : 'Đã ẩn các cảnh báo đã chọn.'); await load();
     } catch (cause) { setError((cause as Error).message); } finally { setBusy(false); }
   };
   const addRule = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
       await api('/admin/analysis/rules', json('POST', { title: ruleForm.title, type: ruleForm.type, terms: ruleForm.terms.split('\n').map(x => x.trim()).filter(Boolean), weight: Number(ruleForm.weight) }));
-      setRuleForm({ ...ruleForm, title: '', terms: '' }); setShowRuleForm(false); setSaved('Đã thêm quy tắc.'); await load();
+      setRuleForm({ ...ruleForm, title: '', terms: '' }); setShowRuleForm(false); showSaved('Đã thêm quy tắc.'); await load();
     } catch (cause) { setError((cause as Error).message); }
   };
   const addIntel = async (event: React.FormEvent) => {
@@ -77,7 +79,7 @@ export const AnalysisKnowledgePage: React.FC = () => {
     try {
       const indicators = intelForm.indicatorType && intelForm.indicatorValue.trim() ? [{ type: intelForm.indicatorType, value: intelForm.indicatorValue.trim() }] : [];
       await api('/admin/analysis/intel', json('POST', { ...intelForm, terms: intelForm.terms.split('\n').map(x => x.trim()).filter(Boolean), indicators }));
-      setIntelForm({ ...intelForm, title: '', category: '', summary: '', sourceName: '', sourceUrl: '', terms: '', indicatorValue: '' }); setShowIntelForm(false); setSaved('Đã lưu cảnh báo có nguồn.'); await load();
+      setIntelForm({ ...intelForm, title: '', category: '', summary: '', sourceName: '', sourceUrl: '', terms: '', indicatorValue: '' }); setShowIntelForm(false); showSaved('Đã lưu cảnh báo có nguồn.'); await load();
     } catch (cause) { setError((cause as Error).message); }
   };
   const field = 'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm';

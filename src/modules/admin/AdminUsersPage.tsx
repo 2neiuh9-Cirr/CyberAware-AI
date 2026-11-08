@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { api, json } from '../../api';
+import { notify } from '../../components/common/toast';
 import { AdminLayout } from '../../components/layout/AdminLayout';
 
 interface AdminUserItem {
@@ -46,12 +47,7 @@ export const AdminUsersPage: React.FC = () => {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserRole, setNewUserRole] = useState<'Công dân' | 'Chuyên gia kiểm duyệt' | 'Admin'>('Công dân');
 
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
-  };
+  const showToast = (msg: string) => notify(msg, msg.startsWith('Đang') || msg.startsWith('Vai trò hiện tại') ? 'info' : 'success');
   const load = async () => {
     try {
       const [list, summary] = await Promise.all([
@@ -970,13 +966,6 @@ export const AdminUsersPage: React.FC = () => {
         </div>
       )}
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 text-xs border border-slate-700">
-          <span className="material-symbols-outlined text-emerald-400 text-base">info</span>
-          <span>{toastMessage}</span>
-        </div>
-      )}
     </AdminLayout>
   );
 };
