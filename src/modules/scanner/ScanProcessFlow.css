@@ -1,0 +1,208 @@
+.scan-flow-card {
+  --flow-rest: #dbeafe;
+  --flow-accent: #60a5fa;
+  --flow-halo: #60a5fa55;
+  --flow-shadow: #004ac688;
+  position: relative;
+  animation: scan-flow-float 5.5s ease-in-out infinite,
+    scan-flow-card-flash 6s ease-in-out infinite;
+}
+
+.scan-flow-card:nth-of-type(3) {
+  --flow-rest: #fef3c7;
+  --flow-accent: #f59e0b;
+  --flow-halo: #fbbf2455;
+  --flow-shadow: #b4530988;
+  animation-delay: -1.4s, -2s;
+}
+
+.scan-flow-card:nth-of-type(5) {
+  --flow-rest: #e0e7ff;
+  --flow-accent: #818cf8;
+  --flow-halo: #818cf855;
+  --flow-shadow: #4338ca88;
+  animation-delay: -2.8s, -4s;
+}
+
+.scan-flow-icon {
+  animation: scan-flow-icon-glow 4s ease-in-out infinite;
+}
+
+.scan-flow-card:nth-of-type(3) .scan-flow-icon {
+  animation-delay: -1.3s;
+}
+
+.scan-flow-card:nth-of-type(5) .scan-flow-icon {
+  animation-delay: -2.6s;
+}
+
+.scan-flow-glow {
+  animation: scan-flow-breathe 4.5s ease-in-out infinite;
+}
+
+.scan-flow-orbit {
+  isolation: isolate;
+  animation: scan-flow-orbit-pulse 4.5s ease-in-out infinite;
+}
+
+.scan-flow-orbit::after {
+  position: absolute;
+  inset: -7px;
+  z-index: -1;
+  border: 3px solid transparent;
+  border-top-color: #004ac6;
+  border-right-color: #22d3ee;
+  border-radius: 50%;
+  box-shadow: 0 0 20px #22d3ee55;
+  content: '';
+  animation: scan-flow-spin 8s linear infinite;
+}
+
+.scan-flow-ring {
+  isolation: isolate;
+}
+
+.scan-flow-ring::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 1px dashed #a5f3fc;
+  border-radius: 50%;
+  content: '';
+  animation: scan-flow-spin 28s linear infinite;
+}
+
+.scan-flow-core {
+  animation: scan-flow-core-pulse 4.5s ease-in-out infinite;
+}
+
+.scan-flow-core svg {
+  animation: scan-flow-brain 3s ease-in-out infinite;
+}
+
+.scan-flow-track {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .scan-flow-track {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 3rem;
+    right: 3rem;
+    height: 3px;
+    transform: translateY(-50%);
+    background: linear-gradient(90deg, #bfdbfe, #67e8f9, #bfdbfe);
+    box-shadow: 0 0 14px #22d3ee55;
+    pointer-events: none;
+  }
+
+  .scan-flow-track::before,
+  .scan-flow-track::after {
+    position: absolute;
+    top: 50%;
+    left: -6rem;
+    transform: translateY(-50%);
+    content: '';
+    animation: scan-flow-travel 6s linear infinite;
+  }
+
+  .scan-flow-track::before {
+    width: 6rem;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #004ac6, #22d3ee, transparent);
+    box-shadow: 0 0 15px 3px #22d3ee77;
+  }
+
+  .scan-flow-track::after {
+    left: -1rem;
+    width: 14px;
+    height: 14px;
+    border: 2px solid white;
+    border-radius: 50%;
+    background: #004ac6;
+    box-shadow: 0 0 0 5px #22d3ee55, 0 0 18px 6px #22d3eeaa;
+  }
+
+  .scan-flow-card:not(:last-child)::after,
+  .scan-flow-ai::after {
+    position: absolute;
+    top: 50%;
+    right: -19px;
+    z-index: 2;
+    transform: translateY(-50%);
+    color: #0284c7;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    text-shadow: 0 0 12px #22d3eeaa;
+    content: '›';
+    animation: scan-flow-arrow 2s ease-in-out infinite;
+  }
+}
+
+@keyframes scan-flow-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes scan-flow-icon-glow {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; transform: scale(1); }
+  50% { box-shadow: 0 0 0 8px #bfdbfe77; transform: scale(1.08); }
+}
+
+@keyframes scan-flow-card-flash {
+  0%, 20%, 100% { box-shadow: 0 12px 28px -18px var(--flow-shadow); border-color: var(--flow-rest); }
+  8% { box-shadow: 0 16px 36px -12px var(--flow-shadow), 0 0 0 3px var(--flow-halo); border-color: var(--flow-accent); }
+}
+
+@keyframes scan-flow-breathe {
+  0%, 100% { opacity: .55; transform: scale(.94); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes scan-flow-orbit-pulse {
+  0%, 100% { box-shadow: 0 0 35px #06b6d444; }
+  50% { box-shadow: 0 0 75px #06b6d488; }
+}
+
+@keyframes scan-flow-core-pulse {
+  0%, 100% { border-color: #22d3ee; box-shadow: 0 0 18px #22d3ee33; }
+  50% { border-color: #004ac6; box-shadow: 0 0 36px #22d3ee77; }
+}
+
+@keyframes scan-flow-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes scan-flow-travel {
+  to { left: 100%; }
+}
+
+@keyframes scan-flow-brain {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 9px #22d3ee); transform: scale(1.13); }
+}
+
+@keyframes scan-flow-arrow {
+  0%, 100% { opacity: .45; transform: translate(-3px, -50%); }
+  50% { opacity: 1; transform: translate(2px, -50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-flow-card,
+  .scan-flow-icon,
+  .scan-flow-glow,
+  .scan-flow-orbit,
+  .scan-flow-orbit::after,
+  .scan-flow-ring::before,
+  .scan-flow-core,
+  .scan-flow-core svg,
+  .scan-flow-track::before,
+  .scan-flow-track::after,
+  .scan-flow-card::after,
+  .scan-flow-ai::after {
+    animation: none;
+  }
+}

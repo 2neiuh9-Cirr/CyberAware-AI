@@ -21,11 +21,15 @@ import { RiskGauge } from '../../components/common/RiskGauge';
 import { ScanType } from '../../types';
 import { ScanHistory } from '../../components/common/ScanHistory';
 import { ComingSoonDialog } from '../../components/common/ComingSoonDialog';
+import { ScanProcessFlow } from './ScanProcessFlow';
+import { scanExamples } from '../../data/scanExamples';
 
 export const ScannerPage: React.FC = () => {
   const {
     activeTab,
     setActiveTab,
+    searchQuery,
+    setSearchQuery,
     runScan,
     isScanning,
     scanResult,
@@ -33,7 +37,6 @@ export const ScannerPage: React.FC = () => {
     setReportModalOpen,
   } = useAppStore();
 
-  const [inputVal, setInputVal] = useState('');
   const [qrFile, setQrFile] = useState<string | null>(null);
   const [comingSoonType, setComingSoonType] = useState<'phone' | 'bank' | null>(null);
 
@@ -43,22 +46,8 @@ export const ScannerPage: React.FC = () => {
       setComingSoonType(activeTab);
       return;
     }
-    if (!inputVal.trim()) return;
-    runScan(inputVal.trim(), activeTab);
-  };
-
-  const sampleScans = {
-    url: [
-      'https://vcb-digibank-xac-thuc-2025.com',
-      'https://shopee-thuong-tet-sieusale.cc',
-      'https://vietcombank.com.vn',
-    ],
-    sms: [
-      'VCB Digibank: Tai khoan dang nhap tai thiet bi la. Nhan vao https://vcb-top.com de huy uy nhiem chi.',
-      'Shopee: Quy khach may man trung 01 xe may SH. Vui long nop thue 2 trieu dong vao STK 098123...',
-    ],
-    phone: ['+84 902 381 928', '+84 28 8888 9999', '+1 800 234 567'],
-    bank: ['19038291028301 - TECHCOMBANK', '1029384756 - VIETCOMBANK'],
+    if (!searchQuery.trim()) return;
+    runScan(searchQuery.trim(), activeTab);
   };
 
   const handleSampleClick = (val: string) => {
@@ -66,7 +55,7 @@ export const ScannerPage: React.FC = () => {
       setComingSoonType(activeTab);
       return;
     }
-    setInputVal(val);
+    setSearchQuery(val);
     runScan(val, activeTab);
   };
 
@@ -76,7 +65,7 @@ export const ScannerPage: React.FC = () => {
       return;
     }
     setActiveTab(scan.type);
-    setInputVal(scan.query);
+    setSearchQuery(scan.query);
     void runScan(scan.query, scan.type);
     document.getElementById('scanner-tool')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -97,10 +86,22 @@ export const ScannerPage: React.FC = () => {
         </p>
       </div>
 
+      <ScanProcessFlow />
+
       {/* Main Tool Container */}
-      <div id="scanner-tool" className="w-full max-w-[896px] bg-white rounded-2xl shadow-xl border border-slate-200/80 p-6 md:p-8 flex flex-col gap-6 scroll-mt-24">
+      <div id="scanner-tool" className="relative flex w-full max-w-[1024px] scroll-mt-24 flex-col gap-6 overflow-hidden rounded-[2rem] border border-blue-100 bg-white/95 p-5 shadow-[0_24px_70px_-34px_rgba(0,74,198,0.32)] ring-1 ring-white md:p-8">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#004AC6] via-cyan-400 to-indigo-500" />
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-[#004AC6] ring-1 ring-blue-100">
+            <Search className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <div>
+            <h2 className="text-lg font-extrabold tracking-tight text-slate-900 md:text-xl">Bắt đầu kiểm tra</h2>
+            <p className="text-xs text-slate-500 md:text-sm">Chọn loại nội dung và nhập thông tin cần phân tích.</p>
+          </div>
+        </div>
         {/* Navigation Tabs */}
-        <div className="grid grid-cols-2 gap-2 border-b border-slate-100 pb-4 lg:flex lg:flex-nowrap lg:items-center lg:overflow-x-auto">
+        <div className="grid grid-cols-2 gap-2.5 border-b border-slate-100 pb-5 lg:grid-cols-4">
           {[
             { id: 'url', label: 'Website / URL', icon: Search },
             { id: 'sms', label: 'Tin nhắn SMS / Chat', icon: MessageSquare },
@@ -119,13 +120,12 @@ export const ScannerPage: React.FC = () => {
                     return;
                   }
                   setActiveTab(tab.id as ScanType);
-                  setInputVal('');
                   clearScan();
                 }}
-                className={`flex min-w-0 items-center justify-center gap-2 rounded-xl px-2 py-2.5 text-center text-xs font-semibold transition-all cursor-pointer lg:shrink-0 lg:whitespace-nowrap lg:px-4 md:text-sm ${
+                className={`flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-xl border px-2 py-2.5 text-center text-xs font-semibold transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2 lg:whitespace-nowrap lg:px-3 md:text-sm ${
                   isActive
-                    ? 'bg-[#004AC6] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'border-blue-600 bg-gradient-to-r from-[#004AC6] to-blue-600 text-white shadow-[0_10px_22px_-10px_rgba(0,74,198,0.8)]'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-[#004AC6]'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -136,9 +136,9 @@ export const ScannerPage: React.FC = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+            <label className="text-xs font-bold uppercase tracking-[0.09em] text-slate-700">
               {activeTab === 'url'
                 ? 'Nhập đường dẫn liên kết cần kiểm tra'
                 : activeTab === 'sms'
@@ -151,17 +151,17 @@ export const ScannerPage: React.FC = () => {
             {activeTab === 'sms' ? (
               <textarea
                 rows={4}
-                value={inputVal}
-                onChange={(e) => setInputVal(e.target.value)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Ví dụ: VCB Digibank: Phat hien tai khoan dang nhap tai thiet bi la. Truy cap link..."
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#004AC6] focus:bg-white resize-none"
+                className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm leading-6 text-slate-900 shadow-inner shadow-slate-100 transition-all placeholder:text-slate-400 focus:border-blue-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100"
               />
             ) : (
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-slate-50 rounded-xl p-2 border border-slate-200 focus-within:ring-2 focus-within:ring-[#004AC6] focus-within:bg-white transition-all">
+              <div className="flex flex-col items-stretch rounded-2xl border border-slate-200 bg-slate-50/70 p-2 shadow-inner shadow-slate-100 transition-all focus-within:border-blue-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100 sm:flex-row sm:items-center">
                 <input
                   type="text"
-                  value={inputVal}
-                  onChange={(e) => setInputVal(e.target.value)}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={
                     activeTab === 'url'
                       ? 'https://nhan-qua-tri-an-tet2025.top'
@@ -169,12 +169,12 @@ export const ScannerPage: React.FC = () => {
                       ? '+84 987 654 321'
                       : '19038291028301 - TECHCOMBANK'
                   }
-                  className="min-w-0 w-full bg-transparent border-none outline-none flex-grow text-slate-900 placeholder:text-slate-400 text-sm py-2 px-3"
+                  className="min-w-0 w-full flex-grow border-none bg-transparent px-3 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400"
                 />
                 <button
                   type="submit"
-                  disabled={isScanning || !inputVal.trim()}
-                  className="py-2.5 px-6 bg-[#004AC6] hover:bg-blue-700 text-white font-semibold text-sm rounded-lg shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shrink-0"
+                  disabled={isScanning || !searchQuery.trim()}
+                  className="flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#004AC6] to-blue-600 px-6 py-3 text-sm font-bold text-white shadow-[0_8px_18px_-8px_rgba(0,74,198,0.8)] transition-all hover:from-blue-700 hover:to-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isScanning ? (
                     <>
@@ -195,8 +195,8 @@ export const ScannerPage: React.FC = () => {
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  disabled={isScanning || !inputVal.trim()}
-                  className="py-2.5 px-6 bg-[#004AC6] hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  disabled={isScanning || !searchQuery.trim()}
+                  className="flex cursor-pointer items-center gap-2 rounded-xl bg-gradient-to-r from-[#004AC6] to-blue-600 px-6 py-3 text-sm font-bold text-white shadow-[0_8px_18px_-8px_rgba(0,74,198,0.8)] transition-all hover:from-blue-700 hover:to-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isScanning ? 'Đang phân tích...' : 'Phân tích tin nhắn này'}
                 </button>
@@ -205,14 +205,14 @@ export const ScannerPage: React.FC = () => {
           </div>
 
           {/* Quick Samples */}
-          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-            <span className="text-slate-500 font-medium">Mẫu thử nghiệm nhanh:</span>
-            {sampleScans[activeTab].map((sample, idx) => (
+          <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-5 text-xs">
+            <span className="mr-1 inline-flex items-center gap-1.5 font-semibold text-slate-500"><span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />Mẫu thử nhanh</span>
+            {scanExamples[activeTab].map((sample, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => handleSampleClick(sample)}
-                className="bg-slate-100 hover:bg-blue-50 hover:text-[#004AC6] text-slate-700 px-2.5 py-1 rounded-md font-mono transition-colors border border-slate-200/60"
+                className="max-w-full truncate rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-mono text-[11px] text-slate-600 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-[#004AC6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6]"
               >
                 {sample.length > 32 ? sample.slice(0, 32) + '...' : sample}
               </button>

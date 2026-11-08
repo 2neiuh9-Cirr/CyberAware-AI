@@ -34,6 +34,7 @@ import { CyberMobileShowcase } from './components/CyberMobileShowcase';
 import { AiChatShowcase } from './components/AiChatShowcase';
 import { FeaturedWarnings } from './components/FeaturedWarnings';
 import { ComingSoonDialog } from '../../components/common/ComingSoonDialog';
+import { scanExamples } from '../../data/scanExamples';
 
 export const HomePage: React.FC = () => {
   const {
@@ -50,7 +51,6 @@ export const HomePage: React.FC = () => {
     scenarios: SCAM_SCENARIOS,
   } = useAppStore();
 
-  const [inputVal, setInputVal] = useState(searchQuery);
   const [comingSoonType, setComingSoonType] = useState<'phone' | 'bank' | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
   const [videoLoading, setVideoLoading] = useState(false);
@@ -86,7 +86,6 @@ export const HomePage: React.FC = () => {
       return;
     }
     setActiveTab(tab);
-    setInputVal('');
     clearScan();
   };
 
@@ -96,8 +95,8 @@ export const HomePage: React.FC = () => {
       setComingSoonType(activeTab);
       return;
     }
-    if (!inputVal.trim()) return;
-    runScan(inputVal.trim(), activeTab);
+    if (!searchQuery.trim()) return;
+    runScan(searchQuery.trim(), activeTab);
   };
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -105,7 +104,7 @@ export const HomePage: React.FC = () => {
       setComingSoonType(activeTab);
       return;
     }
-    setInputVal(suggestion);
+    setSearchQuery(suggestion);
     runScan(suggestion, activeTab);
   };
 
@@ -127,7 +126,7 @@ export const HomePage: React.FC = () => {
         <div className="absolute w-[360px] h-[360px] -right-16 top-16 bg-[#68DBA9]/15 blur-[28px] rounded-full z-0 pointer-events-none" />
         <div className="absolute w-[280px] h-[280px] -left-16 bottom-10 bg-blue-400/10 blur-[28px] rounded-full z-0 pointer-events-none" />
 
-        <div className="flex flex-col items-center max-w-[896px] w-full z-10">
+        <div className="flex flex-col items-center max-w-[960px] w-full z-10">
           {/* Civic Trust Tag */}
           <div className="mb-6">
             <div className="flex flex-row items-center py-1.5 px-3.5 gap-2 bg-white shadow-sm border border-slate-100 rounded-full">
@@ -152,25 +151,29 @@ export const HomePage: React.FC = () => {
           <CyberRadarShield />
 
           {/* Quick Check Tool Box */}
-          <div className="w-full bg-white rounded-2xl shadow-xl shadow-black/5 border border-slate-100/80 p-5 md:p-8 flex flex-col gap-5 relative">
+          <div className="relative flex w-full flex-col gap-5 overflow-hidden rounded-[2rem] border border-blue-100 bg-white/95 p-5 shadow-[0_24px_70px_-34px_rgba(0,74,198,0.28)] ring-1 ring-white md:p-7">
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#004AC6] via-cyan-400 to-indigo-500" />
             {/* Live Engine Status Indicator */}
-            <div className="flex items-center justify-between text-xs font-mono text-slate-500 px-1 border-b border-slate-100 pb-2">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-semibold text-slate-700">KIỂM TRA DẤU HIỆU RỦI RO</span>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-5">
+              <div className="flex items-center gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-[#004AC6] ring-1 ring-blue-100"><Search className="h-5 w-5" aria-hidden="true" /></span>
+                <div>
+                  <h2 className="text-lg font-extrabold tracking-tight text-slate-900 md:text-xl">Kiểm tra nhanh</h2>
+                  <p className="text-xs text-slate-500 md:text-sm">Nhận diện dấu hiệu từ URL hoặc tin nhắn.</p>
+                </div>
               </div>
-              <span className="text-[#004AC6] font-semibold hidden sm:inline">KẾT QUẢ THAM KHẢO</span>
+              <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-bold text-[#004AC6]">Kết quả tham khảo</span>
             </div>
 
             {/* Interactive Tabs */}
-            <div className="grid grid-cols-2 gap-2 lg:flex lg:flex-row lg:items-center lg:overflow-x-auto lg:pb-1">
+            <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
               <button
                 type="button"
                 onClick={() => handleTabChange('url')}
-                className={`flex min-w-0 flex-row items-center justify-center py-2.5 px-2 lg:px-5 gap-2 rounded-xl text-center text-xs sm:text-sm font-semibold transition-all lg:whitespace-nowrap cursor-pointer ${
+                className={`flex min-h-12 min-w-0 cursor-pointer flex-row items-center justify-center gap-2 rounded-xl border px-2 py-2.5 text-center text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2 lg:whitespace-nowrap md:text-sm ${
                   activeTab === 'url'
-                    ? 'bg-[#004AC6] text-white shadow-sm'
-                    : 'bg-[#F1F5F9] text-[#434655] hover:bg-slate-200/80'
+                    ? 'border-blue-600 bg-gradient-to-r from-[#004AC6] to-blue-600 text-white shadow-[0_10px_22px_-10px_rgba(0,74,198,0.8)]'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-[#004AC6]'
                 }`}
               >
                 <Search className="w-4 h-4" />
@@ -180,10 +183,10 @@ export const HomePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleTabChange('sms')}
-                className={`flex min-w-0 flex-row items-center justify-center py-2.5 px-2 lg:px-5 gap-2 rounded-xl text-center text-xs sm:text-sm font-semibold transition-all lg:whitespace-nowrap cursor-pointer ${
+                className={`flex min-h-12 min-w-0 cursor-pointer flex-row items-center justify-center gap-2 rounded-xl border px-2 py-2.5 text-center text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2 lg:whitespace-nowrap md:text-sm ${
                   activeTab === 'sms'
-                    ? 'bg-[#004AC6] text-white shadow-sm'
-                    : 'bg-[#F1F5F9] text-[#434655] hover:bg-slate-200/80'
+                    ? 'border-blue-600 bg-gradient-to-r from-[#004AC6] to-blue-600 text-white shadow-[0_10px_22px_-10px_rgba(0,74,198,0.8)]'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-[#004AC6]'
                 }`}
               >
                 <MessageSquare className="w-4 h-4" />
@@ -193,10 +196,10 @@ export const HomePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleTabChange('phone')}
-                className={`flex min-w-0 flex-row items-center justify-center py-2.5 px-2 lg:px-5 gap-2 rounded-xl text-center text-xs sm:text-sm font-semibold transition-all lg:whitespace-nowrap cursor-pointer ${
+                className={`flex min-h-12 min-w-0 cursor-pointer flex-row items-center justify-center gap-2 rounded-xl border px-2 py-2.5 text-center text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2 lg:whitespace-nowrap md:text-sm ${
                   activeTab === 'phone'
-                    ? 'bg-[#004AC6] text-white shadow-sm'
-                    : 'bg-[#F1F5F9] text-[#434655] hover:bg-slate-200/80'
+                    ? 'border-blue-600 bg-gradient-to-r from-[#004AC6] to-blue-600 text-white shadow-[0_10px_22px_-10px_rgba(0,74,198,0.8)]'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-[#004AC6]'
                 }`}
               >
                 <Phone className="w-4 h-4" />
@@ -206,10 +209,10 @@ export const HomePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleTabChange('bank')}
-                className={`flex min-w-0 flex-row items-center justify-center py-2.5 px-2 lg:px-5 gap-2 rounded-xl text-center text-xs sm:text-sm font-semibold transition-all lg:whitespace-nowrap cursor-pointer ${
+                className={`flex min-h-12 min-w-0 cursor-pointer flex-row items-center justify-center gap-2 rounded-xl border px-2 py-2.5 text-center text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2 lg:whitespace-nowrap md:text-sm ${
                   activeTab === 'bank'
-                    ? 'bg-[#004AC6] text-white shadow-sm'
-                    : 'bg-[#F1F5F9] text-[#434655] hover:bg-slate-200/80'
+                    ? 'border-blue-600 bg-gradient-to-r from-[#004AC6] to-blue-600 text-white shadow-[0_10px_22px_-10px_rgba(0,74,198,0.8)]'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-[#004AC6]'
                 }`}
               >
                 <CreditCard className="w-4 h-4" />
@@ -220,22 +223,22 @@ export const HomePage: React.FC = () => {
             {/* Dynamic AI Scanning Laser Overlay */}
             {/* Input Form */}
             <form onSubmit={handleScanSubmit} className="flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#F1F5F9] rounded-xl p-2 gap-2 border border-slate-200/60 focus-within:ring-2 focus-within:ring-[#004AC6] focus-within:bg-white transition-all">
+              <div className="flex flex-col items-stretch gap-2 rounded-2xl border border-slate-200 bg-slate-50/70 p-2 shadow-inner shadow-slate-100 transition-all focus-within:border-blue-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100 sm:flex-row sm:items-center">
                 <div className="px-3 hidden sm:flex items-center">
                   <Search className="w-5 h-5 text-[#004AC6]" />
                 </div>
                 <input
                   id="search-input-box"
                   type="text"
-                  value={inputVal}
-                  onChange={(e) => setInputVal(e.target.value)}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={currentPlaceholder}
-                  className="min-w-0 w-full bg-transparent border-none outline-none flex-grow text-slate-900 placeholder:text-slate-400 text-sm py-2.5 px-3 sm:px-2"
+                  className="min-w-0 w-full flex-grow border-none bg-transparent px-3 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 sm:px-2"
                 />
                 <button
                   type="submit"
-                  disabled={isScanning || !inputVal.trim()}
-                  className="flex flex-row justify-center items-center py-3 px-6 gap-2 bg-[#004AC6] hover:bg-blue-700 active:scale-98 disabled:opacity-50 text-white rounded-lg shadow-md font-semibold text-sm transition-all cursor-pointer shrink-0"
+                  disabled={isScanning || !searchQuery.trim()}
+                  className="flex shrink-0 cursor-pointer flex-row items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#004AC6] to-blue-600 px-6 py-3 text-sm font-bold text-white shadow-[0_8px_18px_-8px_rgba(0,74,198,0.8)] transition-all hover:from-blue-700 hover:to-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isScanning ? (
                     <>
@@ -252,40 +255,28 @@ export const HomePage: React.FC = () => {
               </div>
 
               {/* Suggestions */}
-              <div className="flex flex-row flex-wrap items-center gap-2 w-full text-xs">
-                <span className="text-[#565E74] font-medium text-[13px]">Gợi ý kiểm tra:</span>
-                <button
+              <div className="flex w-full flex-row flex-wrap items-center gap-2 border-t border-slate-100 pt-4 text-xs">
+                <span className="mr-1 inline-flex items-center gap-1.5 text-[13px] font-semibold text-slate-500"><span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />Mẫu thử nhanh</span>
+                {scanExamples[activeTab].map(sample => <button
+                  key={sample}
                   type="button"
-                  onClick={() => handleSuggestionClick('vcb-digibank-xac-thuc-2025.com')}
-                  className="bg-[#F1F5F9] hover:bg-blue-50 hover:text-[#004AC6] rounded-md py-1 px-2.5 text-[#0F172A] font-mono font-medium transition-colors cursor-pointer border border-slate-200/50"
+                  title={sample}
+                  onClick={() => handleSuggestionClick(sample)}
+                  className="max-w-full truncate rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-mono text-[11px] font-medium text-slate-600 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-[#004AC6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004AC6]"
                 >
-                  vcb-digibank-xac-thuc-2025.com
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSuggestionClick('shopee-thuong-tet-sieusale.cc')}
-                  className="bg-[#F1F5F9] hover:bg-blue-50 hover:text-[#004AC6] rounded-md py-1 px-2.5 text-[#0F172A] font-mono font-medium transition-colors cursor-pointer border border-slate-200/50"
-                >
-                  shopee-thuong-tet-sieusale.cc
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSuggestionClick('https://vietcombank.com.vn')}
-                  className="bg-[#F1F5F9] hover:bg-emerald-50 hover:text-emerald-700 rounded-md py-1 px-2.5 text-[#0F172A] font-mono font-medium transition-colors cursor-pointer border border-slate-200/50"
-                >
-                  vietcombank.com.vn (Chính chủ)
-                </button>
+                  {sample.length > 36 ? `${sample.slice(0, 36)}...` : sample}
+                </button>)}
               </div>
 
               {/* Security Privacy Guarantee */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pt-4 w-full border-t border-gray-100">
+              <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-3.5 sm:flex-row sm:items-center">
                 <div className="flex flex-row items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0" />
                   <span className="text-[#434655] text-[13px]">
                     Không nhập OTP/mật khẩu. Lịch sử được lưu khi đăng nhập; nếu bật Gemini, nội dung sau bước che một số mẫu bí mật được gửi để giải thích.
                   </span>
                 </div>
-                <div className="bg-[#F1F5F9] rounded py-1 px-2.5 shrink-0 flex items-center gap-1.5">
+                <div className="flex shrink-0 items-center gap-1.5 rounded-lg border border-blue-100 bg-white px-2.5 py-1.5">
                   <Lock className="w-3 h-3 text-[#565E74]" />
                   <span className="text-[#565E74] font-medium text-xs">Lưu lịch sử khi đăng nhập</span>
                 </div>
@@ -294,7 +285,8 @@ export const HomePage: React.FC = () => {
 
             {/* LIVE SCAN RESULT CARD */}
             {scanResult && (
-              <div className="mt-2 p-5 md:p-6 bg-slate-50/90 rounded-xl border border-slate-200 flex flex-col gap-5 animate-in fade-in slide-in-from-top-4 duration-200">
+              <div className="relative mt-2 flex flex-col gap-5 overflow-hidden rounded-2xl border border-blue-100 bg-slate-50/80 p-5 shadow-inner shadow-blue-50/60 animate-in fade-in slide-in-from-top-4 duration-200 md:p-6">
+                <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#004AC6] via-cyan-400 to-indigo-500" />
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-200">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs font-mono font-semibold text-slate-500 uppercase tracking-wide">
@@ -309,7 +301,7 @@ export const HomePage: React.FC = () => {
 
                 {/* AI Reasoning */}
                 {scanResult.aiReasoning && (
-                  <div className="p-3.5 bg-blue-50/80 rounded-xl border border-blue-100 text-xs md:text-sm text-blue-900 flex items-start gap-2.5">
+                  <div className="flex items-start gap-2.5 rounded-xl border border-blue-100 bg-blue-50/80 p-3.5 text-xs text-blue-900 md:text-sm">
                     <Sparkles className="w-4 h-4 text-[#004AC6] shrink-0 mt-0.5" />
                     <div>
                       <span className="font-bold">Nhận định AI chuyên sâu: </span>
@@ -379,7 +371,7 @@ export const HomePage: React.FC = () => {
                       className="text-red-600 hover:text-red-700 font-semibold flex items-center gap-1 transition-colors"
                     >
                       <AlertTriangle className="w-3.5 h-3.5" />
-                      <span>Báo cáo link này</span>
+                        <span>Gửi báo cáo</span>
                     </button>
                     <button
                       onClick={clearScan}
