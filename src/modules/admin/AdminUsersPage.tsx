@@ -779,7 +779,7 @@ export const AdminUsersPage: React.FC = () => {
 
       {/* Modal: Thêm người dùng mới */}
       {isAddUserOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" onMouseDown={event => { if (event.target === event.currentTarget && !busy) setIsAddUserOpen(false); }}>
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-5 animate-scale-up">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
@@ -861,7 +861,7 @@ export const AdminUsersPage: React.FC = () => {
 
       {/* Modal: Xem chi tiết người dùng */}
       {viewingUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" onMouseDown={event => { if (event.target === event.currentTarget && !busy) setViewingUser(null); }}>
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-3">
@@ -927,7 +927,7 @@ export const AdminUsersPage: React.FC = () => {
 
       {/* Lock Confirmation Dialog */}
       {lockTargetUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" onMouseDown={event => { if (event.target === event.currentTarget && !busy) setLockTargetUser(null); }}>
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-red-200 space-y-4 animate-scale-up">
             {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
             <div className="flex items-center gap-3 text-red-600 pb-2 border-b border-red-100">

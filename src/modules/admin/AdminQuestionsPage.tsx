@@ -844,7 +844,7 @@ export const AdminQuestionsPage: React.FC = () => {
 
       {/* Question Preview Modal */}
       {previewQuestion && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" onMouseDown={event => { if (event.target === event.currentTarget) setPreviewQuestion(null); }}>
           <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-xl border border-slate-200 space-y-5 animate-scale-up">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
@@ -894,7 +894,7 @@ export const AdminQuestionsPage: React.FC = () => {
         </div>
       )}
 
-      {fileRows && <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs"><div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4"><h3 className="text-base font-bold">Xác nhận nhập CSV</h3><p className="text-sm text-slate-600">Đã kiểm tra {fileRows.length} câu hỏi. Các câu mới sẽ chờ duyệt trước khi học viên thấy.</p>{error && <p role="alert" className="text-sm text-red-700">{error}</p>}<div className="flex justify-end gap-3"><button onClick={() => setFileRows(null)} className="px-4 py-2 rounded-lg bg-slate-100 text-sm">Hủy</button><button disabled={busy} onClick={() => void commitCsv()} className="px-4 py-2 rounded-lg bg-[#004AC6] text-white text-sm disabled:opacity-50">Nhập câu hỏi</button></div></div></div>}
+      {fileRows && <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" onMouseDown={event => { if (event.target === event.currentTarget && !busy) setFileRows(null); }}><div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4"><h3 className="text-base font-bold">Xác nhận nhập CSV</h3><p className="text-sm text-slate-600">Đã kiểm tra {fileRows.length} câu hỏi. Các câu mới sẽ chờ duyệt trước khi học viên thấy.</p>{error && <p role="alert" className="text-sm text-red-700">{error}</p>}<div className="flex justify-end gap-3"><button onClick={() => setFileRows(null)} className="px-4 py-2 rounded-lg bg-slate-100 text-sm">Hủy</button><button disabled={busy} onClick={() => void commitCsv()} className="px-4 py-2 rounded-lg bg-[#004AC6] text-white text-sm disabled:opacity-50">Nhập câu hỏi</button></div></div></div>}
 
     </AdminLayout>
   );
