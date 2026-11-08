@@ -31,7 +31,7 @@ const ScrollToTop: React.FC = () => {
 
 const AppView: React.FC = () => {
   const { pathname } = useLocation();
-  const isAdminPage = /^\/(?:quan-tri-(?:tong-quan|nguoi-dung|khoa-hoc|ngan-hang-cau-hoi|kho-tri-thuc)|admin(?:\/|$))/.test(pathname);
+  const isAdminPage = /^\/(?:quan-tri-(?:tong-quan|nguoi-dung|bao-cao|khoa-hoc|ngan-hang-cau-hoi|kho-tri-thuc)|admin(?:\/|$))/.test(pathname);
   const isLearningPage = pathname === '/hoc-tap';
   const { language } = useSitePreferences();
   const { initialize, error, setError, loading } = useAppStore();

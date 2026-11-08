@@ -7,7 +7,7 @@ import { adminUiPhrases } from '../src/adminUiPhrases';
 export const siteTranslationRouter = Router();
 
 const publicPaths = new Set(['/', '/kiem-tra', '/canh-bao', '/hoc-tap', '/gioi-thieu']);
-const adminPaths = new Set(['/quan-tri-tong-quan', '/quan-tri-nguoi-dung', '/quan-tri-khoa-hoc', '/quan-tri-ngan-hang-cau-hoi', '/quan-tri-kho-tri-thuc']);
+const adminPaths = new Set(['/quan-tri-tong-quan', '/quan-tri-nguoi-dung', '/quan-tri-bao-cao', '/quan-tri-khoa-hoc', '/quan-tri-ngan-hang-cau-hoi', '/quan-tri-kho-tri-thuc']);
 const adminPhraseSet = new Set<string>(adminUiPhrases);
 const cache = new Map<string, string>();
 let dailyCalls = 0;

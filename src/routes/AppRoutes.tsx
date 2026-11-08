@@ -16,6 +16,7 @@ import { AdminUsersPage } from '../modules/admin/AdminUsersPage';
 import { AdminCoursesPage } from '../modules/admin/AdminCoursesPage';
 import { AdminQuestionsPage } from '../modules/admin/AdminQuestionsPage';
 import { AnalysisKnowledgePage } from '../modules/admin/AnalysisKnowledgePage';
+import { AdminReportsPage } from '../modules/admin/AdminReportsPage';
 import { useAppStore } from '../store/useAppStore';
 
 const AccountRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -50,11 +51,13 @@ export const AppRoutes: React.FC = () => {
       <Route path="/quan-tri-khoa-hoc" element={<AdminRoute><AdminCoursesPage /></AdminRoute>} />
       <Route path="/quan-tri-ngan-hang-cau-hoi" element={<AdminRoute><AdminQuestionsPage /></AdminRoute>} />
       <Route path="/quan-tri-kho-tri-thuc" element={<AdminRoute><AnalysisKnowledgePage /></AdminRoute>} />
+      <Route path="/quan-tri-bao-cao" element={<AdminRoute><AdminReportsPage /></AdminRoute>} />
       <Route path="/admin" element={<Navigate to="/quan-tri-tong-quan" replace />} />
       <Route path="/admin/users" element={<Navigate to="/quan-tri-nguoi-dung" replace />} />
       <Route path="/admin/courses" element={<Navigate to="/quan-tri-khoa-hoc" replace />} />
       <Route path="/admin/questions" element={<Navigate to="/quan-tri-ngan-hang-cau-hoi" replace />} />
       <Route path="/admin/analysis-knowledge" element={<Navigate to="/quan-tri-kho-tri-thuc" replace />} />
+      <Route path="/admin/reports" element={<Navigate to="/quan-tri-bao-cao" replace />} />
 
       {/* Authentication Routes */}
       <Route path="/dang-nhap" element={<LoginPage />} />

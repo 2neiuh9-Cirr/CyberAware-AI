@@ -22,6 +22,7 @@ export interface ScanResult {
 
 export interface ScamReport {
   status?: 'pending' | 'approved' | 'rejected' | 'unverified';
+  hidden?: boolean;
   votedByMe?: boolean;
   id: string;
   type: ScanType;

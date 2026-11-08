@@ -53,7 +53,7 @@ function report(id: string) {
 }
 function publicReport(row: any, userId?: string) {
   return { id: row.id, type: row.type, target: row.target, category: row.category, description: row.description,
-    status: row.status, verified: row.status === 'approved',
+    status: row.status, hidden: !!row.is_hidden, verified: row.status === 'approved' && !row.is_hidden,
     riskScore: null, reportedAt: row.created_at, createdAt: row.created_at,
     votes: Number(db.prepare('SELECT COUNT(*) AS n FROM votes WHERE report_id = ?').get(row.id)!.n),
     votedByMe: !!(userId && db.prepare('SELECT 1 FROM votes WHERE report_id = ? AND user_id = ?').get(row.id, userId)),
@@ -176,7 +176,7 @@ apiRouter.post('/analyze', rateLimit(30, 60_000), async (req, res, next) => {
     const type = scanType(req.body?.type); const query = normalizeQuery(type, req.body?.query);
     const account = currentUser(req);
     if (!account && (req.headers.authorization || req.headers.cookie?.includes('cyberaware_session='))) throw new ApiError(401, 'Phiên đã hết hạn. Hãy đăng nhập lại hoặc quét với tư cách khách.');
-    const matching = !!db.prepare("SELECT 1 FROM reports WHERE type = ? AND target = ? AND status = 'approved'").get(type, query);
+    const matching = !!db.prepare("SELECT 1 FROM reports WHERE type = ? AND target = ? AND status = 'approved' AND is_hidden = 0").get(type, query);
     const result = { ...await analyze(type, query, matching), id: randomUUID() };
     const stored = account ? result : { ...result, query: '[Khách: không lưu nội dung]', flags: [], aiReasoning: undefined, actionAdvice: undefined, threatCategory: undefined };
     db.prepare('INSERT INTO scans (id,user_id,result,created_at) VALUES (?,?,?,?)').run(result.id, account?.id || null, JSON.stringify(stored), result.scannedAt);
@@ -202,6 +202,8 @@ apiRouter.get('/reports', (req, res) => {
   if (!['pending', 'approved', 'rejected', 'unverified', 'community', 'all'].includes(status as string)) throw new ApiError(400, 'Trạng thái không hợp lệ.');
   if (!['approved', 'unverified', 'community'].includes(status as string) && !mine && account?.role !== 'admin') throw new ApiError(403, 'Chỉ quản trị viên được xem hàng chờ duyệt.');
   const where = ['1=1']; const params: any[] = [];
+  if (!mine && account?.role !== 'admin') where.push('is_hidden = 0');
+  if (!mine && account?.role === 'admin' && ['community', 'approved', 'unverified'].includes(status as string)) where.push('is_hidden = 0');
   if (status === 'community') where.push("status IN ('approved','unverified')");
   else if (status !== 'all') { where.push('status = ?'); params.push(status); }
   if (mine) { where.push('user_id = ?'); params.push(account!.id); }
@@ -218,7 +220,7 @@ apiRouter.get('/reports', (req, res) => {
 });
 apiRouter.get('/reports/:id', (req, res) => {
   const row = report(req.params.id); const account = currentUser(req);
-  if (!['approved', 'unverified'].includes(String(row.status)) && row.user_id !== account?.id && account?.role !== 'admin') throw new ApiError(404, 'Không tìm thấy báo cáo công khai.');
+  if ((!!row.is_hidden || !['approved', 'unverified'].includes(String(row.status))) && row.user_id !== account?.id && account?.role !== 'admin') throw new ApiError(404, 'Không tìm thấy báo cáo công khai.');
   res.json(publicReport(row, account?.id));
 });
 apiRouter.post('/report', rateLimit(10, 60_000), (req, res) => {
@@ -233,7 +235,7 @@ apiRouter.post('/report', rateLimit(10, 60_000), (req, res) => {
 });
 apiRouter.post('/reports/:id/votes', rateLimit(60, 60_000), (req, res) => {
   const account = user(req); const row = report(req.params.id);
-  if (row.status !== 'approved') throw new ApiError(409, 'Chỉ bình chọn báo cáo đã duyệt.');
+  if (row.status !== 'approved' || row.is_hidden) throw new ApiError(409, 'Chỉ bình chọn báo cáo đã duyệt và đang hiển thị.');
   db.exec('BEGIN IMMEDIATE');
   try {
     const removed = db.prepare('DELETE FROM votes WHERE report_id = ? AND user_id = ?').run(row.id, account.id);
@@ -247,7 +249,7 @@ apiRouter.patch('/admin/reports/:id/status', (req, res) => {
   const account = user(req);
   if (account.role !== 'admin') throw new ApiError(403, 'Chỉ quản trị viên có quyền kiểm duyệt.');
   const row = report(req.params.id); const status = req.body?.status;
-  if (!['pending', 'approved', 'rejected'].includes(status)) throw new ApiError(400, 'Trạng thái không hợp lệ.');
+  if (!['pending', 'approved', 'rejected', 'unverified'].includes(status)) throw new ApiError(400, 'Trạng thái không hợp lệ.');
   const reason = textField(req.body?.reason, 'Lý do kiểm duyệt', 1000, 3);
   db.exec('BEGIN IMMEDIATE');
   try {
@@ -340,7 +342,7 @@ apiRouter.put('/me/learning-progress/:courseId', (req, res) => {
 });
 apiRouter.get('/stats/overview', (_req, res) => {
   const counts = db.prepare("SELECT COUNT(*) AS total, COALESCE(SUM(date(created_at, '+7 hours') = date('now', '+7 hours')),0) AS today, AVG(json_extract(result,'$.analysisTimeMs')) AS average FROM scans").get()!;
-  res.json({ totalScans: Number(counts.total), totalScansToday: Number(counts.today), verifiedReports: Number(db.prepare("SELECT COUNT(*) AS n FROM reports WHERE status = 'approved'").get()!.n), averageAnalysisTimeMs: Math.round(Number(counts.average || 0)), source: 'CyberAware SQLite', updatedAt: now() });
+  res.json({ totalScans: Number(counts.total), totalScansToday: Number(counts.today), verifiedReports: Number(db.prepare("SELECT COUNT(*) AS n FROM reports WHERE status = 'approved' AND is_hidden = 0").get()!.n), averageAnalysisTimeMs: Math.round(Number(counts.average || 0)), source: 'CyberAware SQLite', updatedAt: now() });
 });
 apiRouter.get('/me/stats', (req, res) => {
   const account = user(req);

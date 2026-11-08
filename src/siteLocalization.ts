@@ -358,6 +358,7 @@ function translateAttributes(element: Element, language: SiteLanguage, queue: Qu
 export function installSiteLocalization(root: Element, language: SiteLanguage, path: string, allowCloud: boolean) {
   const isAdminPage = path.startsWith('/quan-tri-');
   const pending = new Map<string, boolean>();
+  const pendingTargets = new Map<string, Set<Element>>();
   const attempted = new Set<string>();
   let timer: ReturnType<typeof setTimeout> | undefined;
   let busy = false;
@@ -366,11 +367,17 @@ export function installSiteLocalization(root: Element, language: SiteLanguage, p
   const queue: Queue = (value, element) => {
     const text = value.trim();
     if (!active || language !== 'en' || (isAdminPage && !adminPhraseSet.has(text)) || !/[\u00c0-\u1ef9\u0111\u0110]/u.test(text) ||
-      text.length < 2 || text.length > 1800 || attempted.has(text) || translatedText(text)) return;
+      text.length < 2 || text.length > 1800 || translatedText(text)) return;
+    if (attempted.has(text) && !pendingTargets.has(text)) return;
     const cloudEligible = allowCloud && !element?.closest('[data-no-auto-translate]') &&
       (isAdminPage ? adminPhraseSet.has(text) : !!element?.closest('main'));
-    pending.set(text, Boolean(pending.get(text) || cloudEligible));
-    if (!timer && !busy) timer = setTimeout(() => { timer = undefined; void flush(); }, 100);
+    if (!attempted.has(text)) pending.set(text, Boolean(pending.get(text) || cloudEligible));
+    if (element) {
+      let targets = pendingTargets.get(text);
+      if (!targets) { targets = new Set(); pendingTargets.set(text, targets); }
+      targets.add(element);
+    }
+    if (!attempted.has(text) && !timer && !busy) timer = setTimeout(() => { timer = undefined; void flush(); }, 100);
   };
 
   const visit = (target: Node) => {
@@ -386,11 +393,18 @@ export function installSiteLocalization(root: Element, language: SiteLanguage, p
     if (busy || !active || !pending.size) return;
     busy = true;
     const entries = [...pending].slice(0, 40).map(([text, cloudEligible]) => ({ text, cloudEligible }));
-    entries.forEach(entry => { pending.delete(entry.text); attempted.add(entry.text); });
+    entries.forEach(entry => {
+      pending.delete(entry.text); attempted.add(entry.text);
+    });
     try { await translateVisibleTexts(entries, path); } finally {
       busy = false;
       if (active) {
-        visit(root);
+        const affected = new Set<Element>();
+        entries.forEach(entry => {
+          pendingTargets.get(entry.text)?.forEach(element => affected.add(element));
+          pendingTargets.delete(entry.text);
+        });
+        affected.forEach(element => { if (root.contains(element)) visit(element); });
         if (pending.size && !timer) timer = setTimeout(() => { timer = undefined; void flush(); }, 100);
       }
     }
@@ -408,5 +422,5 @@ export function installSiteLocalization(root: Element, language: SiteLanguage, p
     }
   });
   observer.observe(root, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['placeholder', 'title', 'aria-label', 'alt'] });
-  return () => { active = false; if (timer) clearTimeout(timer); observer.disconnect(); window.removeEventListener('cyberaware-translator-ready', onTranslatorReady); };
+  return () => { active = false; if (timer) clearTimeout(timer); pendingTargets.clear(); observer.disconnect(); window.removeEventListener('cyberaware-translator-ready', onTranslatorReady); };
 }

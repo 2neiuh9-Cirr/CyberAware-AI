@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { setSiteLanguage, toggleSiteTheme, tr, useSitePreferences } from '../../sitePreferences';
 import { prepareBrowserTranslator } from '../../siteTranslationService';
+import { prefetchAdminReports } from '../../modules/admin/adminReportsData';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const currentUser = useAppStore(state => state.currentUser);
   const { language, theme } = useSitePreferences();
 
+  useEffect(() => {
+    if (!currentUser?.id || currentUser.role !== 'admin') return;
+    const timer = window.setTimeout(() => { void prefetchAdminReports(currentUser.id).catch(() => {}); }, 250);
+    return () => window.clearTimeout(timer);
+  }, [currentUser?.id, currentUser?.role]);
+
   const navItems = [
     {
       title: 'Tổng quan',
@@ -25,6 +32,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       title: 'Người dùng',
       path: '/quan-tri-nguoi-dung',
       icon: 'group',
+    },
+    {
+      title: 'Báo cáo lừa đảo',
+      path: '/quan-tri-bao-cao',
+      icon: 'report',
     },
     {
       title: 'Kịch bản & Khóa học',
@@ -129,6 +141,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               <NavLink
                 key={item.path}
                 to={item.path}
+                onMouseEnter={item.path === '/quan-tri-bao-cao' && currentUser?.id ? () => { void prefetchAdminReports(currentUser.id).catch(() => {}); } : undefined}
+                onFocus={item.path === '/quan-tri-bao-cao' && currentUser?.id ? () => { void prefetchAdminReports(currentUser.id).catch(() => {}); } : undefined}
                 onClick={() => setIsMobileSidebarOpen(false)}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm transition-colors ${

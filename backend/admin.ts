@@ -4,6 +4,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { currentUser, hashPassword, sendAccountSetupCode } from '../auth';
 import { db, catalogItem, catalogItems } from './database';
 import { ApiError, integer, rateLimit, textField } from './http';
+import { normalizeQuery, scanType } from './analysis';
 import './intelligence';
 
 export const adminRouter = Router();
@@ -59,6 +60,21 @@ function userView(row: any) {
   const last = db.prepare('SELECT MAX(last_active_at) AS time FROM sessions WHERE user_id = ?').get(row.id);
   const lock = db.prepare('SELECT reason,updated_at FROM admin_user_locks WHERE user_id = ?').get(row.id);
   return { id: row.id, name: row.name, email: row.email, role: row.role === 'admin' || row.role === 'reviewer' ? row.role : 'member', phone: row.phone || '', avatar: row.avatar, status: row.status, statusReason: lock?.reason || null, createdAt: new Date(Number(row.created_at)).toISOString(), lastActiveAt: last?.time ? new Date(Number(last.time)).toISOString() : null, lockedAt: lock?.updated_at || null };
+}
+function reportRow(id: string) {
+  const row = db.prepare('SELECT * FROM reports WHERE id = ?').get(id);
+  if (!row) throw new ApiError(404, 'Không tìm thấy báo cáo.');
+  return row as any;
+}
+function reportView(row: any) {
+  const reporter = db.prepare('SELECT name, email FROM users WHERE id = ?').get(row.user_id);
+  return {
+    id: row.id, type: row.type, target: row.target, category: row.category,
+    description: row.description, status: row.status, reason: row.reason,
+    hidden: !!row.is_hidden, reportedAt: row.created_at,
+    reporterName: reporter?.name || 'Người dùng đã xóa', reporterEmail: reporter?.email || '',
+    votes: n('SELECT COUNT(*) AS n FROM votes WHERE report_id = ?', row.id),
+  };
 }
 function allQuestions() {
   return catalogItems('quiz').flatMap(q => q.questions.map((question: any) => ({ ...question, courseId: q.courseId, quizId: q.id, status: question.status || 'active', difficulty: question.difficulty || 'Cơ bản' })));
@@ -129,14 +145,78 @@ adminRouter.get('/overview', (_req, res) => {
   const recent = db.prepare('SELECT result FROM scans WHERE created_at >= ?').all(since).map(row => JSON.parse(String(row.result)));
   res.json({ users: n('SELECT COUNT(*) AS n FROM users'), activeUsers: n("SELECT COUNT(*) AS n FROM users WHERE status = 'active'"), scansLast30Days: recent.length, highRiskScansLast30Days: recent.filter(s => s.riskScore >= 70).length, courses: catalogItems('course').filter(c => (c.status || 'published') === 'published').length, questions: allQuestions().filter(q => q.status === 'active').length, reportsPending: n("SELECT COUNT(*) AS n FROM reports WHERE status = 'pending'"), updatedAt: stamp() });
 });
+adminRouter.get('/reports', (req, res) => {
+  const status = String(req.query.status || 'all');
+  const visibility = String(req.query.visibility || 'all');
+  if (!['all', 'pending', 'approved', 'rejected', 'unverified'].includes(status) || !['all', 'visible', 'hidden'].includes(visibility)) throw new ApiError(400, 'Bộ lọc báo cáo không hợp lệ.');
+  const type = req.query.type ? scanType(req.query.type) : '';
+  const q = textField(req.query.q ?? '', 'Từ khóa', 200, 0).toLocaleLowerCase('vi');
+  const filters = ['1=1']; const values: any[] = [];
+  if (status !== 'all') { filters.push('r.status = ?'); values.push(status); }
+  if (visibility !== 'all') { filters.push('r.is_hidden = ?'); values.push(visibility === 'hidden' ? 1 : 0); }
+  if (type) { filters.push('r.type = ?'); values.push(type); }
+  if (q) { filters.push('(instr(lower(r.target), ?) > 0 OR instr(lower(r.category), ?) > 0 OR instr(lower(r.description), ?) > 0 OR instr(lower(u.name), ?) > 0)'); values.push(q, q, q, q); }
+  const where = filters.join(' AND ');
+  const p = page(req);
+  const countSql = `FROM reports r LEFT JOIN users u ON u.id = r.user_id WHERE ${where}`;
+  const total = n(`SELECT COUNT(*) AS n ${countSql}`, ...values);
+  const rows = db.prepare(`SELECT r.* ${countSql} ORDER BY r.created_at DESC, r.id DESC LIMIT ? OFFSET ?`).all(...values, p.pageSize, (p.page - 1) * p.pageSize);
+  const summary = db.prepare("SELECT COUNT(*) AS total, SUM(status = 'pending') AS pending, SUM(status = 'approved' AND is_hidden = 0) AS approved, SUM(status = 'rejected') AS rejected, SUM(is_hidden = 1) AS hidden FROM reports").get() as any;
+  res.json({ items: rows.map(reportView), total, ...p, summary: { total: Number(summary.total), pending: Number(summary.pending || 0), approved: Number(summary.approved || 0), rejected: Number(summary.rejected || 0), hidden: Number(summary.hidden || 0) } });
+});
+adminRouter.patch('/reports/:id', (req, res) => {
+  const old = reportRow(req.params.id);
+  const type = scanType(req.body?.type);
+  const target = normalizeQuery(type, req.body?.target);
+  const category = textField(req.body?.category, 'Danh mục', 100);
+  const description = textField(req.body?.description, 'Mô tả', 3000, 10);
+  if (/(?:otp|mật khẩu|password|mã xác thực)\s*[:=]?\s*[a-z0-9_-]{4,}/i.test(description)) throw new ApiError(400, 'Hãy xóa mã xác thực/mật khẩu khỏi mô tả trước khi lưu.');
+  const changed = old.type !== type || old.target !== target || old.category !== category || old.description !== description;
+  if (!changed) return res.json({ report: reportView(old) });
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    db.prepare("UPDATE reports SET type = ?, target = ?, category = ?, description = ?, status = 'pending', reason = ? WHERE id = ?")
+      .run(type, target, category, description, 'Nội dung đã chỉnh sửa; chờ kiểm duyệt lại.', old.id);
+    db.prepare('DELETE FROM votes WHERE report_id = ?').run(old.id);
+    db.prepare('INSERT INTO moderation_log (report_id,admin_id,status,reason,created_at) VALUES (?,?,?,?,?)')
+      .run(old.id, admin(req).id, 'pending', 'Nội dung đã chỉnh sửa; chờ kiểm duyệt lại.', stamp());
+    audit(req, 'report.edit', 'report', old.id, JSON.stringify({ type, target, category }));
+    db.exec('COMMIT');
+  } catch (error) { db.exec('ROLLBACK'); throw error; }
+  res.json({ report: reportView(reportRow(old.id)) });
+});
+adminRouter.patch('/reports/:id/visibility', (req, res) => {
+  const row = reportRow(req.params.id);
+  if (typeof req.body?.hidden !== 'boolean') throw new ApiError(400, 'Trạng thái hiển thị không hợp lệ.');
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    db.prepare('UPDATE reports SET is_hidden = ? WHERE id = ?').run(req.body.hidden ? 1 : 0, row.id);
+    audit(req, req.body.hidden ? 'report.hide' : 'report.show', 'report', row.id);
+    db.exec('COMMIT');
+  } catch (error) { db.exec('ROLLBACK'); throw error; }
+  res.json({ report: reportView(reportRow(row.id)) });
+});
+adminRouter.delete('/reports/:id', (req, res) => {
+  const row = reportRow(req.params.id);
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    db.prepare('DELETE FROM votes WHERE report_id = ?').run(row.id);
+    db.prepare('DELETE FROM moderation_log WHERE report_id = ?').run(row.id);
+    db.prepare('DELETE FROM reports WHERE id = ?').run(row.id);
+    db.prepare("DELETE FROM admin_audit WHERE target_type = 'report' AND target_id = ?").run(row.id);
+    audit(req, 'report.delete', 'report', row.id, JSON.stringify({ type: row.type, status: row.status }));
+    db.exec('COMMIT');
+  } catch (error) { db.exec('ROLLBACK'); throw error; }
+  res.json({ success: true });
+});
 adminRouter.get('/audit-events', (req, res) => {
   const rows = db.prepare('SELECT a.*,u.name AS actor_name FROM admin_audit a LEFT JOIN users u ON u.id = a.actor_id ORDER BY a.created_at DESC').all();
   res.json(pick(rows.map(row => ({ id: row.id, actorId: row.actor_id, actorName: row.actor_name, action: row.action, targetType: row.target_type, targetId: row.target_id, detail: row.detail, createdAt: row.created_at })), req));
 });
 adminRouter.get('/threats/summary', (req, res) => {
   const days = integer(req.query.days, 7, 365);
-  const rows = db.prepare('SELECT category,COUNT(*) AS count FROM reports WHERE status = ? AND created_at >= ? GROUP BY category ORDER BY count DESC LIMIT 4').all('approved', new Date(Date.now() - days * 86400_000).toISOString());
-  const total = n('SELECT COUNT(*) AS n FROM reports WHERE status = ? AND created_at >= ?', 'approved', new Date(Date.now() - days * 86400_000).toISOString());
+  const rows = db.prepare('SELECT category,COUNT(*) AS count FROM reports WHERE status = ? AND is_hidden = 0 AND created_at >= ? GROUP BY category ORDER BY count DESC LIMIT 4').all('approved', new Date(Date.now() - days * 86400_000).toISOString());
+  const total = n('SELECT COUNT(*) AS n FROM reports WHERE status = ? AND is_hidden = 0 AND created_at >= ?', 'approved', new Date(Date.now() - days * 86400_000).toISOString());
   res.json({ source: 'approved_reports', days, total, items: rows.map(row => ({ category: row.category, count: row.count, percent: total ? Math.round(100 * Number(row.count) / total) : 0 })) });
 });
 adminRouter.get('/system/health', (_req, res) => {

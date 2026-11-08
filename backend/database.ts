@@ -6,7 +6,7 @@ db.exec(`
   PRAGMA busy_timeout = 5000;
   CREATE TABLE IF NOT EXISTS scans (seq INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL UNIQUE, user_id TEXT REFERENCES users(id), result TEXT NOT NULL, created_at TEXT NOT NULL);
   CREATE INDEX IF NOT EXISTS scans_user ON scans(user_id, seq);
-  CREATE TABLE IF NOT EXISTS reports (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), type TEXT NOT NULL, target TEXT NOT NULL, category TEXT NOT NULL, description TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', reason TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL);
+  CREATE TABLE IF NOT EXISTS reports (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), type TEXT NOT NULL, target TEXT NOT NULL, category TEXT NOT NULL, description TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', reason TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, is_hidden INTEGER NOT NULL DEFAULT 0);
   CREATE INDEX IF NOT EXISTS reports_status ON reports(status, created_at);
   CREATE TABLE IF NOT EXISTS votes (report_id TEXT REFERENCES reports(id), user_id TEXT REFERENCES users(id), PRIMARY KEY(report_id,user_id));
   CREATE TABLE IF NOT EXISTS moderation_log (id INTEGER PRIMARY KEY, report_id TEXT REFERENCES reports(id), admin_id TEXT REFERENCES users(id), status TEXT NOT NULL, reason TEXT NOT NULL, created_at TEXT NOT NULL);
@@ -17,6 +17,10 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS submissions_user ON submissions(user_id,course_id);
   CREATE TABLE IF NOT EXISTS lesson_answers (user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, course_id TEXT NOT NULL, lesson_id TEXT NOT NULL, question_id TEXT NOT NULL, selected_index INTEGER NOT NULL, answered_at TEXT NOT NULL, PRIMARY KEY(user_id,course_id,lesson_id,question_id));
 `);
+if (!db.prepare('PRAGMA table_info(reports)').all().some(column => column.name === 'is_hidden')) {
+  db.exec('ALTER TABLE reports ADD COLUMN is_hidden INTEGER NOT NULL DEFAULT 0');
+}
+db.exec('CREATE INDEX IF NOT EXISTS reports_visibility_status ON reports(is_hidden, status, created_at)');
 // Seed curriculum. Real user reports require moderation.
 const insert = db.prepare('INSERT OR IGNORE INTO catalog (kind,id,data) VALUES (?,?,?)');
 db.exec('BEGIN');

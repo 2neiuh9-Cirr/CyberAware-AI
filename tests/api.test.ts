@@ -279,6 +279,36 @@ test('pending reports hidden, owner/admin visibility, audit log and unique votes
   assert.equal((await request('/admin/reports/'+reportId+'/status','PATCH',{status:'rejected',reason:'Thu hồi duyệt để kiểm tra lại'},adminToken)).status,200);
   assert.equal((await request('/reports')).data.total,0);
 });
+
+test('admin manages report visibility, edits, status and permanent deletion', async () => {
+  const created = await request('/report', 'POST', { type: 'sms', target: 'Tin nhắn kiểm thử quản trị', category: 'Kiểm thử', description: 'Nội dung kiểm thử quyền quản lý báo cáo.' }, token);
+  assert.equal(created.status, 201);
+  const id = created.data.report.id;
+  assert.equal((await request('/admin/reports', 'GET', undefined, token)).status, 403);
+  const listed = await request('/admin/reports?status=pending&type=sms', 'GET', undefined, adminToken);
+  assert.equal(listed.status, 200);
+  assert.ok(listed.data.items.some((item: any) => item.id === id));
+  assert.equal((await request(`/admin/reports/${id}/visibility`, 'PATCH', { hidden: true }, token)).status, 403);
+  assert.equal((await request(`/admin/reports/${id}/visibility`, 'PATCH', { hidden: true }, adminToken)).data.report.hidden, true);
+  assert.equal((await request(`/admin/reports/${id}/status`, 'PATCH', { status: 'approved', reason: 'Đã xác minh nội dung' }, adminToken)).status, 200);
+  assert.equal((await request(`/reports/${id}`)).status, 404);
+  assert.equal((await request('/reports?q=Tin nhắn kiểm thử quản trị')).data.total, 0);
+  assert.equal((await request(`/reports/${id}/votes`, 'POST', {}, token)).status, 409);
+  assert.equal((await request(`/admin/reports/${id}/visibility`, 'PATCH', { hidden: false }, adminToken)).data.report.hidden, false);
+  assert.equal((await request(`/reports/${id}`)).status, 200);
+  assert.equal((await request(`/reports/${id}/votes`, 'POST', {}, token)).data.votes, 1);
+  const edited = await request(`/admin/reports/${id}`, 'PATCH', { type: 'sms', target: 'Tin nhắn đã chỉnh sửa', category: 'Đã kiểm tra', description: 'Nội dung báo cáo sau khi quản trị viên chỉnh sửa.' }, adminToken);
+  assert.equal(edited.status, 200);
+  assert.equal(edited.data.report.status, 'pending');
+  assert.equal(edited.data.report.votes, 0);
+  assert.equal((await request(`/reports/${id}`)).status, 404);
+  assert.equal((await request(`/admin/reports/${id}/status`, 'PATCH', { status: 'unverified', reason: 'Cần đối chiếu thêm nguồn' }, adminToken)).status, 200);
+  assert.equal((await request(`/admin/reports/${id}`, 'DELETE', undefined, token)).status, 403);
+  assert.equal((await request(`/admin/reports/${id}`, 'DELETE', undefined, adminToken)).status, 200);
+  assert.equal(db.prepare('SELECT id FROM reports WHERE id = ?').get(id), undefined);
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM moderation_log WHERE report_id = ?').get(id)!.n, 0);
+  assert.ok(Number(db.prepare("SELECT COUNT(*) AS n FROM admin_audit WHERE target_id = ? AND action = 'report.delete'").get(id)!.n) > 0);
+});
 test('catalog has 20 scenarios, filters, lesson content and no leaked quiz solutions', async () => {
   const scenarios=await request('/scenarios');assert.equal(scenarios.data.total,20);
   assert.equal((await request('/scenarios/'+scenarios.data.items[0].id)).status,200);
