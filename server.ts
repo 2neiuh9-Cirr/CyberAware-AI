@@ -49,6 +49,7 @@ export async function startServer() {
   const app = createApp();
   const root = path.dirname(fileURLToPath(import.meta.url));
   const requestedPort = Number(process.env.PORT) || 3000;
+  const bindAddress = process.env.HOST || (process.env.NODE_ENV === 'production' ? '127.0.0.1' : '0.0.0.0');
   if (process.env.NODE_ENV !== 'production') {
     const { createServer } = await import('vite');
     const vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'spa' });
@@ -61,7 +62,7 @@ export async function startServer() {
   for (const port of candidates) {
     try {
       const server = await new Promise<ReturnType<typeof app.listen>>((resolve, reject) => {
-        const listening = app.listen(port, '0.0.0.0');
+        const listening = app.listen(port, bindAddress);
         listening.once('listening', () => resolve(listening));
         listening.once('error', reject);
       });

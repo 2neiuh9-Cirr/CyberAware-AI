@@ -72,6 +72,7 @@ if (!columns('users').has('phone')) db.exec('ALTER TABLE users ADD COLUMN phone 
 if (!columns('users').has('status')) db.exec("ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active'");
 // Existing accounts remain usable; only registrations created from this version require email proof.
 if (!columns('users').has('email_verified')) db.exec('ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0');
+if (!columns('oauth_states').has('link_user_id')) db.exec('ALTER TABLE oauth_states ADD COLUMN link_user_id TEXT');
 for (const [name, kind] of [['id', 'TEXT'], ['created_at', 'INTEGER'], ['last_active_at', 'INTEGER'], ['user_agent', 'TEXT'], ['ip', 'TEXT']] as const) {
   if (!columns('sessions').has(name)) db.exec(`ALTER TABLE sessions ADD COLUMN ${name} ${kind}`);
 }
@@ -285,7 +286,7 @@ function appOrigin(req: Request): string | null {
 export const authRouter = Router();
 
 type OAuthProvider = 'google' | 'facebook';
-type OAuthProfile = { id: string; name: string; email: string; emailVerified: boolean };
+type OAuthProfile = { id: string; name: string; email: string | null; emailVerified: boolean };
 const oauthProvider = (value: string): value is OAuthProvider => value === 'google' || value === 'facebook';
 function oauthConfig(provider: OAuthProvider) {
   const clientId = provider === 'google' ? process.env.GOOGLE_CLIENT_ID : process.env.FACEBOOK_APP_ID;
@@ -295,6 +296,12 @@ function oauthConfig(provider: OAuthProvider) {
 function oauthRedirect(origin: string, provider: OAuthProvider, error?: string) {
   const url = new URL(error ? '/dang-nhap' : '/', origin);
   if (error) { url.searchParams.set('oauth_error', error); url.searchParams.set('provider', provider); }
+  return url.toString();
+}
+function oauthLinkRedirect(origin: string, provider: OAuthProvider, error?: string) {
+  const url = new URL('/cai-dat', origin);
+  if (error) url.searchParams.set('oauth_link_error', error);
+  else url.searchParams.set('oauth_link', provider);
   return url.toString();
 }
 async function oauthProfile(provider: OAuthProvider, code: string, redirectUri: string, config: { clientId: string; clientSecret: string }): Promise<OAuthProfile> {
@@ -327,17 +334,19 @@ async function oauthProfile(provider: OAuthProvider, code: string, redirectUri: 
   });
   if (!profileResponse.ok) throw new Error('oauth_profile');
   const profile = await profileResponse.json() as { id?: string; name?: string; email?: string };
-  if (!profile.id || !profile.email) throw new Error('oauth_email');
-  return { id: profile.id, name: profile.name || '', email: normalizeEmail(profile.email), emailVerified: false };
+  if (!profile.id) throw new Error('oauth_profile');
+  return { id: profile.id, name: profile.name || '', email: profile.email ? normalizeEmail(profile.email) : null, emailVerified: false };
 }
 function socialAccount(provider: OAuthProvider, profile: OAuthProfile): DbUser {
-  if (!emailPattern.test(profile.email) || profile.email.length > 254 || !profile.id || profile.id.length > 255) throw new Error('oauth_profile');
+  if (!profile.id || profile.id.length > 255) throw new Error('oauth_profile');
   const linked = db.prepare('SELECT user_id FROM oauth_accounts WHERE provider = ? AND provider_user_id = ?').get(provider, profile.id) as { user_id: string } | undefined;
   if (linked) {
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(linked.user_id) as DbUser | undefined;
     if (!user || user.status === 'locked') throw new Error('oauth_locked');
     return user;
   }
+  if (!profile.email) throw new Error('oauth_email');
+  if (!emailPattern.test(profile.email) || profile.email.length > 254) throw new Error('oauth_profile');
   const existing = getUserByEmail(profile.email);
   if (existing?.status === 'locked') throw new Error('oauth_locked');
   if (existing && (provider !== 'google' || !profile.emailVerified)) throw new Error('oauth_account_exists');
@@ -358,14 +367,18 @@ function socialAccount(provider: OAuthProvider, profile: OAuthProfile): DbUser {
 }
 
 authRouter.get('/oauth/providers', (_req, res) => res.json({ google: !!oauthConfig('google'), facebook: !!oauthConfig('facebook') }));
-authRouter.get('/oauth/:provider/start', rateLimit(20, 15 * 60_000), (req, res) => {
-  if (!oauthProvider(req.params.provider)) return res.status(404).json({ success: false, error: 'Nhà cung cấp đăng nhập không hợp lệ.' });
-  const provider = req.params.provider;
+authRouter.get('/oauth/links', (req, res) => {
+  const user = currentUser(req);
+  if (!user) return res.status(401).json({ success: false, error: 'Vui lòng đăng nhập lại.' });
+  const links = db.prepare('SELECT provider FROM oauth_accounts WHERE user_id = ?').all(user.id) as { provider: string }[];
+  res.json({ google: links.some(link => link.provider === 'google'), facebook: links.some(link => link.provider === 'facebook') });
+});
+function beginOAuth(req: Request, res: Response, provider: OAuthProvider, linkUserId: string | null = null) {
   const config = oauthConfig(provider); const origin = appOrigin(req);
   if (!config || !origin) return res.status(503).json({ success: false, error: 'Đăng nhập qua dịch vụ này chưa được cấu hình.' });
   const state = randomBytes(32).toString('base64url');
   db.prepare('DELETE FROM oauth_states WHERE expires_at <= ?').run(Date.now());
-  db.prepare('INSERT INTO oauth_states (state_hash,provider,expires_at) VALUES (?,?,?)').run(sha256(state), provider, Date.now() + 10 * 60_000);
+  db.prepare('INSERT INTO oauth_states (state_hash,provider,expires_at,link_user_id) VALUES (?,?,?,?)').run(sha256(state), provider, Date.now() + 10 * 60_000, linkUserId);
   setCookie(res, 'cyberaware_oauth_state', state, 600, '/api/auth/oauth');
   const redirectUri = `${origin}/api/auth/oauth/${provider}/callback`;
   const url = provider === 'google'
@@ -373,6 +386,17 @@ authRouter.get('/oauth/:provider/start', rateLimit(20, 15 * 60_000), (req, res) 
     : new URL(`https://www.facebook.com/${/^v\d+\.\d+$/.test(process.env.FACEBOOK_GRAPH_VERSION || '') ? process.env.FACEBOOK_GRAPH_VERSION : 'v25.0'}/dialog/oauth`);
   for (const [key, value] of Object.entries({ client_id: config.clientId, redirect_uri: redirectUri, response_type: 'code', scope: provider === 'google' ? 'openid email profile' : 'public_profile,email', state })) url.searchParams.set(key, value);
   res.redirect(302, url.toString());
+}
+authRouter.get('/oauth/:provider/link/start', rateLimit(20, 15 * 60_000), (req, res) => {
+  if (!oauthProvider(req.params.provider)) return res.status(404).json({ success: false, error: 'Nhà cung cấp đăng nhập không hợp lệ.' });
+  const user = sessionUser(req);
+  const origin = appOrigin(req);
+  if (!user) return origin ? res.redirect(303, new URL('/dang-nhap', origin).toString()) : res.status(401).json({ success: false, error: 'Vui lòng đăng nhập lại.' });
+  return beginOAuth(req, res, req.params.provider, user.id);
+});
+authRouter.get('/oauth/:provider/start', rateLimit(20, 15 * 60_000), (req, res) => {
+  if (!oauthProvider(req.params.provider)) return res.status(404).json({ success: false, error: 'Nhà cung cấp đăng nhập không hợp lệ.' });
+  return beginOAuth(req, res, req.params.provider);
 });
 authRouter.get('/oauth/:provider/callback', async (req, res) => {
   if (!oauthProvider(req.params.provider)) return res.status(404).json({ success: false, error: 'Nhà cung cấp đăng nhập không hợp lệ.' });
@@ -381,24 +405,33 @@ authRouter.get('/oauth/:provider/callback', async (req, res) => {
   if (!origin) return res.status(503).json({ success: false, error: 'APP_URL chưa được cấu hình hợp lệ.' });
   const state = typeof req.query.state === 'string' ? req.query.state : '';
   const cookie = cookieValue(req, 'cyberaware_oauth_state');
-  const row = state && cookie && state === cookie ? db.prepare('SELECT * FROM oauth_states WHERE state_hash = ?').get(sha256(state)) as { provider: string; expires_at: number } | undefined : undefined;
+  const row = state && cookie && state === cookie ? db.prepare('SELECT * FROM oauth_states WHERE state_hash = ?').get(sha256(state)) as { provider: string; expires_at: number; link_user_id: string | null } | undefined : undefined;
   if (row) db.prepare('DELETE FROM oauth_states WHERE state_hash = ?').run(sha256(state));
   setCookie(res, 'cyberaware_oauth_state', '', 0, '/api/auth/oauth');
   if (!row || row.provider !== provider || row.expires_at <= Date.now()) return res.redirect(303, oauthRedirect(origin, provider, 'state'));
-  if (req.query.error) return res.redirect(303, oauthRedirect(origin, provider, 'cancelled'));
+  const redirect = (error: string) => row.link_user_id ? oauthLinkRedirect(origin, provider, error) : oauthRedirect(origin, provider, error);
+  if (req.query.error) return res.redirect(303, redirect('cancelled'));
   const code = typeof req.query.code === 'string' ? req.query.code : '';
-  if (!code || code.length > 2048) return res.redirect(303, oauthRedirect(origin, provider, 'code'));
+  if (!code || code.length > 2048) return res.redirect(303, redirect('code'));
   const config = oauthConfig(provider);
-  if (!config) return res.redirect(303, oauthRedirect(origin, provider, 'config'));
+  if (!config) return res.redirect(303, redirect('config'));
   try {
     const profile = await oauthProfile(provider, code, `${origin}/api/auth/oauth/${provider}/callback`, config);
+    if (row.link_user_id) {
+      const user = sessionUser(req);
+      if (!user || user.id !== row.link_user_id) throw new Error('oauth_link_session');
+      const linked = db.prepare('SELECT user_id FROM oauth_accounts WHERE provider = ? AND provider_user_id = ?').get(provider, profile.id) as { user_id: string } | undefined;
+      if (linked && linked.user_id !== user.id) throw new Error('oauth_linked_elsewhere');
+      if (!linked) db.prepare('INSERT INTO oauth_accounts (provider,provider_user_id,user_id) VALUES (?,?,?)').run(provider, profile.id, user.id);
+      return res.redirect(303, oauthLinkRedirect(origin, provider));
+    }
     const account = socialAccount(provider, profile);
     createSession(req, res, account, false);
     return res.redirect(303, oauthRedirect(origin, provider));
   } catch (error) {
-    const reason = error instanceof Error && ['oauth_email', 'oauth_account_exists', 'oauth_locked'].includes(error.message) ? error.message : 'provider';
+    const reason = error instanceof Error && ['oauth_email', 'oauth_account_exists', 'oauth_locked', 'oauth_link_session', 'oauth_linked_elsewhere'].includes(error.message) ? error.message : 'provider';
     console.error(`Đăng nhập ${provider} không thành công:`, reason);
-    return res.redirect(303, oauthRedirect(origin, provider, reason));
+    return res.redirect(303, redirect(reason));
   }
 });
 

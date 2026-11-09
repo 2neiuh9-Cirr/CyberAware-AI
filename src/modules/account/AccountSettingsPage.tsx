@@ -14,6 +14,8 @@ export const AccountSettingsPage: React.FC = () => {
   const avatarInput = useRef<HTMLInputElement>(null);
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({ autoDelete30Days: false, anonymousScamSharing: false, emailBankAlerts: false });
   const [userSessions, setUserSessions] = useState<Session[]>([]);
+  const [linkedProviders, setLinkedProviders] = useState({ google: false, facebook: false });
+  const [facebookConfigured, setFacebookConfigured] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(true);
 
@@ -27,12 +29,33 @@ export const AccountSettingsPage: React.FC = () => {
   useEffect(() => {
     if (!currentUser) return;
     let active = true;
-    Promise.all([api<PrivacySettings>('/me/privacy-settings'), api<{ items: Session[] }>('/auth/sessions')])
-      .then(([settings, sessions]) => { if (active) { setPrivacySettings(settings); setUserSessions(sessions.items); } })
+    Promise.all([
+      api<PrivacySettings>('/me/privacy-settings'),
+      api<{ items: Session[] }>('/auth/sessions'),
+      api<{ google: boolean; facebook: boolean }>('/auth/oauth/links'),
+      api<{ google: boolean; facebook: boolean }>('/auth/oauth/providers'),
+    ])
+      .then(([settings, sessions, links, providers]) => { if (active) { setPrivacySettings(settings); setUserSessions(sessions.items); setLinkedProviders(links); setFacebookConfigured(providers.facebook); } })
       .catch(error => { if (active) setPasswordError((error as Error).message); })
       .finally(() => { if (active) setLoadingSettings(false); });
     return () => { active = false; };
   }, [currentUser?.id]);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const linked = params.get('oauth_link');
+    const error = params.get('oauth_link_error');
+    if (linked === 'facebook') notify('Bạn có thể đăng nhập bằng Google hoặc Facebook vào cùng tài khoản.', 'success', 'Đã liên kết Facebook');
+    if (error) {
+      const messages: Record<string, string> = {
+        cancelled: 'Bạn đã hủy xác nhận trên Facebook.',
+        oauth_email: 'Facebook chưa cung cấp email hợp lệ. Hãy cấp quyền email rồi thử lại.',
+        oauth_link_session: 'Phiên đăng nhập đã thay đổi. Hãy đăng nhập lại rồi thử liên kết.',
+        oauth_linked_elsewhere: 'Facebook này đã được liên kết với tài khoản CyberAware khác.',
+      };
+      notify(messages[error] || 'Không thể liên kết Facebook. Vui lòng thử lại.', 'error', 'Liên kết Facebook thất bại');
+    }
+    if (linked || error) window.history.replaceState({}, '', window.location.pathname);
+  }, []);
 
   // Password form state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -441,6 +464,20 @@ export const AccountSettingsPage: React.FC = () => {
                   </button>
                 </div>
               </form>
+              <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Đăng nhập bằng Facebook</h3>
+                  <p className="text-xs text-slate-600 mt-1">Liên kết Facebook khi đang đăng nhập để dùng cùng tài khoản và dữ liệu CyberAware.</p>
+                </div>
+                <button
+                  type="button"
+                  disabled={!facebookConfigured || linkedProviders.facebook}
+                  onClick={() => window.location.assign('/api/auth/oauth/facebook/link/start')}
+                  className="shrink-0 rounded-xl bg-[#004AC6] px-4 py-2.5 text-sm font-semibold text-white disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-[#003EA8] cursor-pointer"
+                >
+                  {linkedProviders.facebook ? 'Đã liên kết Facebook' : facebookConfigured ? 'Liên kết Facebook' : 'Facebook chưa sẵn sàng'}
+                </button>
+              </div>
             </section>
 
             {/* 2. ĐỔI MẬT KHẨU */}

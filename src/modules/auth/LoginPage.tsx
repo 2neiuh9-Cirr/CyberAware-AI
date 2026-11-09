@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
 import { api } from '../../api';
+import { ComingSoonDialog } from '../../components/common/ComingSoonDialog';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export const LoginPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [socialProviders, setSocialProviders] = useState({ google: false, facebook: false });
+  const [facebookNoticeOpen, setFacebookNoticeOpen] = useState(false);
 
   useEffect(() => {
     void api<{ google: boolean; facebook: boolean }>('/auth/oauth/providers')
@@ -26,7 +28,7 @@ export const LoginPage: React.FC = () => {
     const messages: Record<string, string> = {
       cancelled: `Bạn đã hủy xác nhận đăng nhập bằng ${provider}.`,
       oauth_email: `${provider} chưa cung cấp email hợp lệ. Hãy cấp quyền truy cập email hoặc dùng cách đăng nhập khác.`,
-      oauth_account_exists: 'Email này đã có tài khoản CyberAware. Hãy đăng nhập bằng cách hiện tại.',
+      oauth_account_exists: 'Email này đã có tài khoản CyberAware. Hãy đăng nhập bằng Google hoặc mật khẩu, vào Cài đặt tài khoản và chọn Liên kết Facebook.',
       oauth_locked: 'Tài khoản CyberAware đang bị khóa. Vui lòng liên hệ quản trị viên.',
       state: 'Phiên xác nhận đã hết hạn. Vui lòng thử lại.',
     };
@@ -180,7 +182,7 @@ export const LoginPage: React.FC = () => {
                 <span aria-hidden="true" className="text-xl font-extrabold" style={{ background: 'conic-gradient(#4285F4 0deg 90deg, #34A853 90deg 180deg, #FBBC05 180deg 270deg, #EA4335 270deg)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>G</span>
                 Tiếp tục với Google
               </button>
-              <button type="button" onClick={() => startSocial('facebook')} className="flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-[#1877F2] text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1468d6]">
+              <button type="button" onClick={() => setFacebookNoticeOpen(true)} className="flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-[#1877F2] text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1468d6]">
                 <span aria-hidden="true" className="text-2xl font-extrabold leading-none">f</span>
                 Tiếp tục với Facebook
               </button>
@@ -311,6 +313,7 @@ export const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <ComingSoonDialog open={facebookNoticeOpen} description="Đăng nhập bằng Facebook đang được phát triển. Bạn có thể đăng nhập bằng Google hoặc email trong lúc này." onClose={() => setFacebookNoticeOpen(false)} />
     </div>
   );
 };

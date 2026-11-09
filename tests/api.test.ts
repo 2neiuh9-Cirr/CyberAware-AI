@@ -195,6 +195,42 @@ test('Google and Facebook OAuth callbacks create normal sessions with one-use st
     const conflictResponse = await fetch(`${base}/auth/oauth/facebook/callback?state=${conflict.state}&code=test`, { redirect: 'manual', headers: { Cookie: conflict.cookie } });
     assert.match(conflictResponse.headers.get('location')!, /oauth_error=oauth_account_exists/);
     assert.ok(!conflictResponse.headers.getSetCookie().some(value => value.startsWith('cyberaware_session=') && !value.includes('Max-Age=0')));
+
+    const unauthenticatedLink = await fetch(`${base}/auth/oauth/facebook/link/start`, { redirect: 'manual' });
+    assert.equal(unauthenticatedLink.status, 303);
+    const beginLink = async () => {
+      const response = await fetch(`${base}/auth/oauth/facebook/link/start`, { redirect: 'manual', headers: { Cookie: googleCookie } });
+      assert.equal(response.status, 302);
+      const state = new URL(response.headers.get('location')!).searchParams.get('state')!;
+      const cookie = response.headers.getSetCookie().find(value => value.startsWith('cyberaware_oauth_state='))!.split(';')[0];
+      return { state, cookie };
+    };
+    const switchedSession = await beginLink();
+    const rejectedLink = await fetch(`${base}/auth/oauth/facebook/callback?state=${switchedSession.state}&code=test`, {
+      redirect: 'manual', headers: { Cookie: `${facebookCookie}; ${switchedSession.cookie}` },
+    });
+    assert.match(rejectedLink.headers.get('location')!, /oauth_link_error=oauth_link_session/);
+    assert.equal(db.prepare("SELECT COUNT(*) AS n FROM oauth_accounts WHERE provider = 'facebook' AND provider_user_id = ?").get(facebookId)!.n, 0);
+
+    const link = await beginLink();
+    const linked = await fetch(`${base}/auth/oauth/facebook/callback?state=${link.state}&code=test`, {
+      redirect: 'manual', headers: { Cookie: `${googleCookie}; ${link.cookie}` },
+    });
+    assert.equal(linked.headers.get('location'), `${process.env.APP_URL}/cai-dat?oauth_link=facebook`);
+    assert.deepEqual((await request('/auth/oauth/links', 'GET', undefined, undefined, { Cookie: googleCookie })).data, { google: true, facebook: true });
+    const facebookAfterLink = await start('facebook');
+    const loginAfterLink = await fetch(`${base}/auth/oauth/facebook/callback?state=${facebookAfterLink.state}&code=test`, { redirect: 'manual', headers: { Cookie: facebookAfterLink.cookie } });
+    assert.equal(loginAfterLink.headers.get('location'), `${process.env.APP_URL}/`);
+    const linkedCookie = loginAfterLink.headers.getSetCookie().find(value => value.startsWith('cyberaware_session=') && /Path=\/api(?:;|$)/.test(value))!.split(';')[0];
+    assert.equal((await request('/auth/me', 'GET', undefined, undefined, { Cookie: linkedCookie })).data.user.id, userId);
+    facebookEmail = '';
+    const facebookWithoutEmail = await start('facebook');
+    const loginWithoutEmail = await fetch(`${base}/auth/oauth/facebook/callback?state=${facebookWithoutEmail.state}&code=test`, { redirect: 'manual', headers: { Cookie: facebookWithoutEmail.cookie } });
+    assert.equal(loginWithoutEmail.headers.get('location'), `${process.env.APP_URL}/`);
+    facebookId = 'facebook-no-email-new';
+    const newFacebookWithoutEmail = await start('facebook');
+    const rejectedWithoutEmail = await fetch(`${base}/auth/oauth/facebook/callback?state=${newFacebookWithoutEmail.state}&code=test`, { redirect: 'manual', headers: { Cookie: newFacebookWithoutEmail.cookie } });
+    assert.match(rejectedWithoutEmail.headers.get('location')!, /oauth_error=oauth_email/);
   } finally {
     globalThis.fetch = originalFetch;
     for (const [key, value] of Object.entries(originalConfig)) if (value === undefined) delete process.env[key]; else process.env[key] = value;

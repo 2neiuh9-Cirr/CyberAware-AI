@@ -347,9 +347,9 @@ export const RegisterPage: React.FC = () => {
                       Điều khoản dịch vụ
                     </Link>{' '}
                     và{' '}
-                    <Link to="/gioi-thieu" className="text-[#004AC6] hover:underline font-semibold">
+                    <a href="/chinh-sach-quyen-rieng-tu.html" className="text-[#004AC6] hover:underline font-semibold">
                       Chính sách quyền riêng tư
-                    </Link>{' '}
+                    </a>{' '}
                     của CyberAware AI.
                   </span>
                 </label>

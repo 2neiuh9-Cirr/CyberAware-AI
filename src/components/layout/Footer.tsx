@@ -99,9 +99,14 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/gioi-thieu" className="text-[#434655] text-[13px] hover:text-[#004AC6] hover:underline transition-colors">
-                  Điều khoản sử dụng dữ liệu
-                </Link>
+                <a href="/chinh-sach-quyen-rieng-tu.html" className="text-[#434655] text-[13px] hover:text-[#004AC6] hover:underline transition-colors">
+                  Chính sách quyền riêng tư
+                </a>
+              </li>
+              <li>
+                <a href="/xoa-du-lieu.html" className="text-[#434655] text-[13px] hover:text-[#004AC6] hover:underline transition-colors">
+                  Yêu cầu xóa dữ liệu
+                </a>
               </li>
               <li>
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80 mt-1">
