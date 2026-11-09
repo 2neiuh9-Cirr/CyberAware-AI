@@ -1,7 +1,7 @@
 import { performance } from 'node:perf_hooks';
-import type { ScanResult, ScanType } from '../src/types';
-import { ApiError, textField } from './http';
-import { db } from './database';
+import type { ScanResult, ScanType } from '../../src/types';
+import { ApiError, textField } from '../http';
+import { db } from '../database';
 import { evaluateStoredRules, matchReviewedIntel } from './intelligence';
 
 db.exec("CREATE TABLE IF NOT EXISTS analysis_settings (id INTEGER PRIMARY KEY CHECK(id = 1), ai_enabled INTEGER NOT NULL DEFAULT 1)");

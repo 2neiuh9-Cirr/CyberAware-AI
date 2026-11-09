@@ -1,4 +1,4 @@
-import type { Course } from '../src/types';
+import type { Course } from '../../src/types';
 
 type Question = [string, [string, string, string, string], number, string];
 

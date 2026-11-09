@@ -5,7 +5,7 @@ import path from 'node:path';
 import { currentUser, me, publicUser } from '../auth';
 import { db, catalogItem, catalogItems } from './database';
 import { ApiError, integer, rateLimit, textField } from './http';
-import { analyze, normalizeQuery, scanType } from './analysis';
+import { analyze, normalizeQuery, scanType } from './analysis/analysis';
 
 export const apiRouter = Router();
 const now = () => new Date().toISOString();

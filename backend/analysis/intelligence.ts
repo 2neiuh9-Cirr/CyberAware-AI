@@ -1,4 +1,4 @@
-import { db } from './database';
+import { db } from '../database';
 
 export type ScamRule = { id: string; type: string; title: string; terms: string; weight: number; enabled: number; updatedAt: string };
 

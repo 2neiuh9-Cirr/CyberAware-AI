@@ -1,4 +1,4 @@
-import type { ScamScenario, Course, ScamReport } from '../src/types';
+import type { ScamScenario, Course, ScamReport } from '../../src/types';
 
 export const SCAM_SCENARIOS: ScamScenario[] = [
   {

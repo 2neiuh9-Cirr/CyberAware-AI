@@ -2,11 +2,11 @@ import express, { Router, type Request, type Response } from 'express';
 import { randomUUID } from 'node:crypto';
 import { GoogleGenAI, ThinkingLevel, type Part } from '@google/genai';
 import sharp from 'sharp';
-import { db } from './database';
-import { currentUser, chatDigest } from '../auth';
-import { ApiError, integer, rateLimit } from './http';
+import { db } from '../database';
+import { currentUser, chatDigest } from '../../auth';
+import { ApiError, integer, rateLimit } from '../http';
 import { chatKnowledge } from './chatKnowledge';
-import { publicChatSources, sanitizeChatAnswer } from '../shared/chatAnswer';
+import { publicChatSources, sanitizeChatAnswer } from '../../shared/chatAnswer';
 
 const defaults = { enabled:true, imagesEnabled:true, guestTurns:10, memberTurns:40, guestTokens:40000, memberTokens:160000, guestImages:3, memberImages:10 };
 db.exec(`

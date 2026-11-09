@@ -640,8 +640,8 @@ test('chat: quotas, images, grounded sources, history ownership and deletion', a
   process.env.GEMINI_API_KEY = 'mock-key';
   t.after(()=>{process.env.GEMINI_API_KEY = key});
   const provider = new GoogleGenAI({ apiKey:'mock-key' }).models;
-  const { chatProvider } = await import('../backend/chat');
-  const { chatKnowledge } = await import('../backend/chatKnowledge');
+  const { chatProvider } = await import('../backend/chat/chat');
+  const { chatKnowledge } = await import('../backend/chat/chatKnowledge');
   const privateSource = chatKnowledge('Shipper giả mạo hỏi OTP [ĐÃ ẨN]')[0];
   assert.ok(privateSource?.id);
   t.mock.method(chatProvider,'models',()=>provider);

@@ -1,6 +1,6 @@
 # Kế hoạch API cho chatbot CyberAware AI
 
-Ngày rà soát: 07/11/2026 (Asia/Ho_Chi_Minh). Tài liệu này là đặc tả triển khai; các endpoint dưới đây đã được triển khai trong `backend/chat.ts` và `backend/admin.ts`.
+Ngày rà soát: 07/11/2026 (Asia/Ho_Chi_Minh). Tài liệu này là đặc tả triển khai; các endpoint dưới đây đã được triển khai trong `backend/chat/chat.ts` và `backend/admin.ts`.
 
 ## 1. Trạng thái mã hiện tại
 
@@ -8,7 +8,7 @@ Ngày rà soát: 07/11/2026 (Asia/Ho_Chi_Minh). Tài liệu này là đặc tả
 - Ô ảnh hiện chỉ lưu `imageName`, không giữ đối tượng `File`, không tải tệp lên và không đọc nội dung ảnh.
 - `src/api.ts` hỗ trợ JSON, cookie cùng origin và timeout mặc định 20 giây. Nó tự gắn `Content-Type: application/json` với mọi request có body; khi dùng `FormData` phải sửa để trình duyệt tự đặt multipart boundary.
 - Máy chủ Express đã có `POST /api/analyze` cho `url`, `sms`, `phone`, `bank`; `GET /api/courses`, `GET /api/courses/:id/lessons/:lessonId`, `GET /api/scenarios`, `GET /api/reports`; cùng xác thực bằng session cookie/JWT. Không cần viết lại các API này.
-- Gemini chỉ đang được gọi trong `backend/analysis.ts` để hỗ trợ quét URL/SMS. `analysis_settings.ai_enabled` là công tắc cho quét; chatbot cần công tắc riêng. Khóa API nằm ở máy chủ.
+- Gemini chỉ đang được gọi trong `backend/analysis/analysis.ts` để hỗ trợ quét URL/SMS. `analysis_settings.ai_enabled` là công tắc cho quét; chatbot cần công tắc riêng. Khóa API nằm ở máy chủ.
 - Nguồn tri thức phù hợp: `catalog` với khóa đã `published` và module bài học không phải quiz; `threat_intel` với `status='reviewed'` và nguồn/ngày; `scenarios` phải ghi nhãn tình huống minh họa. Không đưa đáp án hoặc giải thích quiz chưa nộp vào ngữ cảnh. Báo cáo cộng đồng chỉ dùng khi `approved` và phải ghi nhãn đúng, không coi là xác nhận từ cơ quan chức năng.
 - `rateLimit()` hiện đếm trong bộ nhớ theo IP. Cần hạn mức theo user/IP và ngân sách token bền vững hơn khi chạy nhiều instance. `privacy_settings.auto_delete_30_days` hiện chỉ xóa `scans`, không xóa chat.
 
@@ -73,8 +73,8 @@ Hạn mức ngày phải điều chỉnh theo quota và ngân sách thật trong
 
 ## 6. Tệp cần sửa hoặc thêm khi triển khai
 
-- `backend/chat.ts`: router chat, kiểm tra request, quota, Gemini, truy hồi, định dạng response.
-- `backend/chatKnowledge.ts`: chọn và đóng gói nguồn từ `catalog`, `threat_intel`, `scenarios`.
+- `backend/chat/chat.ts`: router chat, kiểm tra request, quota, Gemini, truy hồi, định dạng response.
+- `backend/chat/chatKnowledge.ts`: chọn và đóng gói nguồn từ `catalog`, `threat_intel`, `scenarios`.
 - `backend/database.ts` hoặc module khởi tạo chat: `chat_conversations`, `chat_messages`, `chat_usage_daily`, `chat_settings`; index theo `(user_id, updated_at)` và `(conversation_id, created_at)`, khóa ngoại `ON DELETE CASCADE`.
 - `server.ts`: mount `/api/chat` sau middleware JSON/auth và trước 404; thêm parser multipart giới hạn riêng ở route chat khi bật ảnh.
 - `backend/admin.ts`: hai endpoint cấu hình chatbot riêng, ghi audit.

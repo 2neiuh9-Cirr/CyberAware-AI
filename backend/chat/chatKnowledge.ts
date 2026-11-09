@@ -1,5 +1,5 @@
-import { catalogItems, db } from './database';
-import { normalizedText } from './intelligence';
+import { catalogItems, db } from '../database';
+import { normalizedText } from '../analysis/intelligence';
 
 export function chatKnowledge(question: string) {
   const words = [...new Set(normalizedText(question).match(/[a-z0-9]{2,}/g) || [])]

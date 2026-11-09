@@ -10,7 +10,7 @@ Trang `/hoc-tap` hiện có bốn chủ đề: nhận diện deepfake, bảo m�
 
 Người học có thể đọc nội dung mà không đăng nhập. Cần đăng nhập để nộp bài và lưu tiến độ. `GET /api/courses/:id/lessons/:lessonId` trả nội dung bài học và câu hỏi, không trả đáp án hay phần giải thích trước khi nộp. `GET /api/courses/:id` trả cả `incidentGuidance` (tiêu đề, mô tả tình huống, các bước xử lý sau khi gặp lừa đảo) của khóa học. `POST /api/quizzes/:id/submissions` nhận mảng `answers` theo thứ tự câu hỏi; giá trị `-1` biểu thị câu bỏ trống và được tính 0 điểm. Máy chủ trả `score`, `correctCount`, `total`, `passed` và `explanations[]`. Mỗi mục giải thích gồm đáp án đã chọn, đáp án đúng và lý do cho từng phương án. Đạt từ 80% mới có thể bấm hoàn thành khóa; thao tác này tự đánh dấu tất cả bài học trong khóa và lưu tiến độ vào SQLite. Quản trị viên có thể chỉnh `incidentGuidance` trong form khóa học hoặc qua API quản trị.
 
-Nội dung bài học và đáp án gốc nằm ở `backend/education.ts`; 20 câu tình huống bổ sung nằm ở `backend/education-extra-questions.ts`. Danh mục được đưa vào SQLite khi khởi động. Với cơ sở dữ liệu đã có, server chỉ thêm câu hỏi mới còn thiếu theo ID và giữ nguyên các câu đã được quản trị viên chỉnh sửa. Dữ liệu cá nhân về tiến độ và lần nộp vẫn được giữ nguyên.
+Nội dung bài học và đáp án gốc nằm ở `backend/content/education.ts`; 20 câu tình huống bổ sung nằm ở `backend/content/education-extra-questions.ts`. Danh mục được đưa vào SQLite khi khởi động. Với cơ sở dữ liệu đã có, server chỉ thêm câu hỏi mới còn thiếu theo ID và giữ nguyên các câu đã được quản trị viên chỉnh sửa. Dữ liệu cá nhân về tiến độ và lần nộp vẫn được giữ nguyên.
 
 This contains everything you need to run your app locally.
 

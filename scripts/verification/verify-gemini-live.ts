@@ -9,7 +9,7 @@ if (!process.env.GEMINI_API_KEY?.trim()) {
 } else {
   // Isolate the verification scan from the application's normal SQLite data.
   process.env.AUTH_DATA_DIR = mkdtempSync(path.join(tmpdir(), 'cyberaware-gemini-live-'));
-  const { analyze, normalizeQuery } = await import('../../backend/analysis');
+  const { analyze, normalizeQuery } = await import('../../backend/analysis/analysis');
   const result = await analyze('sms', normalizeQuery('sms', 'Chúc mừng sinh nhật! Hẹn gặp bạn ngày mai.'), false);
   console.log(JSON.stringify({
     checkedAt: new Date().toISOString(),

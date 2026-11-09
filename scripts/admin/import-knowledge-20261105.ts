@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 
-const payload = JSON.parse(readFileSync(new URL('../../backend/knowledge-20261105.json', import.meta.url), 'utf8'));
+const payload = JSON.parse(readFileSync(new URL('../../backend/analysis/knowledge-20261105.json', import.meta.url), 'utf8'));
 const databasePath = path.resolve(process.env.AUTH_DATA_DIR || 'data', 'auth.sqlite');
 const db = new DatabaseSync(databasePath);
 db.exec('PRAGMA busy_timeout=5000');

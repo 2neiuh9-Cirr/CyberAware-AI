@@ -1,11 +1,11 @@
-import { adminChatSettings, updateChatSettings } from './chat';
+import { adminChatSettings, updateChatSettings } from './chat/chat';
 import { Router, type Request } from 'express';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { currentUser, hashPassword, sendAccountSetupCode } from '../auth';
 import { db, catalogItem, catalogItems } from './database';
 import { ApiError, integer, rateLimit, textField } from './http';
-import { normalizeQuery, scanType } from './analysis';
-import './intelligence';
+import { normalizeQuery, scanType } from './analysis/analysis';
+import './analysis/intelligence';
 
 export const adminRouter = Router();
 const stamp = () => new Date().toISOString();

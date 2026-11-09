@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { authRouter, refreshRememberedSession } from './auth';
 import { apiRouter, apiError } from './backend/api';
 import { adminRouter } from './backend/admin';
-import { chatRouter } from './backend/chat';
+import { chatRouter } from './backend/chat/chat';
 import { siteTranslationRouter } from './backend/siteTranslation';
 import { db } from './backend/database';
 import { rateLimit } from './backend/http';

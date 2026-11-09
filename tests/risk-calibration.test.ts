@@ -6,7 +6,7 @@ import path from 'node:path';
 
 process.env.AUTH_DATA_DIR = mkdtempSync(path.join(tmpdir(), 'cyberaware-risk-'));
 process.env.GEMINI_API_KEY = '';
-const { analyze, normalizeQuery, applyAiAssessment, applyGeminiWithFallback } = await import('../backend/analysis');
+const { analyze, normalizeQuery, applyAiAssessment, applyGeminiWithFallback } = await import('../backend/analysis/analysis');
 
 test('ordinary URLs and safety advice stay low risk', async () => {
   for (const input of ['https://vietcombank.com.vn/login', 'https://example.org/login', 'https://baochinhphu.vn/canh-bao-lua-dao']) {

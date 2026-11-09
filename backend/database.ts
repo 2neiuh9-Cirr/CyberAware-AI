@@ -1,6 +1,6 @@
 import { db } from '../auth';
-import { courses, quizzes, scenarios } from './catalog';
-import { COURSES } from './catalog-base';
+import { courses, quizzes, scenarios } from './content/catalog';
+import { COURSES } from './content/catalog-base';
 
 db.exec(`
   PRAGMA busy_timeout = 5000;
