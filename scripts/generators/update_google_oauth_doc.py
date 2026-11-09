@@ -1,8 +1,11 @@
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
+from pathlib import Path
 
-path = r'C:\Users\Admin\OneDrive - vnua.edu.vn\Documents\ChatGPT\CyberAware AI\Huong dan cau hinh ket noi API Google.docx'
-doc = Document(path)
+docs_dir = Path(__file__).resolve().parents[2] / 'docs' / 'guides'
+source_path = docs_dir / 'Huong dan cau hinh ket noi API Google.docx'
+output_path = docs_dir / 'Huong dan cau hinh ket noi API Google va Facebook.docx'
+doc = Document(source_path)
 
 # Replace the temporary note that Facebook would be added later.
 paras = list(doc.paragraphs)
@@ -63,5 +66,5 @@ doc.add_paragraph('Việc đầu tiên là đưa website HTTPS lên Internet và
 
 doc.core_properties.title = 'Hướng dẫn cấu hình kết nối API Google và Facebook'
 doc.core_properties.subject = 'Cấu hình OAuth Google và Facebook cho CyberAware AI'
-doc.save(path)
-print(path)
+doc.save(output_path)
+print(output_path)

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { GoogleGenAI } from '@google/genai';
 import { ApiError, rateLimit } from './http';
 import { currentUser } from '../auth';
-import { adminUiPhrases } from '../src/adminUiPhrases';
+import { adminUiPhrases } from '../src/site/adminUiPhrases';
 
 export const siteTranslationRouter = Router();
 

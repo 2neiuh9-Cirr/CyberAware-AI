@@ -1,4 +1,4 @@
-// Generated from administrator UI source by scripts/generate-admin-ui-phrases.ts.
+// Generated from administrator UI source by scripts/generators/generate-admin-ui-phrases.ts.
 export const adminUiPhrases = [
   "+ Thêm bài học vi mô",
   "+ Thêm bài kiểm tra",

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
-import { setSiteLanguage, toggleSiteTheme, tr, useSitePreferences } from '../../sitePreferences';
-import { prepareBrowserTranslator } from '../../siteTranslationService';
+import { setSiteLanguage, toggleSiteTheme, tr, useSitePreferences } from '../../site/sitePreferences';
+import { prepareBrowserTranslator } from '../../site/siteTranslationService';
 import { prefetchAdminReports } from '../../modules/admin/adminReportsData';
 
 interface AdminLayoutProps {

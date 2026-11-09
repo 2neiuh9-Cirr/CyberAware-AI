@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShieldCheck, Menu, X, AlertTriangle, ChevronDown, Sparkles, LogOut, BookOpen, ShieldAlert, LayoutDashboard, Settings, Search, Moon, Sun } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
-import { setSiteLanguage, toggleSiteTheme, tr, useSitePreferences } from '../../sitePreferences';
+import { setSiteLanguage, toggleSiteTheme, tr, useSitePreferences } from '../../site/sitePreferences';
 import { SiteSearchDialog } from './SiteSearchDialog';
-import { prepareBrowserTranslator } from '../../siteTranslationService';
+import { prepareBrowserTranslator } from '../../site/siteTranslationService';
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();

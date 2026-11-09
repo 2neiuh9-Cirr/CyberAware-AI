@@ -14,4 +14,4 @@ for (const file of files) {
     if (value.length >= 2 && value.length <= 1800 && !/[{};<>]|className|=>|===|\?\.|\)\s*:|const |useState|user\.|\breturn\b|\[\]/.test(value) && /[\u00c0-\u1ef9\u0111\u0110]/u.test(value)) phrases.add(value);
   }
 }
-writeFileSync('src/adminUiPhrases.ts', `// Generated from administrator UI source by scripts/generate-admin-ui-phrases.ts.\nexport const adminUiPhrases = ${JSON.stringify([...phrases].sort(), null, 2)} as const;\n`);
+writeFileSync('src/site/adminUiPhrases.ts', `// Generated from administrator UI source by scripts/generators/generate-admin-ui-phrases.ts.\nexport const adminUiPhrases = ${JSON.stringify([...phrases].sort(), null, 2)} as const;\n`);

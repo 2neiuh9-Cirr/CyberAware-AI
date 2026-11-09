@@ -5,7 +5,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import type { AddressInfo } from 'node:net';
 process.env.AUTH_DATA_DIR=mkdtempSync(path.join(tmpdir(),'cyberaware-chat-live-'));
-const {createApp}=await import('../server');
+const {createApp}=await import('../../server');
 const server=createApp().listen(0,'127.0.0.1');
 await new Promise<void>(resolve=>server.once('listening',resolve));
 try {

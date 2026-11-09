@@ -1,0 +1,17 @@
+{
+  "databasePath": "data/auth.sqlite",
+  "backupPath": "outputs/before-knowledge-1793857583107.sqlite",
+  "before": {
+    "rules": 10,
+    "intel": 5
+  },
+  "insertedRules": 56,
+  "insertedIntel": 20,
+  "after": {
+    "rules": 66,
+    "intel": 25
+  },
+  "integrity": {
+    "quick_check": "ok"
+  }
+}

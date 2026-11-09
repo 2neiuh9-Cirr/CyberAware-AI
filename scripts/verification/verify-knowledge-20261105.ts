@@ -1,9 +1,9 @@
 import 'dotenv/config';
 import assert from 'node:assert/strict';
 process.env.GEMINI_API_KEY = '';
-const { evaluateStoredRules } = await import('../backend/intelligence');
-const { analyze } = await import('../backend/analysis');
-const { db } = await import('../backend/database');
+const { evaluateStoredRules } = await import('../../backend/intelligence');
+const { analyze } = await import('../../backend/analysis');
+const { db } = await import('../../backend/database');
 const url = await analyze('url', 'https://example.org/vneid.apk', false);
 assert.ok(url.flags.some(flag => flag.includes('VNeID dạng APK')));
 assert.ok(url.riskScore >= 30);

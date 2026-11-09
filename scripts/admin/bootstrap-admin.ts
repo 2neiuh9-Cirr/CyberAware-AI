@@ -1,5 +1,5 @@
 import { randomBytes, randomUUID, scryptSync } from 'node:crypto';
-import { db } from '../auth';
+import { db } from '../../auth';
 
 const email = (process.env.ADMIN_BOOTSTRAP_EMAIL || 'admin@gmail.com').trim().toLowerCase();
 const password = process.env.ADMIN_BOOTSTRAP_PASSWORD;

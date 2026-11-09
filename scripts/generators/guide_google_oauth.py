@@ -1,9 +1,9 @@
+from pathlib import Path
+
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.section import WD_SECTION
 
-out = r'C:\Users\Admin\OneDrive - vnua.edu.vn\Documents\ChatGPT\CyberAware AI\Huong dan cau hinh ket noi API Google.docx'
+out = Path(__file__).resolve().parents[2] / 'docs' / 'guides' / 'Huong dan cau hinh ket noi API Google.docx'
 doc = Document()
 sec = doc.sections[0]
 sec.top_margin = Inches(.7); sec.bottom_margin = Inches(.7)

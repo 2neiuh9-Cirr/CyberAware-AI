@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, BookOpen, FileText, GraduationCap, Info, Search, ShieldAlert, ShieldCheck, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
-import { tr, useSitePreferences } from '../../sitePreferences';
+import { tr, useSitePreferences } from '../../site/sitePreferences';
 
 type SearchItem = { id: string; title: string; detail: string; kind: 'page' | 'scenario' | 'course'; path: string; keywords?: string; scenarioId?: string };
 

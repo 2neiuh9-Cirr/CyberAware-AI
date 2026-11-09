@@ -9,14 +9,14 @@ import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { NotificationBanner } from './components/layout/NotificationBanner';
 import { AppRoutes } from './routes/AppRoutes';
-import { ReportScamModal } from './components/common/ReportScamModal';
-import { ScenarioDetailModal } from './components/common/ScenarioDetailModal';
+import { ReportScamModal } from './modules/report/ReportScamModal';
+import { ScenarioDetailModal } from './modules/scams/ScenarioDetailModal';
 import { Chatbot } from './components/chat/Chatbot';
 import { ToastViewport } from './components/common/ToastViewport';
 import { useAppStore } from './store/useAppStore';
-import { useSitePreferences } from './sitePreferences';
-import { installSiteLocalization } from './siteLocalization';
-import './siteTheme.css';
+import { useSitePreferences } from './site/sitePreferences';
+import { installSiteLocalization } from './site/siteLocalization';
+import './site/siteTheme.css';
 
 // Helper to scroll to top on page navigation
 const ScrollToTop: React.FC = () => {

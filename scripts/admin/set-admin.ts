@@ -1,4 +1,4 @@
-import { db } from '../auth';
+import { db } from '../../auth';
 const email = process.argv[2]?.trim().toLowerCase();
 if (!email || !email.includes('@')) throw new Error('Cách dùng: npm run admin -- email-da-dang-ky@example.com');
 const result = db.prepare("UPDATE users SET role = 'admin' WHERE email = ?").run(email);
