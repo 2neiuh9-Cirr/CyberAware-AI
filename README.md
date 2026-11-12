@@ -1,8 +1,14 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# CyberAware AI
 
-# Run and deploy your AI Studio app
+Ứng dụng nhận diện dấu hiệu lừa đảo trực tuyến, tiếp nhận báo cáo cộng đồng và hướng dẫn kỹ năng tự vệ số. Frontend dùng React/Vite; API dùng Express/TypeScript và SQLite. Các tính năng AI cần khóa Gemini và có thể chuyển về bộ quy tắc khi dịch vụ không khả dụng.
+
+## Cấu trúc dự án
+
+- `src/modules/`: các trang và thành phần riêng của từng chức năng; `src/components/`: thành phần dùng chung.
+- `backend/auth/`, `backend/routes/`, `backend/analysis/`, `backend/chat/`, `backend/content/`: xác thực, API và dữ liệu nội dung.
+- `tests/`: kiểm thử tự động; `scripts/`: công cụ quản trị, tạo tài liệu, xác minh và mã lưu trữ.
+- `docs/`: hướng dẫn, kế hoạch, đặc tả và báo cáo. Xem `docs/specifications/README.md` để xác định bản SRS hiện hành.
+- `public/`: tài nguyên website phục vụ trực tiếp. `data/` chứa SQLite và dữ liệu chạy, không đưa vào Git.
 
 ## Học tập và kiểm tra trắc nghiệm
 
@@ -12,21 +18,15 @@ Người học có thể đọc nội dung mà không đăng nhập. Cần đăn
 
 Nội dung bài học và đáp án gốc nằm ở `backend/content/education.ts`; 20 câu tình huống bổ sung nằm ở `backend/content/education-extra-questions.ts`. Danh mục được đưa vào SQLite khi khởi động. Với cơ sở dữ liệu đã có, server chỉ thêm câu hỏi mới còn thiếu theo ID và giữ nguyên các câu đã được quản trị viên chỉnh sửa. Dữ liệu cá nhân về tiến độ và lần nộp vẫn được giữ nguyên.
 
-This contains everything you need to run your app locally.
+## Chạy tại máy
 
-View your app in AI Studio: https://ai.studio/apps/0da6e46b-c75c-467c-a9d3-6f41235ebdeb
+Yêu cầu Node.js 24 trở lên và npm. Dùng npm làm trình quản lý gói của dự án.
 
-## Run Locally
+1. Cài phụ thuộc: `npm install --legacy-peer-deps`.
+2. Sao chép `.env.example` thành `.env`, rồi điền các biến cần dùng. `GEMINI_API_KEY` bật phân tích AI cho URL và SMS khi quản trị viên cũng đã bật tính năng. Nếu dịch vụ AI không khả dụng, hệ thống dùng bộ quy tắc đã lưu.
+3. Chạy ứng dụng: `npm run dev`.
 
-**Prerequisites:**  Node.js
-For the authentication API, use Node.js 24 or later (the backend uses the built-in SQLite module).
-
-
-1. Install dependencies:
-   `npm install --legacy-peer-deps`
-2. Copy `.env.example` to `.env` and set `GEMINI_API_KEY` to enable AI context analysis for URL and SMS scans. AI can raise the risk score only when its response cites text present in the user's input; scans fall back to stored rules if the service is unavailable. The admin AI setting must also be enabled.
-3. Run the app:
-   `npm run dev`
+Kiểm tra trước khi triển khai: `npm run lint`, `npm run build`, `npm test`, `npm run test:ai`, `npm run test:auth`. Các bài kiểm tra live cần dịch vụ và cấu hình tương ứng; không nằm trong bộ test mặc định.
 
 Nếu cổng 3000 đang được dùng, chế độ phát triển tự thử các cổng tiếp theo và in địa chỉ thực tế trong terminal, ví dụ `CyberAware AI: http://localhost:3001`. Hãy mở đúng địa chỉ được in ra; không cần chạy lại lệnh nhiều lần. Có thể chỉ định cổng bằng PowerShell: `$env:PORT=3100; $env:APP_URL='http://localhost:3100'; npm.cmd run dev`. Khi chỉ định `PORT`, cổng đó phải còn trống. Do Vite được nhúng trong Express và không mở WebSocket riêng, hãy tải lại trang sau khi sửa giao diện.
 
