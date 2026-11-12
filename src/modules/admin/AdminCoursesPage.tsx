@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { api, json } from '../../api';
 import { notify } from '../../components/common/toast';
 import { AdminLayout } from '../../components/layout/AdminLayout';
+import { AddLessonModal } from './courses/AddLessonModal';
 
 interface CourseAdminItem {
   id: string;
@@ -818,71 +819,7 @@ export const AdminCoursesPage: React.FC = () => {
         </div>
       )}
 
-      {/* Modal: Thêm bài học vi mô */}
-      {isAddLessonOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" onMouseDown={event => { if (event.target === event.currentTarget && !busy) setIsAddLessonOpen(false); }}>
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4 animate-scale-up">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-base font-bold text-slate-900">+ Thêm bài học vi mô</h3>
-              <button
-                type="button"
-                onClick={() => setIsAddLessonOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1"
-              >
-                <span className="material-symbols-outlined text-xl">close</span>
-              </button>
-            </div>
-
-            <form onSubmit={handleAddLessonSubmit} className="space-y-4 text-xs">
-              {error && <p role="alert" className="text-red-700">{error}</p>}
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Tiêu đề bài học vi mô *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ví dụ: Quy tắc 3 giây kiểm tra tên miền người gửi"
-                  value={newLessonTitle}
-                  onChange={(e) => setNewLessonTitle(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:bg-white focus:border-[#004AC6]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Thời lượng ước tính</label>
-                <select
-                  value={newLessonDuration}
-                  onChange={(e) => setNewLessonDuration(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none cursor-pointer"
-                >
-                  <option value="3 phút">3 phút đọc</option>
-                  <option value="4 phút">4 phút thực hành</option>
-                  <option value="5 phút">5 phút đọc &amp; soi mẫu</option>
-                </select>
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Nội dung bài học</label>
-                <textarea rows={5} value={newLessonContent} onChange={e => setNewLessonContent(e.target.value)} placeholder="Viết nội dung để học viên đọc và thực hành..." className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:bg-white focus:border-[#004AC6]" />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsAddLessonOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-lg bg-[#004AC6] hover:bg-blue-700 text-white font-semibold"
-                >
-                  Thêm bài học
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <AddLessonModal open={isAddLessonOpen} busy={busy} error={error} title={newLessonTitle} duration={newLessonDuration} content={newLessonContent} onClose={() => setIsAddLessonOpen(false)} onSubmit={handleAddLessonSubmit} onTitleChange={setNewLessonTitle} onDurationChange={setNewLessonDuration} onContentChange={setNewLessonContent} />
 
       {editingLesson && <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" onMouseDown={event => { if (event.target === event.currentTarget && !busy) setEditingLesson(null); }}><div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-xl border border-slate-200 space-y-4"><h3 className="text-base font-bold">Chỉnh sửa bài học</h3><input value={editingLesson.title} onChange={e => setEditingLesson({ ...editingLesson, title: e.target.value })} className="w-full px-3 py-2 bg-slate-50 border rounded-lg text-sm" /><input value={editingLesson.duration} onChange={e => setEditingLesson({ ...editingLesson, duration: e.target.value })} className="w-full px-3 py-2 bg-slate-50 border rounded-lg text-sm" /><textarea rows={8} value={lessonContent} onChange={e => setLessonContent(e.target.value)} className="w-full px-3 py-2 bg-slate-50 border rounded-lg text-sm" placeholder="Nội dung bài học" /><div className="flex justify-end gap-3"><button onClick={() => setEditingLesson(null)} className="px-4 py-2 rounded-lg bg-slate-100 text-sm">Hủy</button><button disabled={busy} onClick={() => { const lesson = editingLesson; void mutate(async () => { await api(`/admin/courses/${selectedCourse.id}/lessons/${lesson.id}`, json('PATCH', { title: lesson.title, duration: lesson.duration, content: lessonContent })); setEditingLesson(null); }, 'Đã lưu bài học.', selectedCourse.id); }} className="px-4 py-2 rounded-lg bg-[#004AC6] text-white text-sm disabled:opacity-50">Lưu bài học</button></div></div></div>}
       {assigningLesson && <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" onMouseDown={event => { if (event.target === event.currentTarget && !busy && !assignmentLoading) setAssigningLesson(null); }}>
