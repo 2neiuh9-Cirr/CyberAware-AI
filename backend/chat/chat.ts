@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { GoogleGenAI, ThinkingLevel, type Part } from '@google/genai';
 import sharp from 'sharp';
 import { db } from '../database';
-import { currentUser, chatDigest } from '../../auth';
+import { currentUser, chatDigest } from '../auth';
 import { ApiError, integer, rateLimit } from '../http';
 import { chatKnowledge } from './chatKnowledge';
 import { publicChatSources, sanitizeChatAnswer } from '../../shared/chatAnswer';

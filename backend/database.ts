@@ -1,4 +1,4 @@
-import { db } from '../auth';
+import { db } from './auth';
 import { courses, quizzes, scenarios } from './content/catalog';
 import { COURSES } from './content/catalog-base';
 

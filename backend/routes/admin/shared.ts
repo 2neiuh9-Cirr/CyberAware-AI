@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import { randomUUID } from 'node:crypto';
-import { currentUser } from '../../../auth';
+import { currentUser } from '../../auth';
 import { db, catalogItem, catalogItems } from '../../database';
 import { ApiError, integer, textField } from '../../http';
 import '../../analysis/intelligence';

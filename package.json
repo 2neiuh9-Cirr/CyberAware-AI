@@ -1,5 +1,5 @@
 {
-  "name": "react-example",
+  "name": "cyberaware-ai",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -16,7 +16,7 @@
     "test": "tsx --test tests/api.test.ts",
     "test:ai": "tsx --test tests/risk-calibration.test.ts",
     "verify:ai:live": "tsx scripts/verification/verify-gemini-live.ts",
-    "test:auth": "tsx auth-smoke.ts",
+    "test:auth": "tsx tests/auth-smoke.ts",
     "admin": "tsx scripts/admin/set-admin.ts",
     "admin:bootstrap": "tsx scripts/admin/bootstrap-admin.ts"
   },

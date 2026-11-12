@@ -18,7 +18,7 @@ process.env.GOOGLE_CLIENT_SECRET = '';
 process.env.FACEBOOK_APP_ID = '';
 process.env.FACEBOOK_APP_SECRET = '';
 const { createApp } = await import('../server');
-const { db } = await import('../auth');
+const { db } = await import('../backend/auth');
 const { catalogItems } = await import('../backend/database');
 let server: Server; let base: string;
 let token: string; let otherToken: string; let adminToken: string; let userId: string; let reportId: string; let scanId: string;

@@ -1,6 +1,6 @@
 import type { Router } from 'express';
 import { randomUUID } from 'node:crypto';
-import { currentUser, me } from '../../../auth';
+import { currentUser, me } from '../../auth';
 import { db, catalogItems } from '../../database';
 import { ApiError, integer, rateLimit, textField } from '../../http';
 import { now, ensureCertificates, user, item, progress, examPassed, publicCourse, activeQuizQuestions } from './shared';

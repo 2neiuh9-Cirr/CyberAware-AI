@@ -1,6 +1,6 @@
 import type { Router, Request } from 'express';
 import { randomBytes, randomUUID } from 'node:crypto';
-import { hashPassword, sendAccountSetupCode } from '../../../auth';
+import { hashPassword, sendAccountSetupCode } from '../../auth';
 import { db } from '../../database';
 import { ApiError, rateLimit, textField } from '../../http';
 import { stamp, n, admin, audit, pick, json, userRow, userView, csv } from './shared';

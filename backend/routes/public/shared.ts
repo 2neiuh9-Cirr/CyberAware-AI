@@ -2,7 +2,7 @@ import type { Request } from 'express';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
-import { currentUser } from '../../../auth';
+import { currentUser } from '../../auth';
 import { db, catalogItem, catalogItems } from '../../database';
 import { ApiError } from '../../http';
 

@@ -1,5 +1,5 @@
 import type { Router } from 'express';
-import { me } from '../../../auth';
+import { me } from '../../auth';
 import { db } from '../../database';
 import { now, user, item, progress } from './shared';
 

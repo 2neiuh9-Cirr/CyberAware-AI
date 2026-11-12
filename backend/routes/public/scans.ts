@@ -1,6 +1,6 @@
 import type { Router } from 'express';
 import { randomUUID } from 'node:crypto';
-import { currentUser } from '../../../auth';
+import { currentUser } from '../../auth';
 import { db } from '../../database';
 import { ApiError, integer, rateLimit } from '../../http';
 import { analyze, normalizeQuery, scanType } from '../../analysis/analysis';

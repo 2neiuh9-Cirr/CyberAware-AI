@@ -1,7 +1,7 @@
 import type { Router } from 'express';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { me, publicUser } from '../../../auth';
+import { me, publicUser } from '../../auth';
 import { db, catalogItem } from '../../database';
 import { ApiError, textField } from '../../http';
 import { now, avatarDir, privacy, purgeExpiredScans, ensureCertificates, user } from './shared';

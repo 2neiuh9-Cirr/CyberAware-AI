@@ -117,7 +117,7 @@ test('Gemini retries malformed model output but not authentication errors', asyn
 });
 
 test('new source-backed patterns require combined evidence and respect admin enable state', async () => {
-  const { db } = await import('../auth');
+  const { db } = await import('../backend/auth');
   const cases = [
     { id: 'sms-official-order-refund', message: 'Đơn hàng lỗi, cần hoàn tiền. Kết bạn Zalo và quét mã QR để xác minh lệnh hoàn tiền.', marker: 'hoàn/trả hàng qua kênh ngoài' },
     { id: 'sms-official-gift-qr', message: 'Bạn có quà tri ân bất ngờ. Quét mã QR để xác thực nhận quà.', marker: 'Quà hoặc voucher bất ngờ' },

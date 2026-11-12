@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { authRouter, refreshRememberedSession } from './auth';
+import { authRouter, refreshRememberedSession } from './backend/auth';
 import { apiRouter, apiError } from './backend/api';
 import { adminRouter } from './backend/admin';
 import { chatRouter } from './backend/chat/chat';
