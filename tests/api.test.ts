@@ -683,14 +683,14 @@ test('chat: quotas, images, grounded sources, history ownership and deletion', a
   t.mock.method(chatProvider,'models',()=>provider);
   let calls = 0;
   let failCount = true;
-  let failGenerate = false;
+  let failGenerate = 0;
   t.mock.method(provider,'countTokens',async()=>{
     if(failCount){failCount=false;throw Object.assign(new Error('model unavailable'),{status:503})}
     return {totalTokens:90};
   });
   t.mock.method(provider,'generateContent',async (params:any)=>{
     calls++;
-    if(failGenerate){failGenerate=false;throw Object.assign(new Error('model unavailable'),{status:503})}
+    if(failGenerate>0){failGenerate--;throw Object.assign(new Error('model unavailable'),{status:503})}
     const payload=JSON.parse(params.contents[0].parts[0].text);
     assert.doesNotMatch(JSON.stringify(payload),/correctIndex|optionExplanations|123456/);
     if (payload.question.includes('Shipper')) assert.equal(payload.sources[0]?.title,privateSource.title);
@@ -713,10 +713,14 @@ test('chat: quotas, images, grounded sources, history ownership and deletion', a
   assert.ok(g.data.assistantMessage.content.includes(privateSource.title));
   assert.equal((await request('/chat/messages','POST',body,undefined,guest)).status,409);
   assert.equal(calls,1);
-  failGenerate=true;
+  failGenerate=1;
   const m=await request('/chat/messages','POST',{...body,requestId:randomUUID()},adminToken);
   assert.equal(m.status,200);
   assert.equal(calls,3);
+  failGenerate=2;
+  const recovered=await request('/chat/messages','POST',{...body,requestId:randomUUID()},undefined,guest);
+  assert.equal(recovered.status,200);
+  assert.equal(calls,6);
   const route='/chat/conversations/'+m.data.conversationId;
   const outsider=await registerAndVerify({fullname:'Chat Test',email:'chat-test@example.test',password});
   assert.equal((await request(route,'GET',undefined,outsider.data.token)).status,404);

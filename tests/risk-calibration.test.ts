@@ -75,7 +75,7 @@ test('Gemini timeout and quota errors preserve the rule result', async () => {
     const baseline = { score: result.riskScore, source: result.source, flags: [...result.flags] };
     const models: string[] = [];
     await applyGeminiWithFallback(result, 'gemini-3.6-flash', async model => { models.push(model); throw error; });
-    assert.deepEqual(models, ['gemini-3.6-flash']);
+    assert.deepEqual(models, ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.1-flash-lite']);
     assert.equal(result.aiStatus, 'unavailable');
     assert.equal(result.riskScore, baseline.score);
     assert.equal(result.source, baseline.source);
@@ -91,7 +91,72 @@ test('Gemini retries a supported fallback model when the primary model is unavai
     if (model === 'gemini-3.6-flash') throw Object.assign(new Error('unavailable'), { status: 503 });
     return { text: JSON.stringify({ riskScore: 82, evidence: ['kích hoạt hồ sơ nhận quà'], reasoning: 'Yêu cầu thanh toán để nhận quyền lợi.', threatCategory: 'Thu phí trước', actionAdvice: 'Xác minh với tổ chức.' }) };
   });
-  assert.deepEqual(models, ['gemini-3.6-flash', 'gemini-3.1-flash-lite']);
+  assert.deepEqual(models, ['gemini-3.6-flash', 'gemini-3.5-flash']);
   assert.equal(result.aiStatus, 'available');
   assert.ok(result.source?.includes('+ai'));
+});
+
+test('Gemini retries malformed model output but not authentication errors', async () => {
+  const query = normalizeQuery('sms', 'Hãy đọc mã khôi phục ví cho người hướng dẫn.');
+  const recovered = await analyze('sms', query, false);
+  const models: string[] = [];
+  await applyGeminiWithFallback(recovered, 'gemini-3.6-flash', async model => {
+    models.push(model);
+    return { text: model === 'gemini-3.6-flash' ? '{' : JSON.stringify({ riskScore: 80, evidence: ['đọc mã khôi phục ví cho người hướng dẫn'], reasoning: 'Yêu cầu tiết lộ bí mật.', threatCategory: 'Chiếm đoạt ví', actionAdvice: 'Không chia sẻ mã.' }) };
+  });
+  assert.deepEqual(models, ['gemini-3.6-flash', 'gemini-3.5-flash']);
+  assert.equal(recovered.aiStatus, 'available');
+  const denied = await analyze('sms', query, false);
+  const attempted: string[] = [];
+  await applyGeminiWithFallback(denied, 'gemini-3.6-flash', async model => {
+    attempted.push(model);
+    throw Object.assign(new Error('invalid key'), { status: 401 });
+  });
+  assert.deepEqual(attempted, ['gemini-3.6-flash']);
+  assert.equal(denied.aiStatus, 'unavailable');
+});
+
+test('new source-backed patterns require combined evidence and respect admin enable state', async () => {
+  const { db } = await import('../auth');
+  const cases = [
+    { id: 'sms-official-order-refund', message: 'Đơn hàng lỗi, cần hoàn tiền. Kết bạn Zalo và quét mã QR để xác minh lệnh hoàn tiền.', marker: 'hoàn/trả hàng qua kênh ngoài' },
+    { id: 'sms-official-gift-qr', message: 'Bạn có quà tri ân bất ngờ. Quét mã QR để xác thực nhận quà.', marker: 'Quà hoặc voucher bất ngờ' },
+    { id: 'sms-official-fake-captcha', message: 'CAPTCHA xác minh robot: nhấn Windows+R, Ctrl+V rồi Enter.', marker: 'CAPTCHA yêu cầu mở công cụ' },
+  ];
+  for (const item of cases) {
+    const query = normalizeQuery('sms', item.message);
+    const enabled = await analyze('sms', query, false);
+    assert.ok(enabled.flags.some(flag => flag.includes(item.marker)), `${item.id}: missing flag`);
+    db.prepare('UPDATE scam_rules SET enabled = 0 WHERE id = ?').run(item.id);
+    try {
+      const disabled = await analyze('sms', query, false);
+      assert.ok(!disabled.flags.some(flag => flag.includes(item.marker)), `${item.id}: flag remained enabled`);
+    } finally {
+      db.prepare('UPDATE scam_rules SET enabled = 1 WHERE id = ?').run(item.id);
+    }
+  }
+  for (const message of ['Tôi muốn trả hàng, hãy trao đổi với shop trong ứng dụng.', 'Hôm nay tôi dùng mã QR để nhận voucher tại cửa hàng.', 'CAPTCHA thông thường không yêu cầu chạy PowerShell.']) {
+    const result = await analyze('sms', normalizeQuery('sms', message), false);
+    assert.ok(result.riskScore < 30, `${message}: ${result.riskScore}`);
+  }
+});
+
+test('independent AI assessment can raise an unmatched message without leaving a contradictory low-risk flag', async () => {
+  const result = await analyze('sms', normalizeQuery('sms', 'Để hoàn tất hồ sơ, hãy đọc mã khôi phục ví cho người hướng dẫn trong cuộc gọi.'), false);
+  const before = result.riskScore;
+  applyAiAssessment(result, { riskScore: 78, evidence: ['hãy đọc mã khôi phục ví cho người hướng dẫn'], reasoning: 'Yêu cầu tiết lộ bí mật khôi phục ví trong cuộc gọi.', threatCategory: 'Chiếm đoạt ví', actionAdvice: 'Ngừng trao đổi và tự xác minh qua kênh chính thức.' });
+  assert.ok(before < 78);
+  assert.equal(result.riskScore, 78);
+  assert.equal(result.level, 'NGUY_HIEM');
+  assert.ok(result.source?.includes('+ai'));
+  assert.ok(!result.flags.some(flag => flag.startsWith('Chưa khớp dấu hiệu')));
+});
+
+test('AI cannot replace stronger reviewed evidence with a reassuring explanation', async () => {
+  const result = await analyze('sms', normalizeQuery('sms', 'Hãy chuyển tiền ngay để mở khóa hồ sơ.'), true);
+  applyAiAssessment(result, { riskScore: 10, evidence: [], reasoning: 'Không có gì đáng lo.', threatCategory: 'Không rõ', actionAdvice: 'Có thể tiếp tục.' });
+  assert.ok(result.riskScore >= 85);
+  assert.equal(result.aiReasoning, undefined);
+  assert.equal(result.actionAdvice, undefined);
+  assert.equal(result.aiStatus, 'available');
 });

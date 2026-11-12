@@ -7,6 +7,7 @@ import { currentUser, chatDigest } from '../../auth';
 import { ApiError, integer, rateLimit } from '../http';
 import { chatKnowledge } from './chatKnowledge';
 import { publicChatSources, sanitizeChatAnswer } from '../../shared/chatAnswer';
+import { canTryAnotherModel, modelCandidates } from '../ai/modelFallback';
 
 const defaults = { enabled:true, imagesEnabled:true, guestTurns:10, memberTurns:40, guestTokens:40000, memberTokens:160000, guestImages:3, memberImages:10 };
 db.exec(`
@@ -147,11 +148,14 @@ chatRouter.post('/messages',rateLimit(30,60000),express.raw({type:'multipart/for
     history=history.map((h:any)=>({role:h.role,content:redact(h.role==='assistant'?sanitizeChatAnswer(h.content,h.sources?JSON.parse(h.sources):[]):h.content)}));
     const ai={models:chatProvider.models()};
     const source=chatKnowledge(message),cap=image?8000:6000;
-    const abortSignal=AbortSignal.timeout(45000);
-    let selectedModel=model();
+    const abortSignal=AbortSignal.timeout(image?100000:70000);
+    const candidates=modelCandidates(model(),'chat');
+    let modelIndex=0;
+    let selectedModel=candidates[modelIndex];
+    const requestSignal=()=>AbortSignal.any([abortSignal,AbortSignal.timeout(image?38000:25000)]);
     const switchModel=(error:any,stage:string)=>{
-      if(![404,503,504].includes(Number(error?.status)) || abortSignal.aborted) return false;
-      const fallback=selectedModel==='gemini-3.1-flash-lite'?'gemini-3.6-flash':'gemini-3.1-flash-lite';
+      if(!canTryAnotherModel(error) || abortSignal.aborted || modelIndex>=candidates.length-1) return false;
+      const fallback=candidates[++modelIndex];
       console.warn('Gemini chat model unavailable; trying fallback',{stage,status:error.status,model:selectedModel,fallback});
       selectedModel=fallback;
       return true;
@@ -159,11 +163,13 @@ chatRouter.post('/messages',rateLimit(30,60000),express.raw({type:'multipart/for
     // Lock before the first provider request, including token counting.
     reserve(actor,id,!!image,cap+1024,res);reserved=true;
     const count=async(parts:Part[])=>{
-      const run=()=>ai.models.countTokens({model:selectedModel,contents:[{role:'user',parts}],config:{abortSignal}});
-      let r;
-      try{r=await run()}catch(error){if(!switchModel(error,'countTokens'))throw error;r=await run()}
-      if(typeof r.totalTokens!=='number')throw new ApiError(503,'Không đo được token.');
-      return r.totalTokens;
+      while(true){
+        try{
+          const r=await ai.models.countTokens({model:selectedModel,contents:[{role:'user',parts}],config:{abortSignal:requestSignal()}});
+          if(typeof r.totalTokens!=='number')throw new Error('invalid-model-response');
+          return r.totalTokens;
+        }catch(error){if(!switchModel(error,'countTokens'))throw error;}
+      }
     };
     if(await count([{text:message}])>800)throw new ApiError(422,'Câu hỏi vượt 800 token.');
     const parts=():Part[]=>[{text:JSON.stringify({question:message,history,sources:source.map(s=>({title:s.title,kind:s.kind,text:s.text}))})},...(image?[image]:[])];
@@ -171,19 +177,22 @@ chatRouter.post('/messages',rateLimit(30,60000),express.raw({type:'multipart/for
     while(input>cap&&(history.length||source.length)){if(history.length)history=history.slice(1);else source.pop();input=await count([{text:instruction},...parts()]);}
     if(input>cap)throw new ApiError(422,'Nội dung vượt hạn mức ngữ cảnh.');
     generated=true;spent=input+1024;
-    const generate=()=>ai.models.generateContent({model:selectedModel,contents:[{role:'user',parts:parts()}],config:{abortSignal,maxOutputTokens:1024,...(/^gemini-3.*flash/i.test(selectedModel)?{thinkingConfig:{thinkingLevel:ThinkingLevel.MINIMAL}}:{}),systemInstruction:instruction,responseMimeType:'application/json',responseJsonSchema:{type:'object',required:['answer','sourceTitles'],properties:{answer:{type:'string'},sourceTitles:{type:'array',items:{type:'string'}}}}}});
-    let result;
-    try { result = await generate(); }
-    catch (err:any) {
-      if(!switchModel(err,'generateContent')) throw err;
-      if(await count([{text:message}])>800)throw new ApiError(422,'Câu hỏi vượt hạn mức model dự phòng.');
-      input=await count([{text:instruction},...parts()]);
-      if(input>cap)throw new ApiError(422,'Ngữ cảnh vượt hạn mức model dự phòng.');
-      result=await generate();
+    const generate=()=>ai.models.generateContent({model:selectedModel,contents:[{role:'user',parts:parts()}],config:{abortSignal:requestSignal(),maxOutputTokens:1024,...(/^gemini-3.*flash/i.test(selectedModel)?{thinkingConfig:{thinkingLevel:ThinkingLevel.MINIMAL}}:{}),systemInstruction:instruction,responseMimeType:'application/json',responseJsonSchema:{type:'object',required:['answer','sourceTitles'],properties:{answer:{type:'string'},sourceTitles:{type:'array',items:{type:'string'}}}}}});
+    let result;let answer;
+    while(true){
+      try{
+        result=await generate();
+        try{answer=JSON.parse(result.text || '');}catch{throw new Error('invalid-model-response');}
+        if(typeof answer?.answer!=='string'||!answer.answer.trim()||!Array.isArray(answer.sourceTitles)||answer.sourceTitles.some((title:unknown)=>typeof title!=='string'))throw new Error('invalid-model-response');
+        break;
+      }catch(err:any){
+        if(!switchModel(err,'generateContent'))throw err;
+        if(await count([{text:message}])>800)throw new ApiError(422,'Câu hỏi vượt hạn mức model dự phòng.');
+        input=await count([{text:instruction},...parts()]);
+        if(input>cap)throw new ApiError(422,'Ngữ cảnh vượt hạn mức model dự phòng.');
+      }
     }
     spent=result.usageMetadata?.totalTokenCount ?? spent;
-    let answer;try{answer=JSON.parse(result.text || '')}catch{throw new ApiError(503,'AI chưa trả về câu trả lời đầy đủ.')}
-    if(typeof answer?.answer!=='string'||!answer.answer.trim()||!Array.isArray(answer.sourceTitles)||answer.sourceTitles.some((title:unknown)=>typeof title!=='string'))throw new ApiError(503,'Phản hồi AI không hợp lệ.');
     const sources=publicChatSources(source.filter(s=>answer.sourceTitles.includes(s.title)));
     const createdAt=new Date().toISOString(),conversationId=who.userId?(cid||randomUUID()):null;
     const userMessage={id:randomUUID(),role:'user',content:message,createdAt,sources:[]};
