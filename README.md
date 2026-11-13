@@ -9,6 +9,7 @@
 - `tests/`: kiểm thử tự động; `scripts/`: công cụ quản trị, tạo tài liệu, xác minh và mã lưu trữ.
 - `docs/`: hướng dẫn, kế hoạch, đặc tả và báo cáo. Xem `docs/specifications/README.md` để xác định bản SRS hiện hành.
 - `public/`: tài nguyên website phục vụ trực tiếp. `data/` chứa SQLite và dữ liệu chạy, không đưa vào Git.
+- `google-workspace-addon/`: mã Apps Script cho thẻ đánh giá thư đang mở trong Gmail; `browser-extension/`: tiện ích Chrome để chủ động bấm quét. Mục Gmail trên [trang chủ](https://cyberaware.click/#tien-ich-gmail) hướng dẫn cài và mô tả quyền truy cập.
 
 ## Học tập và kiểm tra trắc nghiệm
 

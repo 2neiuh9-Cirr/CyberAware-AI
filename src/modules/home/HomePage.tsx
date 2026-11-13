@@ -33,6 +33,7 @@ import { DeepfakeWaveformVisualizer } from '../../components/cyber/DeepfakeWavef
 import { CyberMobileShowcase } from './components/CyberMobileShowcase';
 import { AiChatShowcase } from './components/AiChatShowcase';
 import { FeaturedWarnings } from './components/FeaturedWarnings';
+import { GmailToolsSection } from '../gmail/GmailToolsSection';
 import { ComingSoonDialog } from '../../components/common/ComingSoonDialog';
 import { scanExamples } from '../../data/scanExamples';
 
@@ -742,6 +743,8 @@ export const HomePage: React.FC = () => {
           </div>
         </section>
       </div>}
+
+      <GmailToolsSection />
 
       {/* Community Support & Report Banner */}
       <section className="w-full bg-[#F8FAFC] flex flex-col items-center py-12 md:py-16 px-4 md:px-12">

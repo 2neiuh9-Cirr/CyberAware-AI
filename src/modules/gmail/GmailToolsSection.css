@@ -1,0 +1,28 @@
+.gmail-tools-grid {
+  background-image: linear-gradient(to right, #dbeafe 1px, transparent 1px), linear-gradient(to bottom, #dbeafe 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, transparent, black 20%, black 75%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gmail-tools-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 650ms ease, transform 650ms ease, box-shadow 300ms ease, border-color 300ms ease;
+  }
+
+  .gmail-tools-card-first { transition-delay: 80ms; }
+  .gmail-tools-card-second { transition-delay: 160ms; }
+  .gmail-tools-privacy { transition-delay: 220ms; }
+
+  .gmail-tools-reveal.gmail-tools-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .gmail-tools-card.gmail-tools-visible:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 28px 70px -25px rgba(15, 23, 42, 0.24);
+    border-color: #bfdbfe;
+  }
+}

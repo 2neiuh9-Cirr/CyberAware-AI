@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ShieldCheck,
   Search,
@@ -11,7 +12,7 @@ import {
   Lock,
   Clock,
   Sparkles,
-  ExternalLink,
+  ArrowRight,
   Upload,
   RefreshCw,
   FileCheck,
@@ -87,6 +88,9 @@ export const ScannerPage: React.FC = () => {
       </div>
 
       <ScanProcessFlow />
+      <Link to="/#tien-ich-gmail" className="mb-7 inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-bold text-[#004AC6] hover:bg-blue-100">
+        Kiểm tra thư ngay trong Gmail <ArrowRight className="h-4 w-4" />
+      </Link>
 
       {/* Main Tool Container */}
       <div id="scanner-tool" className="relative flex w-full max-w-[1024px] scroll-mt-24 flex-col gap-6 overflow-hidden rounded-[2rem] border border-blue-100 bg-white/95 p-5 shadow-[0_24px_70px_-34px_rgba(0,74,198,0.32)] ring-1 ring-white md:p-8">

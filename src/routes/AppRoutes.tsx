@@ -37,6 +37,7 @@ export const AppRoutes: React.FC = () => {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/kiem-tra" element={<ScannerPage />} />
+      <Route path="/tien-ich-gmail" element={<Navigate to="/#tien-ich-gmail" replace />} />
       <Route path="/canh-bao" element={<ScamsLibraryPage />} />
       <Route path="/hoc-tap" element={<LearningPage />} />
       <Route path="/bao-cao" element={<ReportPage />} />
