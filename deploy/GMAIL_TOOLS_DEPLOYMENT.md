@@ -1,0 +1,38 @@
+# Đưa công cụ Gmail lên cyberaware.click
+
+## 1. Server CyberAware AI
+
+Gói sẵn cho WinSCP: `deploy/packages/cyberaware-gmail-v1-vps.zip` (tạo lại bằng `scripts/package-gmail-vps.ps1` sau khi sửa mã). ZIP chứa `backend/`, `shared/`, `src/`, `public/`, `dist/`, `server.ts`, `package.json`, `package-lock.json`, `vite.config.ts`, `tsconfig.json` và `index.html`. ZIP không chứa `.env`, `data/`, `node_modules/` hoặc khóa bí mật. Trước khi giải nén, sao lưu cấu hình và dữ liệu hiện có.
+
+Trong WinSCP, tải ZIP vào `/root/` trên VPS. Kiểm tra SHA-256 và `unzip -t` trước khi dùng. Sao lưu `/srv/cyberaware/app` và cơ sở dữ liệu trong `/var/lib/cyberaware/`, rồi giải nén ZIP vào một thư mục riêng dưới `/srv/cyberaware/releases/`. Chép `.env` từ bản đang chạy vào bản mới với quyền `root:cyberaware 640`. Không giải nén đè trực tiếp lên `/srv/cyberaware/app` vì sẽ khó hoàn tác nếu bản mới không khởi động.
+
+Trên server (tại thư mục bản mới), dùng Node.js 24 trở lên:
+
+```sh
+npm ci --legacy-peer-deps
+npm run lint
+npm run build
+```
+
+Kiểm tra các thư mục trong bản mới có quyền đi qua (`x`) cho tài khoản chạy dịch vụ `cyberaware`, đặc biệt là `backend/routes/`. Script đóng gói hiện tại tạo ZIP với quyền thư mục Linux `755`. Sau khi kiểm tra, dừng `cyberaware.service`, đổi tên thư mục `app` thành một thư mục giữ bản cũ, chuyển bản mới thành `app`, rồi khởi động dịch vụ và kiểm tra `http://127.0.0.1:3000/api/health`. Nếu kiểm tra thất bại, chuyển lại bản cũ ngay.
+
+Đặt `GMAIL_ADDON_API_KEY` trong `.env` hoặc biến môi trường của dịch vụ bằng một giá trị ngẫu nhiên dài ít nhất 32 ký tự. Giữ nguyên `APP_URL=https://cyberaware.click`. Khởi động lại dịch vụ Node theo cách VPS đang dùng (ví dụ systemd hoặc PM2). Kiểm tra:
+
+- `https://cyberaware.click/#tien-ich-gmail` cuộn tới mục Gmail trên trang chủ và hiển thị hai cách dùng.
+- `https://cyberaware.click/downloads/cyberaware-gmail-extension.zip` tải được ZIP có `manifest.json` ở gốc.
+- `https://cyberaware.click/images/cyberaware-addon.png` trả ảnh.
+- `POST /api/gmail-addon/analyze` không có khóa trả 401; `POST /api/gmail-extension/analyze` với thư thử trả điểm, mức độ và dấu hiệu.
+
+## 2. Google Workspace add-on
+
+Làm theo [google-workspace-addon/README.md](../google-workspace-addon/README.md). Tạo Apps Script project, chép `Code.gs` và `appsscript.json`, đặt **cùng khóa** vào Script Properties, rồi chọn **Deploy → Test deployments → Install**. Kiểm tra trực tiếp trên một thư trong Gmail. Tài khoản thử phải có quyền chỉnh sửa Apps Script project và thuộc cùng miền với chủ dự án, theo [hướng dẫn của Google](https://developers.google.com/workspace/add-ons/how-tos/testing-workspace-addons).
+
+Để người dùng bất kỳ tự cài, phải xuất bản add-on qua Google Workspace Marketplace. Việc xuất bản cần standard Google Cloud project, cấu hình OAuth consent và Google xét duyệt bản công khai. Sau khi được duyệt, thêm URL Marketplace vào mục Gmail trên trang chủ. Quyền `gmail.addons.current.message.readonly` chỉ đọc thư đang mở khi add-on chạy, nhưng vẫn là quyền *sensitive* theo [danh mục quyền Gmail](https://developers.google.com/workspace/gmail/api/auth/scopes).
+
+## 3. Tiện ích Chrome
+
+ZIP trong `public/downloads` cài thủ công qua Load unpacked sau khi giải nén. Để người dùng cài bằng một nút, đưa ZIP lên Chrome Web Store, hoàn tất thông tin quyền riêng tư và thay liên kết trong mục Gmail trên trang chủ bằng URL cửa hàng. Gói ZIP phải được tạo lại sau mỗi lần sửa `browser-extension/` bằng `scripts/package-gmail-extension.ps1`.
+
+## Giới hạn hiện tại
+
+Hai công cụ chỉ đánh giá thư đang mở hoặc thư người dùng bấm quét. Chúng không quét hàng loạt thư cũ, không đọc tệp đính kèm và không tự gắn nhãn Gmail. Điểm thấp không xác nhận thư an toàn.

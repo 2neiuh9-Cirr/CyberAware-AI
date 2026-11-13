@@ -4,3 +4,5 @@
 - `nginx/cyberaware.click.conf`: cấu hình Nginx HTTP ban đầu để tham khảo. Cấu hình HTTPS đang chạy trên VPS đã được Certbot bổ sung chứng chỉ và chuyển hướng; không chép đè tệp mẫu này lên cấu hình đang chạy.
 
 Không đưa `.env`, khóa bí mật, cơ sở dữ liệu hoặc dữ liệu người dùng vào ZIP triển khai.
+
+Triển khai công cụ Gmail: xem `GMAIL_TOOLS_DEPLOYMENT.md`.
