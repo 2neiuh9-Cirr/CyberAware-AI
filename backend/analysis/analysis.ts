@@ -161,7 +161,7 @@ function additionalSmsSignals(raw: string) {
   return { score: Math.min(score, 70), flags };
 }
 
-export async function analyze(type: ScanType, query: string, approvedReport: boolean): Promise<ScanResult> {
+export async function analyze(type: ScanType, query: string, approvedReport: boolean, allowAi = true): Promise<ScanResult> {
   const start = performance.now();
   const relatedWarnings = matchReviewedIntel(type, query);
   const exactIntelMatch = relatedWarnings.some(warning => warning.indicatorMatched);
@@ -221,7 +221,7 @@ export async function analyze(type: ScanType, query: string, approvedReport: boo
     source: approvedReport ? 'rules+community' : exactIntelMatch ? 'rules+intel' : 'rules', confidence: 'limited', aiStatus: 'disabled',
     scannedAt: new Date().toISOString(), analysisTimeMs: 0,
   };
-  if ((type === 'url' || type === 'sms') && process.env.GEMINI_API_KEY && db.prepare('SELECT ai_enabled FROM analysis_settings WHERE id = 1').get()?.ai_enabled === 1) {
+  if (allowAi && (type === 'url' || type === 'sms') && process.env.GEMINI_API_KEY && db.prepare('SELECT ai_enabled FROM analysis_settings WHERE id = 1').get()?.ai_enabled === 1) {
     try {
       const { GoogleGenAI } = await import('@google/genai');
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });

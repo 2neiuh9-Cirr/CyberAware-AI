@@ -12,6 +12,7 @@ process.env.AUTH_DATA_DIR = mkdtempSync(path.join(tmpdir(), 'cyberaware-api-'));
 process.env.AUTH_JWT_SECRET = 'isolated-test-secret-at-least-32-bytes-long';
 process.env.NODE_ENV = 'test';
 process.env.GEMINI_API_KEY = '';
+process.env.GMAIL_ADDON_API_KEY = 'test-gmail-addon-secret-at-least-32-bytes';
 process.env.SMTP_HOST = '';
 process.env.GOOGLE_CLIENT_ID = '';
 process.env.GOOGLE_CLIENT_SECRET = '';
@@ -88,6 +89,23 @@ test('health, safe error contract and anonymous access', async () => {
   assert.equal((await request('/auth/register','POST',{},undefined,{Origin:'https://attacker.invalid'})).status,403);
   const malformed = await fetch(base+'/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:'{broken'});
   assert.equal(malformed.status,400); assert.equal((await malformed.json() as any).success,false);
+});
+test('Gmail add-on scans only the submitted mail and does not persist its contents', async () => {
+  const mail = { subject: 'Xác minh tài khoản', sender: 'Hỗ trợ <help@example.com>', body: 'Vui lòng gửi mã OTP ngay để tránh khóa tài khoản.', links: ['http://example.net/login'] };
+  const beforeCount = (db.prepare('SELECT COUNT(*) AS count FROM scans').get() as { count: number }).count;
+  const noKey = await request('/gmail-addon/analyze', 'POST', mail);
+  assert.equal(noKey.status, 401);
+  const result = await request('/gmail-addon/analyze', 'POST', mail, undefined, {
+    'x-cyberaware-addon-key': process.env.GMAIL_ADDON_API_KEY!,
+    'x-cyberaware-install-id': '123e4567-e89b-42d3-a456-426614174000',
+  });
+  assert.equal(result.status, 200);
+  assert.ok(result.data.riskScore >= 30);
+  assert.equal(result.data.query, undefined);
+  assert.equal(result.data.aiStatus, 'disabled');
+  assert.equal((db.prepare('SELECT COUNT(*) AS count FROM scans').get() as { count: number }).count, beforeCount);
+  const browser = await request('/gmail-extension/analyze', 'POST', mail, undefined, { Origin: 'chrome-extension://abcdefghijklmnopabcdefghijklmnop' });
+  assert.equal(browser.status, 200);
 });
 test('registration requires email code, same browser, one-time use and resend cooldown', async () => {
   const email = 'verification@example.test';
