@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "CyberAware AI - Quét thư Gmail",
+  "version": "1.0.0",
+  "description": "Chủ động kiểm tra dấu hiệu lừa đảo của thư đang mở trong Gmail.",
+  "action": { "default_popup": "popup.html", "default_title": "Quét thư Gmail" },
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["https://cyberaware.click/*"]
+}

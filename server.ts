@@ -23,7 +23,8 @@ export function createApp() {
     res.set({ 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' });
     if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method) && req.headers.origin) {
       const expected = process.env.APP_URL ? new URL(process.env.APP_URL).origin : `${req.protocol}://${req.get('host')}`;
-      if (req.headers.origin !== expected) return res.status(403).json({ success: false, error: 'Nguồn yêu cầu không hợp lệ.' });
+      const gmailExtension = req.path === '/gmail-extension/analyze' && /^chrome-extension:\/\/[a-p]{32}$/.test(req.headers.origin);
+      if (req.headers.origin !== expected && !gmailExtension) return res.status(403).json({ success: false, error: 'Nguồn yêu cầu không hợp lệ.' });
     }
     next();
   });
