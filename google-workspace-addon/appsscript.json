@@ -1,0 +1,25 @@
+{
+  "timeZone": "Asia/Ho_Chi_Minh",
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/gmail.addons.execute",
+    "https://www.googleapis.com/auth/gmail.addons.current.message.readonly",
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/script.storage"
+  ],
+  "urlFetchWhitelist": ["https://cyberaware.click/"],
+  "addOns": {
+    "common": {
+      "name": "CyberAware AI",
+      "logoUrl": "https://cyberaware.click/images/cyberaware-addon.png",
+      "homepageTrigger": { "runFunction": "onHomepage" },
+      "openLinkUrlPrefixes": ["https://cyberaware.click/"]
+    },
+    "gmail": {
+      "contextualTriggers": [
+        { "unconditional": {}, "onTriggerFunction": "onGmailMessageOpen" }
+      ]
+    }
+  }
+}
