@@ -1,70 +1,113 @@
 # CyberAware AI
 
-Ứng dụng nhận diện dấu hiệu lừa đảo trực tuyến, tiếp nhận báo cáo cộng đồng và hướng dẫn kỹ năng tự vệ số. Frontend dùng React/Vite; API dùng Express/TypeScript và SQLite. Các tính năng AI cần khóa Gemini và có thể chuyển về bộ quy tắc khi dịch vụ không khả dụng.
+CyberAware AI là ứng dụng web tiếng Việt hỗ trợ nhận diện dấu hiệu lừa đảo trực tuyến, tiếp nhận cảnh báo cộng đồng và hướng dẫn kỹ năng tự vệ số. Kết quả quét là đánh giá tham khảo dựa trên quy tắc, dữ liệu đã kiểm duyệt và, khi được cấu hình, Google Gemini; điểm thấp không xác nhận một đối tượng là an toàn.
 
-## Cấu trúc dự án
+## Chức năng chính
 
-- `src/modules/`: các trang và thành phần riêng của từng chức năng; `src/components/`: thành phần dùng chung.
-- `backend/auth/`, `backend/routes/`, `backend/analysis/`, `backend/chat/`, `backend/content/`: xác thực, API và dữ liệu nội dung.
-- `tests/`: kiểm thử tự động; `scripts/`: công cụ quản trị, tạo tài liệu, xác minh và mã lưu trữ.
-- `docs/`: hướng dẫn, kế hoạch, đặc tả và báo cáo. Xem `docs/specifications/README.md` để xác định bản SRS hiện hành.
-- `public/`: tài nguyên website phục vụ trực tiếp. `data/` chứa SQLite và dữ liệu chạy, không đưa vào Git.
-- `google-workspace-addon/`: mã Apps Script cho thẻ đánh giá thư đang mở trong Gmail; `browser-extension/`: tiện ích Chrome để chủ động bấm quét. Mục Gmail trên [trang chủ](https://cyberaware.click/#tien-ich-gmail) hướng dẫn cài và mô tả quyền truy cập.
+| Nhóm | Khả năng hiện có |
+| --- | --- |
+| Kiểm tra | Đánh giá URL, tin nhắn, số điện thoại và số tài khoản ngân hàng; hiển thị điểm rủi ro, dấu hiệu và bước tự xác minh. Tài khoản đăng nhập xem lại lịch sử quét của mình. |
+| Cộng đồng | Gửi báo cáo, xem cảnh báo công khai và bình chọn báo cáo đã duyệt. Quản trị viên kiểm duyệt và quyết định trạng thái hiển thị. |
+| Học tập | Xem tình huống, khóa học, bài học và câu hỏi tương tác. Người dùng đăng nhập có thể nộp bài, lưu tiến độ và nhận chứng nhận khi đáp ứng điều kiện của khóa. |
+| Trợ lý AI | Trả lời câu hỏi về an toàn số, có thể nhận một ảnh mỗi lượt khi quản trị viên bật; tài khoản đăng nhập có lịch sử hội thoại. Cần khóa Gemini và chịu hạn mức sử dụng. |
+| Tài khoản | Đăng ký có mã xác minh email, đăng nhập bằng mật khẩu hoặc Google/Facebook khi đã cấu hình, khôi phục mật khẩu, quản lý hồ sơ, phiên đăng nhập và quyền riêng tư. |
+| Quản trị | Quản lý người dùng, báo cáo, khóa học, ngân hàng câu hỏi, tri thức và quy tắc phân tích, cấu hình AI, nhật ký và thống kê hệ thống. |
+| Gmail | Tiện ích Chrome quét thư khi người dùng bấm; Google Workspace add-on hiển thị đánh giá cho thư đang mở. Hai công cụ yêu cầu đồng ý trước khi gửi dữ liệu thư tới máy chủ. |
 
-## Học tập và kiểm tra trắc nghiệm
+Các trang chính: `/kiem-tra`, `/canh-bao`, `/hoc-tap`, `/bao-cao`, `/dang-nhap`, `/tong-quan` và mục Gmail tại `/#tien-ich-gmail`. Các trang tài khoản và quản trị kiểm tra quyền truy cập.
 
-Trang `/hoc-tap` hiện có bốn chủ đề: nhận diện deepfake, bảo mật ngân hàng/OTP, tự vệ số cho gia đình và xử lý sau khi gặp liên kết đáng ngờ. Mỗi chủ đề có 2–3 bài học với tình huống, cách kiểm tra và bước xử lý cụ thể, cộng một bài kiểm tra cuối khóa gồm 10 câu. Tổng cộng có 11 bài học và 40 câu hỏi. Mỗi câu có đúng bốn lựa chọn A–D. Năm câu mới của mỗi khóa là tình huống gần đời thực và có giải thích cho từng lựa chọn.
+## Kiến trúc và dữ liệu
 
-Người học có thể đọc nội dung mà không đăng nhập. Cần đăng nhập để nộp bài và lưu tiến độ. `GET /api/courses/:id/lessons/:lessonId` trả nội dung bài học và câu hỏi, không trả đáp án hay phần giải thích trước khi nộp. `GET /api/courses/:id` trả cả `incidentGuidance` (tiêu đề, mô tả tình huống, các bước xử lý sau khi gặp lừa đảo) của khóa học. `POST /api/quizzes/:id/submissions` nhận mảng `answers` theo thứ tự câu hỏi; giá trị `-1` biểu thị câu bỏ trống và được tính 0 điểm. Máy chủ trả `score`, `correctCount`, `total`, `passed` và `explanations[]`. Mỗi mục giải thích gồm đáp án đã chọn, đáp án đúng và lý do cho từng phương án. Đạt từ 80% mới có thể bấm hoàn thành khóa; thao tác này tự đánh dấu tất cả bài học trong khóa và lưu tiến độ vào SQLite. Quản trị viên có thể chỉnh `incidentGuidance` trong form khóa học hoặc qua API quản trị.
+- Giao diện: React 19, TypeScript, React Router, Zustand, Vite và Tailwind CSS. `src/modules/` chứa từng chức năng; `src/components/` chứa thành phần dùng chung; `src/site/` chứa ngôn ngữ, tùy chọn và theme.
+- Máy chủ: Express 4 và TypeScript trong `server.ts` và `backend/`. API công khai ở `backend/routes/public/`, API quản trị ở `backend/routes/admin/`; xác thực ở `backend/auth/`, phân tích ở `backend/analysis/`, chatbot ở `backend/chat/`, nội dung học tập ở `backend/content/`.
+- Lưu trữ: SQLite trong `data/auth.sqlite` (hoặc `AUTH_DATA_DIR` đã cấu hình). `backend/database.ts` khởi tạo dữ liệu và các bảng nghiệp vụ. `data/` chứa dữ liệu chạy và được bỏ qua bởi Git; cần sao lưu riêng khi triển khai.
+- Phân tích: quy tắc và dữ liệu đã lưu luôn là nền tảng. Gemini chỉ tham gia khi có `GEMINI_API_KEY` và tính năng AI tương ứng được bật. Nếu gọi Gemini thất bại, phần đánh giá bằng quy tắc vẫn hoạt động. Quét số điện thoại/tài khoản ngân hàng không xác minh chủ sở hữu tại nhà mạng hoặc ngân hàng.
+- Xác thực: mật khẩu được băm bằng scrypt; trình duyệt dùng cookie HttpOnly gắn với phiên ở máy chủ. API có thể dùng JWT đã ký, có hiệu lực một giờ. Phiên ghi nhớ có cửa sổ không hoạt động tối đa 30 ngày; đổi mật khẩu thu hồi các phiên cũ.
 
-Nội dung bài học và đáp án gốc nằm ở `backend/content/education.ts`; 20 câu tình huống bổ sung nằm ở `backend/content/education-extra-questions.ts`. Danh mục được đưa vào SQLite khi khởi động. Với cơ sở dữ liệu đã có, server chỉ thêm câu hỏi mới còn thiếu theo ID và giữ nguyên các câu đã được quản trị viên chỉnh sửa. Dữ liệu cá nhân về tiến độ và lần nộp vẫn được giữ nguyên.
+```text
+src/                       Giao diện, trang và trạng thái phía trình duyệt
+backend/                   API, xác thực, phân tích, nội dung, SQLite
+shared/                    Logic dùng chung giữa giao diện và máy chủ
+tests/                     Kiểm thử API, AI và xác thực
+browser-extension/         Nguồn tiện ích Chrome cho Gmail
+google-workspace-addon/    Nguồn Apps Script của Gmail add-on
+public/                    Tài nguyên được website phục vụ trực tiếp
+scripts/                   Công cụ quản trị, tạo tài liệu, triển khai, xác minh
+deploy/                    Hướng dẫn và cấu hình triển khai
+docs/                      Hướng dẫn, kế hoạch, đặc tả, báo cáo và lưu trữ
+data/                      Dữ liệu chạy cục bộ, không đưa vào Git
+```
 
-## Chạy tại máy
+Chi tiết từng phần xem [README của scripts](scripts/README.md), [README triển khai](deploy/README.md), [README tiện ích Chrome](browser-extension/README.md) và [README add-on](google-workspace-addon/README.md).
 
-Yêu cầu Node.js 24 trở lên và npm. Dùng npm làm trình quản lý gói của dự án.
+## Chạy trên máy phát triển
 
-1. Cài phụ thuộc: `npm install --legacy-peer-deps`.
-2. Sao chép `.env.example` thành `.env`, rồi điền các biến cần dùng. `GEMINI_API_KEY` bật phân tích AI cho URL, SMS và thư Gmail khi quản trị viên cũng đã bật tính năng và người dùng Gmail đồng ý với bản AI. Nếu dịch vụ AI không khả dụng, hệ thống dùng bộ quy tắc đã lưu.
-3. Chạy ứng dụng: `npm run dev`.
+Yêu cầu **Node.js 24 trở lên** và npm. `package-lock.json` là khóa phụ thuộc dùng cho các lệnh npm trong tài liệu này; `bun.lock` vẫn được giữ trong kho nhưng không phải quy trình cài đặt được hướng dẫn.
 
-Kiểm tra trước khi triển khai: `npm run lint`, `npm run build`, `npm test`, `npm run test:ai`, `npm run test:auth`. Các bài kiểm tra live cần dịch vụ và cấu hình tương ứng; không nằm trong bộ test mặc định.
+1. Cài phụ thuộc từ khóa hiện có: `npm ci --legacy-peer-deps`.
+2. Sao chép `.env.example` thành `.env`, rồi điền các biến cần cho chức năng sẽ dùng. Không đưa `.env` hoặc khóa vào Git.
+3. Chạy `npm run dev` và mở địa chỉ được in trong terminal.
 
-Nếu cổng 3000 đang được dùng, chế độ phát triển tự thử các cổng tiếp theo và in địa chỉ thực tế trong terminal, ví dụ `CyberAware AI: http://localhost:3001`. Hãy mở đúng địa chỉ được in ra; không cần chạy lại lệnh nhiều lần. Có thể chỉ định cổng bằng PowerShell: `$env:PORT=3100; $env:APP_URL='http://localhost:3100'; npm.cmd run dev`. Khi chỉ định `PORT`, cổng đó phải còn trống. Do Vite được nhúng trong Express và không mở WebSocket riêng, hãy tải lại trang sau khi sửa giao diện.
+Trong PowerShell có thể dùng `Copy-Item .env.example .env` và `npm.cmd` thay cho `npm`. Mặc định ứng dụng dùng cổng 3000. Nếu cổng này bận, chế độ phát triển tự thử cổng kế tiếp và cập nhật `APP_URL` khi giá trị đang là `http://localhost:<cổng>`. Muốn chọn cổng cố định trong PowerShell: `$env:PORT=3100; $env:APP_URL='http://localhost:3100'; npm.cmd run dev`. Khi đổi giao diện, tải lại trang vì Vite đang chạy qua middleware Express với HMR tắt.
 
-## Authentication API
+### Cấu hình môi trường
 
-The existing frontend sends requests to the same server. The backend now supports:
+| Biến | Vai trò |
+| --- | --- |
+| `APP_URL` | Origin công khai của ứng dụng, dùng cho OAuth và kiểm tra nguồn yêu cầu API; phải khớp giao thức, tên miền và cổng thực tế. |
+| `GEMINI_API_KEY` | Khóa Gemini trên máy chủ cho phân tích, chatbot và dịch giao diện khi tính năng tương ứng được bật. Không dùng biến `VITE_*` cho khóa này. |
+| `GEMINI_MODEL`, `GEMINI_CHAT_MODEL`, `GEMINI_TRANSLATION_MODEL` | Model chính cho phân tích, chatbot và dịch giao diện. Model dịch là tùy chọn; nếu không đặt, server dùng model chatbot. `.env.example` có giá trị mẫu cho hai model đầu. |
+| `AUTH_JWT_SECRET`, `AUTH_DATA_DIR` | Khóa ký xác thực và vị trí dữ liệu. Production cần khóa ngẫu nhiên dài ít nhất 32 byte. Máy phát triển tự tạo khóa bền vững trong `data/jwt-secret` nếu để trống. |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | Gửi mã đăng ký, mã khôi phục và thông báo đổi mật khẩu. Production cần SMTP cho các luồng gửi mã. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET` | Bật đăng nhập OAuth; callback phải đăng ký đúng theo `APP_URL`. `FACEBOOK_GRAPH_VERSION` có thể đổi khi cần. |
+| `GMAIL_ADDON_API_KEY` | Khóa dùng chung của server và Apps Script, dài ít nhất 32 ký tự. Tiện ích Chrome không dùng khóa này. |
+| `PORT`, `HOST`, `NODE_ENV`, `TRUST_PROXY_HOPS` | Cổng, địa chỉ lắng nghe và cấu hình chạy sau proxy. Ở production, server mặc định lắng nghe trên `127.0.0.1` nếu không đặt `HOST`. |
 
-| Method | Path | Request body | Result |
-| --- | --- | --- | --- |
-| POST | `/api/auth/register` | `{ "fullname", "email", "password" }` | Gửi mã xác minh email; chưa tạo phiên đăng nhập |
-| POST | `/api/auth/verify-email` | `{ "email", "code" }` và cookie từ bước đăng ký | Tạo tài khoản, đánh dấu email đã xác minh và đăng nhập |
-| POST | `/api/auth/resend-verification` | `{ "email" }` và cookie từ bước đăng ký | Gửi mã mới sau ít nhất 60 giây; mã cũ mất hiệu lực |
-| POST | `/api/auth/login` | `{ "email", "password", "remember": true/false }` | `{ success, user, token }` và cookie phiên |
-| GET | `/api/auth/oauth/providers` | Không có | Trạng thái cấu hình Google/Facebook |
-| GET | `/api/auth/oauth/google/start` | Không có | Chuyển sang Google để người dùng xác nhận |
-| GET | `/api/auth/oauth/facebook/start` | Không có | Chuyển sang Facebook để người dùng xác nhận |
-| GET | `/api/auth/oauth/:provider/callback` | Mã và state từ nhà cung cấp | Tạo phiên CyberAware rồi chuyển về trang chủ |
-| GET | `/api/auth/me` | Session cookie or `Authorization: Bearer <token>` | `{ success, user }` |
-| POST | `/api/auth/logout` | None | Clears the authentication cookie |
-| POST | `/api/auth/forgot-password` | `{ "email" }` | Trả cùng một phản hồi dù email có tài khoản hay không; nếu có, gửi mã 8 số có hiệu lực 5 phút |
-| POST | `/api/auth/verify-reset-code` | `{ "email", "code" }` | Verifies the code, allows at most 5 wrong attempts, consumes it and sets a short-lived HttpOnly reset cookie |
-| GET | `/api/auth/reset-password/status` | Recovery cookie | Confirms that code verification is still valid after a page reload |
-| POST | `/api/auth/reset-password` | `{ "newPassword" }` and verified recovery cookie | Changes the password, consumes the recovery grant and revokes existing sessions; user must log in again |
+Không có SMTP ở môi trường phát triển, mã đăng ký và khôi phục được ghi vào `data/dev-verification-codes.log` và `data/dev-reset-codes.log`. Đây là chế độ thử cục bộ. Sau khi sửa `.env`, khởi động lại server.
 
-Users and sessions are stored in `data/auth.sqlite`. Passwords are salted and hashed with scrypt. The JSON response still includes a signed one-hour JWT for API clients; the browser uses an HttpOnly cookie backed by a server-side session. The `data/` directory is ignored by Git. Set `AUTH_JWT_SECRET` to a random value of at least 32 bytes in production. For local development, the server creates a persistent secret in `data/jwt-secret` when this variable is absent.
+## Luồng nghiệp vụ và API tiêu biểu
 
-The login form starts with blank email and password fields and an unchecked Remember box. With `remember: false`, the cookie is a browser-session cookie. With `remember: true`, it survives browser restarts for up to 30 days of inactivity. Opening the app renews the 30-day cookie and server-side idle window. Existing remembered sessions from the former 400-day setting are capped to 30 days at server startup. Clearing browser data may end the session earlier. Logout calls `/api/auth/logout`, revokes the server session and returns to the login screen. Password reset revokes all sessions for that user.
+### Đăng nhập và khôi phục
 
-### Google/Facebook sign-in
+Đăng ký gọi `POST /api/auth/register`, nhận mã 8 chữ số qua email, rồi xác minh tại `POST /api/auth/verify-email` trong cùng trình duyệt để tạo tài khoản và phiên. Có thể gửi lại mã sau thời gian chờ. Đăng nhập bằng `POST /api/auth/login`, kiểm tra phiên ở `GET /api/auth/me` và đăng xuất bằng `POST /api/auth/logout`.
 
-Create a Web OAuth client in Google Cloud and a Facebook Login app in Meta for Developers. Configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `FACEBOOK_APP_ID`, and `FACEBOOK_APP_SECRET` in `.env`; keep secrets on the server. Register the exact callbacks `${APP_URL}/api/auth/oauth/google/callback` and `${APP_URL}/api/auth/oauth/facebook/callback` with the corresponding provider. `APP_URL` must match the actual origin, including the port used by the running server. Configure Facebook Login's `email` permission. If Meta changes its Graph API version, set `FACEBOOK_GRAPH_VERSION` to a supported version.
+Quên mật khẩu dùng `POST /api/auth/forgot-password` → `POST /api/auth/verify-reset-code` → `POST /api/auth/reset-password`. Mã khôi phục có hiệu lực 5 phút, tối đa 5 lần nhập sai; sau xác minh có 10 phút để đặt mật khẩu mới trong cùng trình duyệt. Đổi mật khẩu không tự đăng nhập lại. Tài khoản đã tồn tại trước khi có bước xác minh email vẫn sử dụng được.
 
-The browser redirects to the provider's consent screen. The callback checks a single-use state bound to the browser, exchanges the code on the server, and creates the same CyberAware session used by password login. Provider access tokens are not stored. A new social user gets a normal member account and can use learning, reporting, and scan history. A Google account with a verified email may join an existing CyberAware account with the same email. A Facebook login with an email already used by CyberAware does not automatically join that account; use the existing login method. Facebook accounts without an email cannot sign in. Provider credentials are required for live use; without them, the buttons explain that sign-in has not been configured.
+OAuth cần cấu hình thông tin ứng dụng phía Google/Meta và callback `${APP_URL}/api/auth/oauth/google/callback`, `${APP_URL}/api/auth/oauth/facebook/callback`. Người dùng còn có thể liên kết tài khoản mạng xã hội từ phần cài đặt tài khoản. Xem tài liệu cấu hình trong `docs/guides/`.
 
-To send registration and recovery email, set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, and `SMTP_FROM` in `.env` or the deployment environment. For Gmail SMTP, use the Gmail account's app password where required; never put credentials in source control. Restart the server after editing `.env`. New users must enter the single-use 8-digit registration code in the same browser within 10 minutes before the account is created. Existing accounts remain usable after this update; their `emailVerified` field stays false until a separate legacy verification flow is added.
+### Kiểm tra, báo cáo và học tập
 
-In local development without SMTP, registration codes are written to `data/dev-verification-codes.log` and recovery codes to `data/dev-reset-codes.log`; the pages identify this mode. In production SMTP is required. Recovery requests return the same status, body and delivery mode for known and unknown addresses. Mail delivery occurs after the request is accepted, so SMTP failures are logged on the server rather than returned to the browser. The recovery code expires after five minutes. After successful verification, the user has ten minutes to enter a new password in the same browser. Sending a new code invalidates the old code and any pending password-reset grant. A successful password change triggers a notification email when SMTP is configured and does not log the user in automatically.
+- `POST /api/analyze` nhận loại `url`, `sms`, `phone` hoặc `bank` và nội dung cần kiểm tra. `GET /api/scans` trả lịch sử của người dùng đăng nhập. Nội dung quét của khách không được lưu nguyên văn trong lịch sử.
+- `GET /api/reports` trả báo cáo theo quyền và bộ lọc; `POST /api/report` yêu cầu đăng nhập; chỉ báo cáo đã duyệt và đang hiển thị mới được bình chọn.
+- `GET /api/courses` và `GET /api/courses/:id/lessons/:lessonId` cung cấp nội dung đã phát hành mà không lộ đáp án trước khi nộp. `POST /api/quizzes/:id/submissions` yêu cầu đăng nhập và trả điểm, đáp án, giải thích. Để hoàn thành khóa, người học cần đánh dấu đã đọc mọi bài học và đạt ít nhất 80% ở mọi bài kiểm tra của khóa.
+- `POST /api/chat/messages` phục vụ chatbot khi AI sẵn sàng. Lịch sử hội thoại của tài khoản được lưu trong SQLite; khách không có lịch sử tài khoản. Quản trị viên có thể đặt hạn mức lượt, token và ảnh.
 
-The login store does not use an offline demo account or fake success fallback.
+API kiểm tra sức khỏe: `GET /api/health`. Các router quản trị dưới `/api/admin/` kiểm tra vai trò quản trị ở máy chủ, ngoài kiểm tra quyền trong giao diện.
 
+### Công cụ Gmail
+
+Tiện ích Chrome trong `browser-extension/` được đóng gói ở `public/downloads/cyberaware-gmail-extension.zip`; người dùng giải nén và cài thủ công bằng `chrome://extensions` → **Developer mode** → **Load unpacked**. Add-on trong `google-workspace-addon/` là mã Apps Script; bản thử cần cài qua **Test deployments**. Mã add-on chưa đồng nghĩa đã phát hành công khai trên Google Workspace Marketplace.
+
+Sau khi đồng ý, hai công cụ gửi chủ đề, người gửi, tối đa 4.500 ký tự nội dung và 10 liên kết của **thư đang mở** tới server. Chỉ khi có tiêu đề `x-cyberaware-ai-consent: v2`, khóa Gemini và cấu hình AI được bật thì chủ đề, nội dung và liên kết mới có thể được chuyển tiếp để đánh giá AI; địa chỉ người gửi không được gửi riêng tới Gemini. Máy chủ không lưu nguyên văn thư vào lịch sử quét. Hai công cụ không quét toàn hộp thư, tệp đính kèm hoặc tự gắn nhãn. Xem [chính sách quyền riêng tư](public/chinh-sach-quyen-rieng-tu.html) và [hướng dẫn triển khai Gmail](deploy/GMAIL_TOOLS_DEPLOYMENT.md).
+
+## Kiểm tra và triển khai
+
+Chạy từ gốc dự án:
+
+```sh
+npm run lint
+npm run build
+npm test
+npm run test:ai
+npm run test:auth
+```
+
+`npm run lint` kiểm tra TypeScript; `npm run build` tạo `dist/`; các lệnh test kiểm tra API, phân tích AI và luồng xác thực. `npm run verify:ai:live` cần khóa và kết nối Gemini thật, không thuộc bộ kiểm thử mặc định. Các lệnh quản trị `npm run admin` và `npm run admin:bootstrap` có thể sửa dữ liệu thật; đọc [README của scripts](scripts/README.md) trước khi chạy.
+
+Với VPS, dùng `NODE_ENV=production`, cài phụ thuộc, build và khởi động bằng `npm run start` theo cấu hình dịch vụ. Production phục vụ `dist/` qua Express. Giữ riêng `.env`, `data/` và bản sao lưu SQLite; không đưa chúng vào ZIP triển khai. Xem [hướng dẫn trong deploy](deploy/README.md) và [quy trình Gmail](deploy/GMAIL_TOOLS_DEPLOYMENT.md) trước khi thay bản chạy.
+
+## Tài liệu và giới hạn
+
+- `docs/guides/`: hướng dẫn cấu hình và vận hành; `docs/plans/`: kế hoạch; `docs/reports/`: báo cáo; `docs/archive/`: bản nháp lưu trữ.
+- [Danh mục SRS](docs/specifications/README.md) xác định v2.3 là bản tài liệu mới nhất trong thư mục chính, nhưng bản này đối chiếu mã ở một commit cũ và chưa bao quát đầy đủ tính năng Gmail. Mã nguồn và các README theo chức năng mô tả trạng thái triển khai hiện tại.
+- Kết quả phân tích không thay cho việc xác minh trực tiếp với tổ chức, ngân hàng hoặc người gửi bằng kênh chính thức. AI và tài nguyên Gmail ngoài hệ thống cần cấu hình, quyền và dịch vụ tương ứng để dùng thực tế.
