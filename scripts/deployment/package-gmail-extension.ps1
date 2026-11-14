@@ -1,4 +1,4 @@
-$workspace = Split-Path -Parent $PSScriptRoot
+$workspace = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $source = Join-Path $workspace 'browser-extension'
 $destinationDirectory = Join-Path $workspace 'public/downloads'
 $destination = Join-Path $destinationDirectory 'cyberaware-gmail-extension.zip'

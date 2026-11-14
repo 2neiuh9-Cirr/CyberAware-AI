@@ -7,7 +7,7 @@ import sqlite3
 import zipfile
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 SOURCE = ROOT / "data" / "auth.sqlite"
 AVATARS = ROOT / "data" / "avatars"
 ARCHIVE = ROOT / "data" / "cyberaware-data-migration.zip"

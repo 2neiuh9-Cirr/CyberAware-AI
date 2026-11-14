@@ -33,7 +33,10 @@ def add_entry(archive: ZipFile, root: Path, path: Path) -> None:
 
 def main() -> None:
     root = Path(argv[1]).resolve()
-    destination = root / "deploy" / "packages" / "cyberaware-gmail-v1-vps.zip"
+    package_name = argv[2] if len(argv) > 2 else "cyberaware-gmail-v1-vps.zip"
+    if Path(package_name).name != package_name or not package_name.endswith(".zip"):
+        raise ValueError("Package name must be a ZIP filename")
+    destination = root / "deploy" / "packages" / package_name
     paths = [root / item for item in ITEMS]
     missing = [str(path) for path in paths if not path.exists()]
     if missing:

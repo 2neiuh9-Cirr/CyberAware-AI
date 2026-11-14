@@ -2,7 +2,7 @@
 
 ## 1. Server CyberAware AI
 
-Gói sẵn cho WinSCP: `deploy/packages/cyberaware-gmail-v1-vps.zip` (tạo lại bằng `scripts/package-gmail-vps.ps1` sau khi sửa mã). ZIP chứa `backend/`, `shared/`, `src/`, `public/`, `dist/`, `server.ts`, `package.json`, `package-lock.json`, `vite.config.ts`, `tsconfig.json` và `index.html`. ZIP không chứa `.env`, `data/`, `node_modules/` hoặc khóa bí mật. Trước khi giải nén, sao lưu cấu hình và dữ liệu hiện có.
+Gói sẵn cho WinSCP đặt trong `deploy/packages/` (tạo lại bằng `scripts/deployment/package-gmail-vps.ps1 -PackageName ten-goi.zip` sau khi sửa mã). ZIP chứa `backend/`, `shared/`, `src/`, `public/`, `dist/`, `server.ts`, `package.json`, `package-lock.json`, `vite.config.ts`, `tsconfig.json` và `index.html`. ZIP không chứa `.env`, `data/`, `node_modules/` hoặc khóa bí mật. Trước khi giải nén, sao lưu cấu hình và dữ liệu hiện có.
 
 Trong WinSCP, tải ZIP vào `/root/` trên VPS. Kiểm tra SHA-256 và `unzip -t` trước khi dùng. Sao lưu `/srv/cyberaware/app` và cơ sở dữ liệu trong `/var/lib/cyberaware/`, rồi giải nén ZIP vào một thư mục riêng dưới `/srv/cyberaware/releases/`. Chép `.env` từ bản đang chạy vào bản mới với quyền `root:cyberaware 640`. Không giải nén đè trực tiếp lên `/srv/cyberaware/app` vì sẽ khó hoàn tác nếu bản mới không khởi động.
 
@@ -18,6 +18,8 @@ Kiểm tra các thư mục trong bản mới có quyền đi qua (`x`) cho tài 
 
 Đặt `GMAIL_ADDON_API_KEY` trong `.env` hoặc biến môi trường của dịch vụ bằng một giá trị ngẫu nhiên dài ít nhất 32 ký tự. Giữ nguyên `APP_URL=https://cyberaware.click`. Khởi động lại dịch vụ Node theo cách VPS đang dùng (ví dụ systemd hoặc PM2). Kiểm tra:
 
+Từ bản kết hợp AI, chỉ yêu cầu có tiêu đề `x-cyberaware-ai-consent: v2` mới được gửi nội dung thư tới Gemini. Bản add-on và tiện ích Chrome cũ không gửi tiêu đề này nên vẫn chỉ dùng quy tắc. Khi phát hành mã mới, cập nhật thông báo quyền riêng tư, yêu cầu người dùng đồng ý lại và kiểm tra `aiStatus` trong kết quả. Nếu quản trị viên tắt AI hoặc Gemini lỗi, điểm quy tắc vẫn được trả về.
+
 - `https://cyberaware.click/#tien-ich-gmail` cuộn tới mục Gmail trên trang chủ và hiển thị hai cách dùng.
 - `https://cyberaware.click/downloads/cyberaware-gmail-extension.zip` tải được ZIP có `manifest.json` ở gốc.
 - `https://cyberaware.click/images/cyberaware-addon.png` trả ảnh.
@@ -31,7 +33,9 @@ Làm theo [google-workspace-addon/README.md](../google-workspace-addon/README.md
 
 ## 3. Tiện ích Chrome
 
-ZIP trong `public/downloads` cài thủ công qua Load unpacked sau khi giải nén. Để người dùng cài bằng một nút, đưa ZIP lên Chrome Web Store, hoàn tất thông tin quyền riêng tư và thay liên kết trong mục Gmail trên trang chủ bằng URL cửa hàng. Gói ZIP phải được tạo lại sau mỗi lần sửa `browser-extension/` bằng `scripts/package-gmail-extension.ps1`.
+ZIP trong `public/downloads` cài thủ công qua Load unpacked sau khi giải nén. Để người dùng cài bằng một nút, đưa ZIP lên Chrome Web Store, hoàn tất thông tin quyền riêng tư và thay liên kết trong mục Gmail trên trang chủ bằng URL cửa hàng. Gói ZIP phải được tạo lại sau mỗi lần sửa `browser-extension/` bằng `scripts/deployment/package-gmail-extension.ps1`.
+
+ZIP tiện ích 1.1 phải được đóng gói lại từ `browser-extension/` trước khi tạo gói VPS. Bản 1.1 yêu cầu đồng ý lại và hiển thị trạng thái Gemini trong kết quả.
 
 ## Giới hạn hiện tại
 
