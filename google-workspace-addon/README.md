@@ -18,4 +18,4 @@ Tài liệu Google: [thẻ Gmail theo thư đang mở](https://developers.google
 
 ## Giới hạn phiên bản đầu
 
-Add-on chỉ đọc thư đang mở khi người dùng đã bật quét và mở add-on. Nó không đọc toàn hộp thư, tự gắn nhãn Gmail, hay đọc tệp đính kèm. Phân tích dùng quy tắc trên máy chủ; nội dung thư không lưu lịch sử và không gửi tới Gemini.
+Add-on chỉ đọc thư đang mở khi người dùng đã bật quét và mở add-on. Nó không đọc toàn hộp thư, tự gắn nhãn Gmail, hay đọc tệp đính kèm. Bản mới xin đồng ý lại trước khi kết hợp quy tắc với Gemini. Chủ đề, nội dung và liên kết của thư có thể được gửi tới Gemini khi AI được bật; địa chỉ người gửi không được gửi riêng tới Gemini. Nếu AI không khả dụng, kết quả chỉ dựa trên quy tắc. Nội dung thư không lưu lịch sử quét.

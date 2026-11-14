@@ -9,14 +9,14 @@ async function initialize() {
     statusElement.textContent = 'Hãy mở Gmail trên trình duyệt và chọn một thư.';
     return;
   }
-  const { consent } = await chrome.storage.local.get('consent');
-  consentElement.hidden = consent === true;
-  scanButton.hidden = consent !== true;
-  statusElement.textContent = consent ? 'Chỉ thư bạn chọn quét mới được gửi để đánh giá.' : 'Hãy đọc và đồng ý trước khi quét.';
+  const { consentAiV2 } = await chrome.storage.local.get('consentAiV2');
+  consentElement.hidden = consentAiV2 === true;
+  scanButton.hidden = consentAiV2 !== true;
+  statusElement.textContent = consentAiV2 ? 'Chỉ thư bạn chọn quét mới được gửi để đánh giá.' : 'Hãy đọc và đồng ý trước khi quét.';
 }
 
 document.getElementById('agree').addEventListener('click', async () => {
-  await chrome.storage.local.set({ consent: true });
+  await chrome.storage.local.set({ consentAiV2: true });
   consentElement.hidden = true;
   scanButton.hidden = false;
   statusElement.textContent = 'Chỉ thư bạn chọn quét mới được gửi để đánh giá.';
@@ -33,7 +33,7 @@ scanButton.addEventListener('click', async () => {
     const mail = injected?.result;
     if (!mail?.subject && !mail?.body) throw new Error('Không tìm thấy thư đang mở. Hãy mở một thư rồi thử lại.');
     const response = await fetch('https://cyberaware.click/api/gmail-extension/analyze', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(mail)
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-cyberaware-ai-consent': 'v2' }, body: JSON.stringify(mail)
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Máy chủ không phản hồi.');
@@ -69,6 +69,20 @@ function renderResult(data) {
   const note = document.createElement('p'); note.className = 'note';
   note.textContent = 'Điểm số là dấu hiệu tham khảo. Kết quả thấp không xác nhận thư an toàn.';
   resultElement.append(title, list, note);
+  const method = document.createElement('p'); method.className = 'note';
+  method.textContent = data.aiStatus === 'available' ? 'Đã đối chiếu bằng Gemini (AI). Điểm tổng hợp ở trên giữ dấu hiệu rủi ro mạnh hơn.'
+    : data.aiStatus === 'unavailable' ? 'Gemini tạm không khả dụng; kết quả dựa trên quy tắc.' : 'Kết quả dựa trên quy tắc.';
+  resultElement.append(method);
+  if (data.aiReasoning) {
+    const reasoning = document.createElement('p'); reasoning.className = 'note';
+    reasoning.textContent = `AI giải thích: ${data.aiReasoning}`;
+    resultElement.append(reasoning);
+  }
+  if (data.actionAdvice) {
+    const advice = document.createElement('p'); advice.className = 'note';
+    advice.textContent = `AI gợi ý: ${data.actionAdvice}`;
+    resultElement.append(advice);
+  }
 }
 
 initialize().catch(() => { statusElement.textContent = 'Không thể khởi tạo tiện ích.'; });

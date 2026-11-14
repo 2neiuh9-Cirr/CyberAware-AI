@@ -95,10 +95,18 @@ test('Gmail add-on scans only the submitted mail and does not persist its conten
   const beforeCount = (db.prepare('SELECT COUNT(*) AS count FROM scans').get() as { count: number }).count;
   const noKey = await request('/gmail-addon/analyze', 'POST', mail);
   assert.equal(noKey.status, 401);
-  const result = await request('/gmail-addon/analyze', 'POST', mail, undefined, {
-    'x-cyberaware-addon-key': process.env.GMAIL_ADDON_API_KEY!,
-    'x-cyberaware-install-id': '123e4567-e89b-42d3-a456-426614174000',
-  });
+  const configuredKey = process.env.GEMINI_API_KEY;
+  let result;
+  try {
+    // An older client must remain rules-only even when Gemini is configured.
+    process.env.GEMINI_API_KEY = 'test-key-that-must-not-be-used';
+    result = await request('/gmail-addon/analyze', 'POST', mail, undefined, {
+      'x-cyberaware-addon-key': process.env.GMAIL_ADDON_API_KEY!,
+      'x-cyberaware-install-id': '123e4567-e89b-42d3-a456-426614174000',
+    });
+  } finally {
+    process.env.GEMINI_API_KEY = configuredKey;
+  }
   assert.equal(result.status, 200);
   assert.ok(result.data.riskScore >= 30);
   assert.equal(result.data.query, undefined);
@@ -106,6 +114,13 @@ test('Gmail add-on scans only the submitted mail and does not persist its conten
   assert.equal((db.prepare('SELECT COUNT(*) AS count FROM scans').get() as { count: number }).count, beforeCount);
   const browser = await request('/gmail-extension/analyze', 'POST', mail, undefined, { Origin: 'chrome-extension://abcdefghijklmnopabcdefghijklmnop' });
   assert.equal(browser.status, 200);
+  const optIn = await request('/gmail-addon/analyze', 'POST', mail, undefined, {
+    'x-cyberaware-addon-key': process.env.GMAIL_ADDON_API_KEY!,
+    'x-cyberaware-install-id': '123e4567-e89b-42d3-a456-426614174000',
+    'x-cyberaware-ai-consent': 'v2',
+  });
+  assert.equal(optIn.status, 200);
+  assert.equal(optIn.data.aiStatus, 'disabled'); // Test suite has no Gemini key.
 });
 test('registration requires email code, same browser, one-time use and resend cooldown', async () => {
   const email = 'verification@example.test';

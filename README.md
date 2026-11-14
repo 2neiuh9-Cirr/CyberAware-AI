@@ -24,7 +24,7 @@ Nội dung bài học và đáp án gốc nằm ở `backend/content/education.t
 Yêu cầu Node.js 24 trở lên và npm. Dùng npm làm trình quản lý gói của dự án.
 
 1. Cài phụ thuộc: `npm install --legacy-peer-deps`.
-2. Sao chép `.env.example` thành `.env`, rồi điền các biến cần dùng. `GEMINI_API_KEY` bật phân tích AI cho URL và SMS khi quản trị viên cũng đã bật tính năng. Nếu dịch vụ AI không khả dụng, hệ thống dùng bộ quy tắc đã lưu.
+2. Sao chép `.env.example` thành `.env`, rồi điền các biến cần dùng. `GEMINI_API_KEY` bật phân tích AI cho URL, SMS và thư Gmail khi quản trị viên cũng đã bật tính năng và người dùng Gmail đồng ý với bản AI. Nếu dịch vụ AI không khả dụng, hệ thống dùng bộ quy tắc đã lưu.
 3. Chạy ứng dụng: `npm run dev`.
 
 Kiểm tra trước khi triển khai: `npm run lint`, `npm run build`, `npm test`, `npm run test:ai`, `npm run test:auth`. Các bài kiểm tra live cần dịch vụ và cấu hình tương ứng; không nằm trong bộ test mặc định.

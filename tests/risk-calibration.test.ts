@@ -7,6 +7,22 @@ import path from 'node:path';
 process.env.AUTH_DATA_DIR = mkdtempSync(path.join(tmpdir(), 'cyberaware-risk-'));
 process.env.GEMINI_API_KEY = '';
 const { analyze, normalizeQuery, applyAiAssessment, applyGeminiWithFallback } = await import('../backend/analysis/analysis');
+const { analyzeEmail } = await import('../backend/analysis/email');
+
+test('urgent informal email asking for a transfer receives a caution even without AI', async () => {
+  for (const body of [
+    'Hoi t dang can tien gap, m chuyen giup t 5 trieu vao tai khoan t gui voi, mai t tra m nhe.',
+    'Tôi cần tiền gấp, chuyển giúp tôi 5 triệu, mai tôi trả nhé.',
+  ]) {
+    const result = await analyzeEmail({ sender: 'Bạn quen <friend@example.test>', body }, false);
+    assert.ok(result.riskScore >= 30, `${body}: ${result.riskScore}`);
+    assert.equal(result.aiStatus, 'disabled');
+    assert.ok(result.flags.some(flag => flag.includes('chuyển tiền gấp')));
+    assert.ok(!result.flags.some(flag => flag.startsWith('Chưa khớp dấu hiệu')));
+  }
+  const advice = await analyzeEmail({ body: 'Cảnh báo: đừng chuyển 5 triệu ngay cho người lạ. Hãy tự xác minh.' }, false);
+  assert.ok(advice.riskScore < 30, String(advice.riskScore));
+});
 
 test('ordinary URLs and safety advice stay low risk', async () => {
   for (const input of ['https://vietcombank.com.vn/login', 'https://example.org/login', 'https://baochinhphu.vn/canh-bao-lua-dao']) {

@@ -1,5 +1,5 @@
 var API_URL = 'https://cyberaware.click/api/gmail-addon/analyze';
-var CONSENT_KEY = 'mail_scan_consent_v1';
+var CONSENT_KEY = 'mail_scan_ai_consent_v2';
 var INSTALL_KEY = 'mail_scan_install_id_v1';
 
 function onHomepage() {
@@ -45,7 +45,7 @@ function requestAnalysis_(payload) {
     method: 'post',
     contentType: 'application/json',
     payload: JSON.stringify(payload),
-    headers: { 'x-cyberaware-addon-key': key, 'x-cyberaware-install-id': installId },
+    headers: { 'x-cyberaware-addon-key': key, 'x-cyberaware-install-id': installId, 'x-cyberaware-ai-consent': 'v2' },
     muteHttpExceptions: true
   });
   if (response.getResponseCode() !== 200) throw new Error('API status ' + response.getResponseCode());
@@ -65,7 +65,7 @@ function homeCard_() {
 
 function consentCard_() {
   var section = CardService.newCardSection()
-    .addWidget(CardService.newTextParagraph().setText('Khi bạn bật tính năng và mở add-on trên một thư, chủ đề, địa chỉ người gửi, tối đa 4.500 ký tự nội dung và tối đa 10 liên kết của thư đó được gửi tới máy chủ CyberAware AI để chấm điểm. Máy chủ không lưu nguyên văn thư trong lịch sử quét và không gửi nội dung này tới Gemini. Kết quả là gợi ý, không xác nhận thư an toàn.'))
+    .addWidget(CardService.newTextParagraph().setText('Khi bạn bật tính năng và mở add-on trên một thư, chủ đề, địa chỉ người gửi, tối đa 4.500 ký tự nội dung và tối đa 10 liên kết của thư đó được gửi tới máy chủ CyberAware AI. Chủ đề, nội dung và liên kết có thể tiếp tục được gửi tới Google Gemini để đánh giá bổ sung khi AI được bật. Địa chỉ người gửi không được gửi riêng tới Gemini. Nếu AI không khả dụng, hệ thống chỉ dùng quy tắc. Máy chủ không lưu nguyên văn thư vào lịch sử quét. Kết quả là gợi ý, không xác nhận thư an toàn.'))
     .addWidget(CardService.newTextButton().setText('Đọc chính sách quyền riêng tư')
       .setOpenLink(CardService.newOpenLink().setUrl('https://cyberaware.click/chinh-sach-quyen-rieng-tu.html')))
     .addWidget(CardService.newTextButton().setText('Tôi đồng ý và bật quét thư')
@@ -91,13 +91,18 @@ function resultCard_(result) {
   var label = result.level === 'NGUY_HIEM' ? 'Nguy hiểm' : result.level === 'CANH_GIAC' ? 'Cần cảnh giác' : 'Chưa thấy dấu hiệu rõ';
   var section = CardService.newCardSection()
     .addWidget(CardService.newDecoratedText().setTopLabel('Đánh giá thư đang mở').setText(label + ' · ' + Number(result.riskScore) + '/100'))
-    .addWidget(CardService.newTextParagraph().setText('Điểm số thể hiện dấu hiệu nhận diện, không phải xác suất lừa đảo. Thiếu dấu hiệu không có nghĩa thư an toàn.'));
+    .addWidget(CardService.newTextParagraph().setText('Điểm số thể hiện dấu hiệu nhận diện, không phải xác suất lừa đảo. Thiếu dấu hiệu không có nghĩa thư an toàn.'))
+    .addWidget(CardService.newTextParagraph().setText(result.aiStatus === 'available'
+      ? 'Đã đối chiếu bằng Gemini (AI). Điểm tổng hợp ở trên giữ dấu hiệu rủi ro mạnh hơn.'
+      : result.aiStatus === 'unavailable' ? 'Gemini tạm không khả dụng; kết quả dựa trên quy tắc.' : 'Kết quả dựa trên quy tắc.'));
+  if (result.aiReasoning) section.addWidget(CardService.newTextParagraph().setText('AI giải thích: ' + escape_(String(result.aiReasoning))));
   (result.flags || []).slice(0, 6).forEach(function(flag) {
     section.addWidget(CardService.newTextParagraph().setText('• ' + escape_(String(flag))));
   });
   (result.recommendations || []).slice(0, 3).forEach(function(item) {
     section.addWidget(CardService.newTextParagraph().setText('Gợi ý: ' + escape_(String(item))));
   });
+  if (result.actionAdvice) section.addWidget(CardService.newTextParagraph().setText('AI gợi ý: ' + escape_(String(result.actionAdvice))));
   return CardService.newCardBuilder().setHeader(CardService.newCardHeader().setTitle('CyberAware AI')).addSection(section).build();
 }
 

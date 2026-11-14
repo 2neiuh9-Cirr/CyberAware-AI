@@ -28,11 +28,11 @@ export function registerGmailAddonRoutes(router: Router) {
     try {
       if (!authorized(req.get('x-cyberaware-addon-key'))) throw new ApiError(401, 'Add-on chưa được cấu hình.');
       throttle(req.get('x-cyberaware-install-id'));
-      res.json(await analyzeEmail(req.body));
+      res.json(await analyzeEmail(req.body, req.get('x-cyberaware-ai-consent') === 'v2'));
     } catch (error) { next(error); }
   });
   router.post('/gmail-extension/analyze', rateLimit(10, 60_000), async (req, res, next) => {
-    try { res.json(await analyzeEmail(req.body)); }
+    try { res.json(await analyzeEmail(req.body, req.get('x-cyberaware-ai-consent') === 'v2')); }
     catch (error) { next(error); }
   });
 }
