@@ -9,6 +9,16 @@
 <body>
   <main>
     <h1>CyberAware AI</h1>
+    <section id="url-check" hidden>
+      <h2>Kiểm tra trang đang mở</h2>
+      <p id="url-status">Chỉ kiểm tra khi bạn bấm nút.</p>
+      <p class="note">Địa chỉ trang (gồm đường dẫn, không gồm phần sau ? hoặc #) được gửi tới CyberAware và Google Safe Browsing. Google có thể bỏ sót trang nguy hiểm hoặc cảnh báo nhầm. Không nhập thông tin nhạy cảm vào trang trước khi tự xác minh.</p>
+      <p class="note"><a href="https://cyberaware.click/chinh-sach-quyen-rieng-tu.html" target="_blank" rel="noreferrer">Chính sách quyền riêng tư</a></p>
+      <button id="check-url" type="button">Kiểm tra trang này</button>
+      <section id="url-result" aria-live="polite"></section>
+    </section>
+    <section id="gmail-check" hidden>
+    <h2>Kiểm tra thư Gmail</h2>
     <p id="status">Mở một thư trong Gmail để kiểm tra.</p>
     <section id="consent" hidden>
       <p>Khi bấm quét, chủ đề, người gửi, tối đa 4.500 ký tự nội dung và 10 liên kết của thư đang mở được gửi đến máy chủ CyberAware AI. Chủ đề, nội dung và liên kết có thể tiếp tục được gửi tới Google Gemini để đánh giá bổ sung khi AI được bật; địa chỉ người gửi không được gửi riêng tới Gemini. Nếu AI không khả dụng, kết quả chỉ dựa trên quy tắc. Nội dung thư không lưu vào lịch sử. Kết quả chỉ là gợi ý.</p>
@@ -17,7 +27,10 @@
     </section>
     <button id="scan" type="button" hidden>Quét thư này</button>
     <section id="result" aria-live="polite"></section>
+    </section>
+    <p id="unsupported" hidden>Hãy mở một trang web HTTP/HTTPS để kiểm tra.</p>
   </main>
+  <script src="config.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

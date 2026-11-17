@@ -19,6 +19,7 @@ render_google_facebook/
 # Local archives
 *.zip
 !public/downloads/cyberaware-gmail-extension.zip
+/deploy/local-extension/
 
 # Logs and operating system files
 *.log

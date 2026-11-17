@@ -6,12 +6,15 @@ import path from 'node:path';
 import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
 import { DatabaseSync } from 'node:sqlite';
+import { Writer } from 'protobufjs';
 import { passwordChangedMail, resetCodeMail, verificationCodeMail } from '../backend/securityMail';
+import { decodeSafeBrowsingResponse } from '../backend/analysis/safeBrowsing';
 import { formatChatAnswer } from '../shared/chatAnswer';
 process.env.AUTH_DATA_DIR = mkdtempSync(path.join(tmpdir(), 'cyberaware-api-'));
 process.env.AUTH_JWT_SECRET = 'isolated-test-secret-at-least-32-bytes-long';
 process.env.NODE_ENV = 'test';
 process.env.GEMINI_API_KEY = '';
+process.env.SAFE_BROWSING_API_KEY = '';
 process.env.GMAIL_ADDON_API_KEY = 'test-gmail-addon-secret-at-least-32-bytes';
 process.env.SMTP_HOST = '';
 process.env.GOOGLE_CLIENT_ID = '';
@@ -89,6 +92,48 @@ test('health, safe error contract and anonymous access', async () => {
   assert.equal((await request('/auth/register','POST',{},undefined,{Origin:'https://attacker.invalid'})).status,403);
   const malformed = await fetch(base+'/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:'{broken'});
   assert.equal(malformed.status,400); assert.equal((await malformed.json() as any).success,false);
+});
+test('URL reputation keeps Google status separate and does not save a scan', async () => {
+  const beforeCount = Number(db.prepare('SELECT COUNT(*) AS n FROM scans').get()!.n);
+  const result = await request('/url-reputation', 'POST', { url: 'https://example.com/path?token=private#section' });
+  assert.equal(result.status, 200);
+  assert.equal(result.data.url, 'https://example.com/path');
+  assert.deepEqual(result.data.google, { status: 'unavailable', threatTypes: [] });
+  assert.equal(result.data.cyberAware.type, 'url');
+  assert.equal(Number(db.prepare('SELECT COUNT(*) AS n FROM scans').get()!.n), beforeCount);
+  assert.equal((await request('/url-reputation', 'POST', { url: 'file:///etc/passwd' })).status, 400);
+  assert.equal((await request('/url-reputation', 'POST', { url: 'https://example.com' }, undefined, { Origin: 'https://attacker.invalid' })).status, 403);
+  assert.equal((await request('/url-reputation', 'POST', { url: 'https://example.com' }, undefined, { Origin: 'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' })).status, 200);
+});
+test('Safe Browsing v5 binary response decodes threat and cache duration', () => {
+  const bytes = Writer.create()
+    .uint32(10).fork().uint32(10).string('https://example.test/').uint32(16).int32(2).ldelim()
+    .uint32(18).fork().uint32(8).int64(120).ldelim().finish();
+  assert.deepEqual(decodeSafeBrowsingResponse(bytes), { threatTypes: ['SOCIAL_ENGINEERING'], cacheSeconds: 120 });
+  assert.throws(() => decodeSafeBrowsingResponse(new Uint8Array()), /Missing Safe Browsing cache duration/);
+});
+test('Google threat overrides a low CyberAware rule score in overall URL verdict', async () => {
+  const url = 'https://testsafebrowsing.appspot.com/s/phishing.html';
+  const bytes = Writer.create()
+    .uint32(10).fork().uint32(10).string(url).uint32(16).int32(2).ldelim()
+    .uint32(18).fork().uint32(8).int64(120).ldelim().finish();
+  const originalFetch = globalThis.fetch;
+  const originalKey = process.env.SAFE_BROWSING_API_KEY;
+  process.env.SAFE_BROWSING_API_KEY = 'test-only-key';
+  globalThis.fetch = ((input, init) => String(input).startsWith('https://safebrowsing.googleapis.com/')
+    ? Promise.resolve(new Response(new Uint8Array(bytes)))
+    : originalFetch(input, init)) as typeof fetch;
+  try {
+    const result = await request('/url-reputation', 'POST', { url });
+    assert.equal(result.status, 200);
+    assert.equal(result.data.google.status, 'matched');
+    assert.deepEqual(result.data.overall, { level: 'NGUY_HIEM', source: 'google' });
+    assert.equal(result.data.cyberAware.level, 'AN_TOAN');
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalKey === undefined) delete process.env.SAFE_BROWSING_API_KEY;
+    else process.env.SAFE_BROWSING_API_KEY = originalKey;
+  }
 });
 test('Gmail add-on scans only the submitted mail and does not persist its contents', async () => {
   const mail = { subject: 'Xác minh tài khoản', sender: 'Hỗ trợ <help@example.com>', body: 'Vui lòng gửi mã OTP ngay để tránh khóa tài khoản.', links: ['http://example.net/login'] };

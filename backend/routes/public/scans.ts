@@ -4,9 +4,26 @@ import { currentUser } from '../../auth';
 import { db } from '../../database';
 import { ApiError, integer, rateLimit } from '../../http';
 import { analyze, normalizeQuery, scanType } from '../../analysis/analysis';
+import { checkSafeBrowsing } from '../../analysis/safeBrowsing';
 import { user } from './shared';
 
 export function registerScanRoutes(router: Router) {
+  router.post('/url-reputation', rateLimit(15, 60_000), async (req, res, next) => {
+    try {
+      const url = normalizeQuery('url', req.body?.url);
+      const matching = !!db.prepare("SELECT 1 FROM reports WHERE type = 'url' AND target = ? AND status = 'approved' AND is_hidden = 0").get(url);
+      const [google, cyberAware] = await Promise.all([
+        checkSafeBrowsing(url),
+        analyze('url', url, matching, false),
+      ]);
+      const overall = google.status === 'matched'
+        ? { level: 'NGUY_HIEM', source: 'google' }
+        : cyberAware.level === 'NGUY_HIEM' || cyberAware.level === 'CANH_GIAC'
+          ? { level: cyberAware.level, source: 'cyberAware' }
+          : { level: 'CHUA_XAC_MINH', source: 'none' };
+      res.json({ url, overall, google, cyberAware });
+    } catch (error) { next(error); }
+  });
   router.post('/analyze', rateLimit(30, 60_000), async (req, res, next) => {
     try {
       const type = scanType(req.body?.type); const query = normalizeQuery(type, req.body?.query);

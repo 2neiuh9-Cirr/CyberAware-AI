@@ -17,6 +17,7 @@ interface CourseAdminItem {
   status: 'published' | 'draft' | 'archived';
   statusLabel: string;
   updatedAt: string;
+  updatedAtRaw?: string;
 }
 
 interface MicroLessonItem {
@@ -50,6 +51,7 @@ export const AdminCoursesPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [topicFilter, setTopicFilter] = useState('');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'title-asc' | 'title-desc'>('newest');
   const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
 
   // Modal create/edit course
@@ -84,7 +86,7 @@ export const AdminCoursesPage: React.FC = () => {
       for (let nextPage = 2; all.length < first.total; nextPage++) {
         const next = await api<typeof first>(`/admin/courses?pageSize=100&page=${nextPage}`); all.push(...next.items);
       }
-      const mapped = all.map(course => ({ ...course, statusLabel: course.status === 'published' ? 'Đang phát hành' : course.status === 'draft' ? 'Bản nháp' : 'Lưu trữ', updatedAt: course.updatedAt ? new Date(course.updatedAt).toLocaleString('vi-VN') : 'Chưa có' }));
+      const mapped = all.map(course => ({ ...course, statusLabel: course.status === 'published' ? 'Đang phát hành' : course.status === 'draft' ? 'Bản nháp' : 'Lưu trữ', updatedAtRaw: course.updatedAt, updatedAt: course.updatedAt ? new Date(course.updatedAt).toLocaleString('vi-VN') : 'Chưa có' }));
       setCourses(mapped);
       setSelectedCourse(previous => mapped.find(item => item.id === (preferredId || previous.id)) || mapped[0] || previous);
       setError('');
@@ -114,7 +116,7 @@ export const AdminCoursesPage: React.FC = () => {
   };
 
   const filteredCourses = useMemo(() => {
-    return courses.filter((c) => {
+    const matching = courses.filter((c) => {
       const matchSearch =
         c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -125,12 +127,20 @@ export const AdminCoursesPage: React.FC = () => {
 
       return matchSearch && matchStatus && matchTopic;
     });
-  }, [courses, searchQuery, statusFilter, topicFilter]);
+    return matching.sort((a, b) => {
+      if (sortOrder === 'title-asc' || sortOrder === 'title-desc') {
+        const comparison = a.title.localeCompare(b.title, 'vi', { sensitivity: 'base' });
+        return (sortOrder === 'title-asc' ? comparison : -comparison) || a.id.localeCompare(b.id);
+      }
+      const comparison = (a.updatedAtRaw || '').localeCompare(b.updatedAtRaw || '');
+      return (sortOrder === 'newest' ? -comparison : comparison) || a.id.localeCompare(b.id);
+    });
+  }, [courses, searchQuery, statusFilter, topicFilter, sortOrder]);
 
   const currentLessons = lessonsMap[selectedCourse.id] || [];
   const visibleCourses = filteredCourses.slice((page - 1) * pageSize, page * pageSize);
   const pageCount = Math.max(1, Math.ceil(filteredCourses.length / pageSize));
-  useEffect(() => setPage(1), [searchQuery, statusFilter, topicFilter, pageSize]);
+  useEffect(() => setPage(1), [searchQuery, statusFilter, topicFilter, sortOrder, pageSize]);
 
   const handleOpenCreateModal = () => {
     setEditingCourseId(null);
@@ -398,10 +408,18 @@ export const AdminCoursesPage: React.FC = () => {
                 <span className="font-semibold text-slate-900">{filteredCourses.length}</span> khóa học
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-slate-500">Sắp xếp:</span>
-                <span className="text-[#004AC6] font-semibold cursor-pointer flex items-center gap-1">
-                  Mới cập nhật gần nhất <span className="material-symbols-outlined text-[16px]">arrow_downward</span>
-                </span>
+                <label htmlFor="course-sort-order" className="text-slate-500">Sắp xếp:</label>
+                <select
+                  id="course-sort-order"
+                  value={sortOrder}
+                  onChange={(event) => setSortOrder(event.target.value as typeof sortOrder)}
+                  className="max-w-[190px] cursor-pointer bg-transparent font-semibold text-[#004AC6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#004AC6]"
+                >
+                  <option value="newest">Mới cập nhật gần nhất</option>
+                  <option value="oldest">Cũ cập nhật trước</option>
+                  <option value="title-asc">Tên A–Z</option>
+                  <option value="title-desc">Tên Z–A</option>
+                </select>
               </div>
             </div>
           </div>

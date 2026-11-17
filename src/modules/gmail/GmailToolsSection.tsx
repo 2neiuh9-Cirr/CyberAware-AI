@@ -30,9 +30,9 @@ export function GmailToolsSection() {
       <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-32 h-80 w-80 rounded-full bg-blue-100/60 blur-3xl" />
       <div className="relative mx-auto w-full max-w-[1184px] text-slate-800">
         <div className="gmail-tools-reveal mb-10 max-w-3xl">
-          <p className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#004AC6] shadow-sm"><Sparkles aria-hidden="true" className="h-4 w-4" /> CyberAware AI trong Gmail</p>
-          <h2 id="gmail-tools-heading" className="mt-5 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-[42px]">Kiểm tra email ngay khi đọc</h2>
-          <p className="mt-4 text-sm leading-relaxed text-slate-600 sm:text-base">Hai cách dùng chung bộ đánh giá của CyberAware AI. Kết quả chỉ gợi ý dấu hiệu rủi ro; hãy tự xác minh người gửi qua kênh chính thức trước khi cung cấp thông tin hoặc chuyển tiền.</p>
+          <p className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#004AC6] shadow-sm"><Sparkles aria-hidden="true" className="h-4 w-4" /> CyberAware AI trong trình duyệt và Gmail</p>
+          <h2 id="gmail-tools-heading" className="mt-5 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-[42px]">Kiểm tra trang web và email khi cần</h2>
+          <p className="mt-4 text-sm leading-relaxed text-slate-600 sm:text-base">Tiện ích Chrome giúp bạn chủ động kiểm tra trang đang mở hoặc thư Gmail; Google Workspace add-on hỗ trợ thư đang xem. Kết quả chỉ gợi ý dấu hiệu rủi ro, không xác nhận một trang hay thư là an toàn.</p>
         </div>
 
         <div className="grid items-stretch gap-6 lg:grid-cols-2">
@@ -43,15 +43,15 @@ export function GmailToolsSection() {
               <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-[#004AC6]">Chrome · Máy tính</span>
             </div>
             <h3 className="mt-6 text-2xl font-extrabold tracking-tight text-slate-900">Tiện ích trình duyệt</h3>
-            <p className="mt-3 text-sm leading-relaxed text-slate-600">Dành cho Chrome trên máy tính. Mở thư trong Gmail, bấm biểu tượng CyberAware AI rồi chọn “Quét thư này”. Chỉ quét khi bạn chủ động bấm.</p>
+            <p className="mt-3 text-sm leading-relaxed text-slate-600">Dành cho Chrome trên máy tính. Bấm biểu tượng CyberAware AI để kiểm tra URL của trang đang mở; trong Gmail, bạn còn có thể chọn “Quét thư này”. Chỉ kiểm tra khi bạn chủ động bấm.</p>
             <ol className="mt-7 space-y-4 border-t border-slate-100 pt-6 text-sm text-slate-700">
               <li className="flex items-start gap-3"><span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-[#004AC6]">1</span><span>Giải nén tệp ZIP vào một thư mục cố định.</span></li>
               <li className="flex items-start gap-3"><span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-[#004AC6]">2</span><span>Mở <strong>chrome://extensions</strong>, bật Developer mode, chọn Load unpacked và trỏ tới thư mục vừa giải nén.</span></li>
-              <li className="flex items-start gap-3"><span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-[#004AC6]">3</span><span>Mở Gmail, ghim tiện ích lên thanh công cụ và bấm quét thư cần kiểm tra.</span></li>
+              <li className="flex items-start gap-3"><span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-[#004AC6]">3</span><span>Ghim tiện ích, mở trang hoặc thư Gmail cần kiểm tra rồi bấm nút tương ứng.</span></li>
             </ol>
             <div className="mt-auto pt-8">
               <a className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#004AC6] px-5 py-3 text-sm font-bold text-white shadow-[0_12px_24px_-12px_rgba(0,74,198,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#003EA8] hover:shadow-[0_18px_30px_-12px_rgba(0,74,198,0.65)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#004AC6] sm:w-auto" href="/downloads/cyberaware-gmail-extension.zip" download><ArrowDownToLine aria-hidden="true" className="h-4 w-4" /> Tải tiện ích ZIP <ArrowRight aria-hidden="true" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" /></a>
-              <p className="mt-4 text-xs leading-relaxed text-amber-800">Tiện ích kết hợp quy tắc và Gemini khi AI khả dụng. Bạn cần đồng ý trước khi quét; nếu AI không khả dụng, kết quả dựa trên quy tắc. Tiện ích được cài thủ công trong giai đoạn thử nghiệm.</p>
+              <p className="mt-4 text-xs leading-relaxed text-amber-800">Kiểm tra URL đối chiếu với Google Safe Browsing khi dịch vụ khả dụng; không có cảnh báo không đồng nghĩa trang an toàn. Quét Gmail có thể dùng Gemini sau khi bạn đồng ý. Tiện ích được cài thủ công trong giai đoạn thử nghiệm.</p>
             </div>
           </article>
 
@@ -70,7 +70,7 @@ export function GmailToolsSection() {
 
         <div className="gmail-tools-reveal gmail-tools-privacy mt-7 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white/90 p-5 text-sm text-slate-700 shadow-sm sm:flex-row sm:items-start sm:p-6">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#004AC6]"><ShieldCheck aria-hidden="true" className="h-5 w-5" /></span>
-          <div><h3 className="font-bold text-slate-900">Dữ liệu được xử lý</h3><p className="mt-1 leading-relaxed">Sau khi bạn đồng ý, hệ thống gửi chủ đề, người gửi, tối đa 4.500 ký tự nội dung và 10 liên kết của thư đang mở tới máy chủ CyberAware AI. Ở bản có AI, chủ đề, nội dung và liên kết có thể tiếp tục được gửi tới Google Gemini để đánh giá bổ sung; địa chỉ người gửi không được gửi riêng tới Gemini. Nếu AI không khả dụng, hệ thống vẫn chấm bằng quy tắc. Nội dung thư không được lưu vào lịch sử quét.</p><p className="mt-2">Xem <a className="font-semibold text-[#004AC6] underline underline-offset-2" href="/chinh-sach-quyen-rieng-tu.html">chính sách quyền riêng tư</a> hoặc quay lại <Link className="font-semibold text-[#004AC6] underline underline-offset-2" to="/kiem-tra">công cụ kiểm tra</Link>.</p></div>
+          <div><h3 className="font-bold text-slate-900">Dữ liệu được xử lý</h3><p className="mt-1 leading-relaxed">Khi bạn bấm kiểm tra trang, URL gồm tên miền và đường dẫn được gửi đến CyberAware AI và Google Safe Browsing; phần sau dấu ? và # được bỏ trước khi gửi. Nội dung trang không được đọc và lần kiểm tra này không lưu vào lịch sử.</p><p className="mt-2 leading-relaxed">Khi bạn đồng ý quét thư, chủ đề, người gửi, tối đa 4.500 ký tự nội dung và 10 liên kết của thư đang mở được gửi tới CyberAware AI. Chủ đề, nội dung và liên kết có thể tiếp tục được gửi tới Gemini nếu AI khả dụng; địa chỉ người gửi không được gửi riêng tới Gemini. Nội dung thư không được lưu vào lịch sử quét.</p><p className="mt-2">Xem <a className="font-semibold text-[#004AC6] underline underline-offset-2" href="/chinh-sach-quyen-rieng-tu.html">chính sách quyền riêng tư</a> hoặc quay lại <Link className="font-semibold text-[#004AC6] underline underline-offset-2" to="/kiem-tra">công cụ kiểm tra</Link>.</p></div>
         </div>
       </div>
     </section>

@@ -12,7 +12,7 @@ CyberAware AI là ứng dụng web tiếng Việt hỗ trợ nhận diện dấu
 | Trợ lý AI | Trả lời câu hỏi về an toàn số, có thể nhận một ảnh mỗi lượt khi quản trị viên bật; tài khoản đăng nhập có lịch sử hội thoại. Cần khóa Gemini và chịu hạn mức sử dụng. |
 | Tài khoản | Đăng ký có mã xác minh email, đăng nhập bằng mật khẩu hoặc Google/Facebook khi đã cấu hình, khôi phục mật khẩu, quản lý hồ sơ, phiên đăng nhập và quyền riêng tư. |
 | Quản trị | Quản lý người dùng, báo cáo, khóa học, ngân hàng câu hỏi, tri thức và quy tắc phân tích, cấu hình AI, nhật ký và thống kê hệ thống. |
-| Gmail | Tiện ích Chrome quét thư khi người dùng bấm; Google Workspace add-on hiển thị đánh giá cho thư đang mở. Hai công cụ yêu cầu đồng ý trước khi gửi dữ liệu thư tới máy chủ. |
+| Gmail và trình duyệt | Tiện ích Chrome quét thư hoặc kiểm tra URL của trang đang mở khi người dùng bấm; Google Workspace add-on hiển thị đánh giá cho thư đang mở. Kiểm tra URL đối chiếu thêm với Google Safe Browsing khi máy chủ được cấu hình khóa. |
 
 Các trang chính: `/kiem-tra`, `/canh-bao`, `/hoc-tap`, `/bao-cao`, `/dang-nhap`, `/tong-quan` và mục Gmail tại `/#tien-ich-gmail`. Các trang tài khoản và quản trị kiểm tra quyền truy cập.
 
