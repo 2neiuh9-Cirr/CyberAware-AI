@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CyberAware AI - Kiểm tra nhanh</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <main>
+    <header>
+      <span class="eyebrow">CYBERAWARE AI</span>
+      <h1>Kiểm tra nhanh</h1>
+      <p>Đọc nội dung bạn vừa chọn trước khi quyết định kiểm tra.</p>
+    </header>
+
+    <p id="empty" class="empty">Bôi đen một đoạn văn bản hoặc nhấp phải vào liên kết trên trang, rồi chọn “Kiểm tra với CyberAware”.</p>
+
+    <section id="preview" hidden>
+      <h2 id="kind"></h2>
+      <pre id="selected-value"></pre>
+      <p id="truncated" class="warning" hidden>Nội dung được chọn quá dài. Bản xem trước đã bị cắt ngắn; với liên kết dài, hãy chọn một liên kết ngắn hơn.</p>
+      <p id="privacy-note" class="note"></p>
+      <button id="check" type="button">Kiểm tra</button>
+      <div id="found-links" hidden></div>
+    </section>
+
+    <p id="status" role="status" aria-live="polite"></p>
+    <section id="result" aria-live="polite"></section>
+    <p class="footer-note">Kết quả chỉ là cảnh báo tham khảo; chưa phát hiện dấu hiệu không có nghĩa là an toàn.</p>
+    <p id="server-target" class="note"></p>
+    <a class="privacy-link" href="https://cyberaware.click/chinh-sach-quyen-rieng-tu.html" target="_blank" rel="noreferrer">Chính sách quyền riêng tư</a>
+  </main>
+  <script src="config.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

@@ -6,7 +6,7 @@ CyberAware AI là ứng dụng web tiếng Việt hỗ trợ nhận diện dấu
 
 | Nhóm | Khả năng hiện có |
 | --- | --- |
-| Kiểm tra | Đánh giá URL, tin nhắn, số điện thoại và số tài khoản ngân hàng; hiển thị điểm rủi ro, dấu hiệu và bước tự xác minh. Tài khoản đăng nhập xem lại lịch sử quét của mình. |
+| Kiểm tra | Đánh giá URL, tin nhắn, số điện thoại và số tài khoản ngân hàng; hiển thị điểm rủi ro, dấu hiệu và bước tự xác minh. Ảnh QR được giải mã ngay trong trình duyệt để xem trước nội dung; khi người dùng chủ động bấm kiểm tra URL trong QR, hệ thống đối chiếu thêm với Google Safe Browsing mà không lưu ảnh hoặc lần tra cứu vào lịch sử. Tiện ích Chrome hỗ trợ kiểm tra đoạn văn bản hoặc liên kết bằng menu chuột phải mà không lưu vào lịch sử. Tài khoản đăng nhập xem lại lịch sử quét thông thường của mình. |
 | Cộng đồng | Gửi báo cáo, xem cảnh báo công khai và bình chọn báo cáo đã duyệt. Quản trị viên kiểm duyệt và quyết định trạng thái hiển thị. |
 | Học tập | Xem tình huống, khóa học, bài học và câu hỏi tương tác. Người dùng đăng nhập có thể nộp bài, lưu tiến độ và nhận chứng nhận khi đáp ứng điều kiện của khóa. |
 | Trợ lý AI | Trả lời câu hỏi về an toàn số, có thể nhận một ảnh mỗi lượt khi quản trị viên bật; tài khoản đăng nhập có lịch sử hội thoại. Cần khóa Gemini và chịu hạn mức sử dụng. |

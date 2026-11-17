@@ -23,6 +23,7 @@ import { ScanType } from '../../types';
 import { ScanHistory } from './ScanHistory';
 import { ComingSoonDialog } from '../../components/common/ComingSoonDialog';
 import { ScanProcessFlow } from './ScanProcessFlow';
+import { QrChecker } from './QrChecker';
 import { scanExamples } from '../../data/scanExamples';
 
 export const ScannerPage: React.FC = () => {
@@ -38,7 +39,6 @@ export const ScannerPage: React.FC = () => {
     setReportModalOpen,
   } = useAppStore();
 
-  const [qrFile, setQrFile] = useState<string | null>(null);
   const [comingSoonType, setComingSoonType] = useState<'phone' | 'bank' | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -332,6 +332,7 @@ export const ScannerPage: React.FC = () => {
           </div>
         )}
       </div>
+      <div className="mt-8 w-full max-w-[1024px]"><QrChecker /></div>
       <div data-no-auto-translate className="w-full"><ScanHistory onSelect={handleHistorySelect} /></div>
       <ComingSoonDialog
         open={comingSoonType !== null}

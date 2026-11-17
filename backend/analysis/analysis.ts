@@ -77,11 +77,17 @@ function smsSignals(raw: string) {
   const prize = /(?:chuc mung|trung\s+(?:\d+\s*)?(?:thuong|xe|giai|qua)|may man\s+trung|khach hang may man|nguoi may man|nhan giai thuong)/.test(plain);
   const prizeFee = prize && /(?:nop|dong|chuyen|thanh toan)\s+(?:tien\s+)?(?:thue|phi|le phi|tien).{0,70}(?:stk|so tai khoan|tai khoan|\d{4,})/.test(plain);
   const lure = prize || /(?:nhan qua|hoan tien|loi nhuan|hoa hong|viec nhe luong cao|lam nhiem vu|hoan thue|tro cap)/.test(plain);
+  const bankLock = /\b(?:tai khoan(?: ngan hang)?|the(?: ngan hang)?|giao dich)\b.{0,100}\b(?:bi khoa|khoa tam thoi|khoa vinh vien|dinh chi|ngung hoat dong)\b/.test(plain);
+  const verifyAtLink = /\b(?:vui long|hay|can|phai)\s+(?:xac minh|dang nhap|cap nhat thong tin)\b/.test(plain) && links.length > 0;
   let score = 5;
   if (!advisory && action && credential) { score += 50; flags.push('Tin nhắn hướng người nhận cung cấp thông tin xác thực hoặc thông tin nhạy cảm.'); }
   if (!advisory && payment) { score += 45; flags.push('Có yêu cầu chuyển/nộp tiền gắn với điều kiện hoặc thời hạn.'); }
   if (!advisory && install) { score += 65; flags.push('Có hướng dẫn cài ứng dụng hoặc cấp quyền thiết bị.'); }
   if (pressure) { score += advisory ? 0 : 12; if (!advisory) flags.push('Nội dung gây áp lực bằng thời hạn hoặc hậu quả.'); }
+  if (!advisory && bankLock && verifyAtLink) {
+    score += 65;
+    flags.push('Thông báo tài khoản/giao dịch bị khóa và yêu cầu xác minh qua liên kết; tự mở ứng dụng ngân hàng hoặc gọi số chính thức để kiểm tra.');
+  }
   if (lure) { score += advisory ? 0 : 10; if (!advisory) flags.push('Nội dung dùng phần thưởng, lợi nhuận hoặc quyền lợi để thu hút.'); }
   if (!advisory && prizeFee) { score += 65; flags.push('Thông báo trúng thưởng nhưng yêu cầu nộp thuế hoặc phí vào tài khoản để nhận giải.'); }
   if (!advisory && prize && action && links.length) { score += 50; flags.push('Thông báo trúng giải bất ngờ và yêu cầu mở liên kết để nhận thưởng.'); }
@@ -226,11 +232,15 @@ export async function analyze(type: ScanType, query: string, approvedReport: boo
       const { GoogleGenAI } = await import('@google/genai');
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       const primaryModel = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+      // Keep one scan within the website's 20-second request timeout even if
+      // the provider or multiple fallback models are slow.
+      const scanAbortSignal = AbortSignal.timeout(15_000);
       const request = {
         // Assess the input independently so an unmatched rule set cannot anchor AI to a low score.
         // This provider call has no conversation ID and never touches chat history.
         contents: JSON.stringify({ type, untrustedInput: query }),
-        config: { httpOptions: { timeout: 30000 }, responseMimeType: 'application/json', maxOutputTokens: 1600, temperature: 0.2,
+        config: { httpOptions: { timeout: 10000, retryOptions: { attempts: 1 } }, abortSignal: scanAbortSignal,
+          responseMimeType: 'application/json', maxOutputTokens: 1600, temperature: 0.2,
           responseJsonSchema: { type: 'object', required: ['riskScore', 'evidence', 'reasoning', 'threatCategory', 'actionAdvice'], properties: {
             riskScore: { type: 'integer', minimum: 0, maximum: 100 },
             evidence: { type: 'array', items: { type: 'string' }, maxItems: 3 },
@@ -240,7 +250,7 @@ export async function analyze(type: ScanType, query: string, approvedReport: boo
 Cho riskScore tham khảo 0-100, không phải xác suất: 0-29 khi chưa có dấu hiệu đáng kể; 30-69 khi có dấu hiệu cụ thể nhưng chưa đủ rõ; 70-90 khi có yêu cầu hoặc chuỗi hành động nguy hiểm rõ trong chính đầu vào. Mức cao cần nhiều dấu hiệu liên quan hoặc một yêu cầu rất rõ như cung cấp bí mật, chuyển tiền để xác minh, cài ứng dụng không rõ nguồn, chạy lệnh hệ điều hành. evidence gồm tối đa 3 đoạn trích NGUYÊN VĂN từ untrustedInput, mỗi đoạn tự thể hiện dấu hiệu; không bịa bằng chứng. reasoning giải thích vì sao các trích đoạn làm tăng rủi ro và nêu bất định. actionAdvice đưa bước tự xác minh an toàn.
 Với URL, chỉ phân tích ký tự của URL: tên miền, cấu trúc, đường dẫn và kiểu tệp. Không suy đoán nội dung trang, chủ sở hữu, trạng thái danh sách đen, hay việc URL còn hoạt động; không tuyên bố đã mở URL. URL bình thường nhưng chưa truy cập không được xác nhận là an toàn. Với tin nhắn, chú ý mục đích và hành động người gửi muốn người nhận làm. Không kết luận một người hoặc tài khoản phạm tội. Trả JSON đúng schema.` },
       } as const;
-      await applyGeminiWithFallback(result, primaryModel, model => ai.models.generateContent({ model, ...request }));
+      await applyGeminiWithFallback(result, primaryModel, model => ai.models.generateContent({ model, ...request }), scanAbortSignal);
     } catch (error) {
       // Also cover SDK loading or client construction failures.
       markGeminiUnavailable(result, error);
@@ -260,16 +270,21 @@ export async function applyGeminiWithFallback(
   result: ScanResult,
   primaryModel: string,
   generate: (model: string) => Promise<{ text?: string }>,
+  abortSignal?: AbortSignal,
 ) {
   const models = modelCandidates(primaryModel, 'scan');
   for (const [index, model] of models.entries()) {
+    if (abortSignal?.aborted) {
+      markGeminiUnavailable(result, abortSignal.reason);
+      return;
+    }
     try {
       const response = await generate(model);
       try { applyAiAssessment(result, JSON.parse(response.text || '{}')); }
       catch { throw new Error('invalid-model-response'); }
       return;
     } catch (error) {
-      if (index === models.length - 1 || !canTryAnotherModel(error)) {
+      if (abortSignal?.aborted || index === models.length - 1 || !canTryAnotherModel(error)) {
         markGeminiUnavailable(result, error);
         return;
       }

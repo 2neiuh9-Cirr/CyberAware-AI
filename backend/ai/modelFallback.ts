@@ -1,6 +1,6 @@
 export function modelCandidates(primary: string, purpose: 'scan' | 'chat') {
   const backups = purpose === 'scan'
-    ? ['gemini-3.5-flash', 'gemini-3.1-flash-lite']
+    ? ['gemini-3.1-flash-lite', 'gemini-3.5-flash']
     : ['gemini-3.5-flash-lite', 'gemini-3.6-flash'];
   return [...new Set([primary, ...backups])].slice(0, 3);
 }

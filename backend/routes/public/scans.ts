@@ -2,12 +2,39 @@ import type { Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { currentUser } from '../../auth';
 import { db } from '../../database';
-import { ApiError, integer, rateLimit } from '../../http';
+import { ApiError, integer, rateLimit, textField } from '../../http';
 import { analyze, normalizeQuery, scanType } from '../../analysis/analysis';
 import { checkSafeBrowsing } from '../../analysis/safeBrowsing';
 import { user } from './shared';
 
 export function registerScanRoutes(router: Router) {
+  router.post('/context-check', rateLimit(15, 60_000), async (req, res, next) => {
+    try {
+      if (req.body?.kind === 'url') {
+        const url = normalizeQuery('url', req.body?.url);
+        const matching = !!db.prepare("SELECT 1 FROM reports WHERE type = 'url' AND target = ? AND status = 'approved' AND is_hidden = 0").get(url);
+        const [google, result] = await Promise.all([checkSafeBrowsing(url), analyze('url', url, matching)]);
+        const overall = google.status === 'matched'
+          ? { level: 'NGUY_HIEM', source: 'google' }
+          : result.level === 'NGUY_HIEM' || result.level === 'CANH_GIAC'
+            ? { level: result.level, source: 'cyberAware' }
+            : { level: 'CHUA_XAC_MINH', source: 'none' };
+        res.json({ url, overall, google, cyberAware: {
+          riskScore: result.riskScore, level: result.level, title: result.title, flags: result.flags,
+          aiStatus: result.aiStatus, aiReasoning: result.aiReasoning, actionAdvice: result.actionAdvice,
+        } });
+      } else {
+        if (req.body?.kind !== undefined && req.body.kind !== 'text') throw new ApiError(400, 'Loại nội dung không hợp lệ.');
+        const text = normalizeQuery('sms', textField(req.body?.text, 'Đoạn văn bản', 4500));
+        const result = await analyze('sms', text, false);
+        res.json({
+          riskScore: result.riskScore, level: result.level, title: result.title, flags: result.flags,
+          recommendations: result.recommendations, aiStatus: result.aiStatus,
+          aiReasoning: result.aiReasoning, actionAdvice: result.actionAdvice,
+        });
+      }
+    } catch (error) { next(error); }
+  });
   router.post('/url-reputation', rateLimit(15, 60_000), async (req, res, next) => {
     try {
       const url = normalizeQuery('url', req.body?.url);

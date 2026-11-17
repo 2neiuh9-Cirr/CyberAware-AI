@@ -104,6 +104,29 @@ test('URL reputation keeps Google status separate and does not save a scan', asy
   assert.equal((await request('/url-reputation', 'POST', { url: 'file:///etc/passwd' })).status, 400);
   assert.equal((await request('/url-reputation', 'POST', { url: 'https://example.com' }, undefined, { Origin: 'https://attacker.invalid' })).status, 403);
   assert.equal((await request('/url-reputation', 'POST', { url: 'https://example.com' }, undefined, { Origin: 'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' })).status, 200);
+  assert.equal((await request('/url-reputation', 'POST', { url: 'https://example.com' }, undefined, { Origin: 'extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' })).status, 200);
+  assert.equal((await request('/url-reputation', 'POST', { url: 'https://example.com' }, undefined, { Origin: base.replace('/api', '').replace('127.0.0.1', 'localhost') })).status, 200);
+});
+
+test('context check accepts extension text without saving a scan', async () => {
+  const beforeCount = Number(db.prepare('SELECT COUNT(*) AS n FROM scans').get()!.n);
+  const text = 'Vui lòng gửi mã OTP ngay để tránh khóa tài khoản.';
+  const result = await request('/context-check', 'POST', { text }, undefined, { Origin: 'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' });
+  assert.equal(result.status, 200);
+  assert.equal(typeof result.data.riskScore, 'number');
+  assert.equal(Array.isArray(result.data.flags), true);
+  assert.equal(result.data.aiStatus, 'disabled');
+  assert.equal(result.data.query, undefined);
+  assert.equal(Number(db.prepare('SELECT COUNT(*) AS n FROM scans').get()!.n), beforeCount);
+  assert.equal((await request('/context-check', 'POST', { text }, undefined, { Origin: 'extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' })).status, 200);
+  const urlResult = await request('/context-check', 'POST', { kind: 'url', url: 'https://example.com/path?private=token' }, undefined, { Origin: 'extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' });
+  assert.equal(urlResult.status, 200);
+  assert.equal(urlResult.data.url, 'https://example.com/path');
+  assert.equal(urlResult.data.cyberAware.aiStatus, 'disabled');
+  assert.equal(Number(db.prepare('SELECT COUNT(*) AS n FROM scans').get()!.n), beforeCount);
+  assert.equal((await request('/context-check', 'POST', { text: '' })).status, 400);
+  assert.equal((await request('/context-check', 'POST', { kind: 'other', text })).status, 400);
+  assert.equal((await request('/context-check', 'POST', { text }, undefined, { Origin: 'https://attacker.invalid' })).status, 403);
 });
 test('Safe Browsing v5 binary response decodes threat and cache duration', () => {
   const bytes = Writer.create()

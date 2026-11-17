@@ -23,8 +23,15 @@ export function createApp() {
     res.set({ 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' });
     if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method) && req.headers.origin) {
       const expected = process.env.APP_URL ? new URL(process.env.APP_URL).origin : `${req.protocol}://${req.get('host')}`;
-      const browserExtension = ['/gmail-extension/analyze', '/url-reputation'].includes(req.path) && /^chrome-extension:\/\/[a-p]{32}$/.test(req.headers.origin);
-      if (req.headers.origin !== expected && !browserExtension) return res.status(403).json({ success: false, error: 'Nguồn yêu cầu không hợp lệ.' });
+      const browserExtension = ['/gmail-extension/analyze', '/url-reputation', '/context-check'].includes(req.path) && /^(?:chrome-extension|extension):\/\/[a-p]{32}$/.test(req.headers.origin);
+      const loopback = (origin: string) => {
+        try {
+          const url = new URL(origin);
+          return url.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(url.hostname) && !!url.port;
+        } catch { return false; }
+      };
+      const sameLocalPort = process.env.NODE_ENV !== 'production' && loopback(req.headers.origin) && loopback(expected) && new URL(req.headers.origin).port === new URL(expected).port;
+      if (req.headers.origin !== expected && !browserExtension && !sameLocalPort) return res.status(403).json({ success: false, error: 'Nguồn yêu cầu không hợp lệ.' });
     }
     next();
   });

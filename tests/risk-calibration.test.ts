@@ -48,6 +48,18 @@ test('brand impersonation, executable download and credential requests rank high
   assert.ok(linked.riskScore >= 70);
 });
 
+test('bank lock message urging verification through a link ranks high without AI', async () => {
+  const message = 'THÔNG BÁO KHẨN! Tài khoản ngân hàng của quý khách hiện đang bị khóa tạm thời do phát hiện giao dịch bất thường. Để tránh bị gián đoạn giao dịch và mất quyền truy cập tài khoản, quý khách vui lòng xác minh thông tin ngay trong vòng 15 phút tại đường dẫn: https://banking-xacminh.example.com/ Nếu không xác minh đúng thời hạn, tài khoản sẽ bị khóa vĩnh viễn.';
+  const result = await analyze('sms', normalizeQuery('sms', message), false);
+  assert.equal(result.level, 'NGUY_HIEM');
+  assert.ok(result.riskScore >= 70, String(result.riskScore));
+  assert.ok(result.flags.some(flag => flag.includes('xác minh qua liên kết')));
+  const ordinary = await analyze('sms', normalizeQuery('sms', 'Tài khoản ngân hàng của tôi bị khóa tạm thời. Tôi sẽ gọi số trên thẻ để hỏi ngân hàng.'), false);
+  assert.ok(ordinary.riskScore < 30, String(ordinary.riskScore));
+  const safetyAdvice = await analyze('sms', normalizeQuery('sms', 'Cảnh báo: không cung cấp OTP và không bấm đường dẫn để xác minh tài khoản ngân hàng bị khóa. Hãy gọi ngân hàng.'), false);
+  assert.ok(safetyAdvice.riskScore < 30, String(safetyAdvice.riskScore));
+});
+
 test('unexpected prize link from the screenshot is high risk without treating the demo URL as a live threat', async () => {
   const message = 'Chúc mừng bạn là 1 trong 5 khách hàng may mắn trúng xe máy Honda SH 150i trị giá 98.000.000đ. Nhấn vào https://example.invalid/minh-hoa để hoàn tất thủ tục nhận xe!';
   const result = await analyze('sms', normalizeQuery('sms', message), false);
@@ -91,12 +103,27 @@ test('Gemini timeout and quota errors preserve the rule result', async () => {
     const baseline = { score: result.riskScore, source: result.source, flags: [...result.flags] };
     const models: string[] = [];
     await applyGeminiWithFallback(result, 'gemini-3.6-flash', async model => { models.push(model); throw error; });
-    assert.deepEqual(models, ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.1-flash-lite']);
+    assert.deepEqual(models, ['gemini-3.6-flash', 'gemini-3.1-flash-lite', 'gemini-3.5-flash']);
     assert.equal(result.aiStatus, 'unavailable');
     assert.equal(result.riskScore, baseline.score);
     assert.equal(result.source, baseline.source);
     assert.deepEqual(result.flags, baseline.flags);
   }
+});
+
+test('scan stops trying fallback models when its time budget expires', async () => {
+  const result = await analyze('sms', normalizeQuery('sms', 'Vui lòng gửi mã OTP ngay.'), false);
+  const baseline = result.riskScore;
+  const controller = new AbortController();
+  const attempted: string[] = [];
+  await applyGeminiWithFallback(result, 'gemini-3.6-flash', async model => {
+    attempted.push(model);
+    controller.abort(new Error('scan budget expired'));
+    throw new Error('timeout');
+  }, controller.signal);
+  assert.deepEqual(attempted, ['gemini-3.6-flash']);
+  assert.equal(result.aiStatus, 'unavailable');
+  assert.equal(result.riskScore, baseline);
 });
 
 test('Gemini retries a supported fallback model when the primary model is unavailable', async () => {
@@ -107,7 +134,7 @@ test('Gemini retries a supported fallback model when the primary model is unavai
     if (model === 'gemini-3.6-flash') throw Object.assign(new Error('unavailable'), { status: 503 });
     return { text: JSON.stringify({ riskScore: 82, evidence: ['kích hoạt hồ sơ nhận quà'], reasoning: 'Yêu cầu thanh toán để nhận quyền lợi.', threatCategory: 'Thu phí trước', actionAdvice: 'Xác minh với tổ chức.' }) };
   });
-  assert.deepEqual(models, ['gemini-3.6-flash', 'gemini-3.5-flash']);
+  assert.deepEqual(models, ['gemini-3.6-flash', 'gemini-3.1-flash-lite']);
   assert.equal(result.aiStatus, 'available');
   assert.ok(result.source?.includes('+ai'));
 });
@@ -120,7 +147,7 @@ test('Gemini retries malformed model output but not authentication errors', asyn
     models.push(model);
     return { text: model === 'gemini-3.6-flash' ? '{' : JSON.stringify({ riskScore: 80, evidence: ['đọc mã khôi phục ví cho người hướng dẫn'], reasoning: 'Yêu cầu tiết lộ bí mật.', threatCategory: 'Chiếm đoạt ví', actionAdvice: 'Không chia sẻ mã.' }) };
   });
-  assert.deepEqual(models, ['gemini-3.6-flash', 'gemini-3.5-flash']);
+  assert.deepEqual(models, ['gemini-3.6-flash', 'gemini-3.1-flash-lite']);
   assert.equal(recovered.aiStatus, 'available');
   const denied = await analyze('sms', query, false);
   const attempted: string[] = [];

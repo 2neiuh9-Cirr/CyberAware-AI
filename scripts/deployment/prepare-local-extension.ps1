@@ -4,10 +4,10 @@ $workspace = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $source = Join-Path $workspace 'browser-extension'
 $destination = Join-Path $workspace 'deploy/local-extension'
 New-Item -ItemType Directory -Path $destination -Force | Out-Null
-foreach ($name in @('popup.html', 'popup.css', 'popup.js', 'README.md')) {
+foreach ($name in @('popup.html', 'popup.css', 'popup.js', 'README.md', 'background.js', 'sidepanel.html', 'sidepanel.css', 'sidepanel.js')) {
   Copy-Item -LiteralPath (Join-Path $source $name) -Destination (Join-Path $destination $name) -Force
 }
-$manifest = Get-Content -LiteralPath (Join-Path $source 'manifest.json') -Raw | ConvertFrom-Json
+$manifest = Get-Content -LiteralPath (Join-Path $source 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 $manifest.name = 'CyberAware AI - Local test'
 $manifest.host_permissions = @('http://localhost/*')
 $utf8 = [System.Text.UTF8Encoding]::new($false)

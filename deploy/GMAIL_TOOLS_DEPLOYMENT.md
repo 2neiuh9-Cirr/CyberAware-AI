@@ -44,7 +44,7 @@ Làm theo [google-workspace-addon/README.md](../google-workspace-addon/README.md
 
 ZIP trong `public/downloads` cài thủ công qua Load unpacked sau khi giải nén. Để người dùng cài bằng một nút, đưa ZIP lên Chrome Web Store, hoàn tất thông tin quyền riêng tư và thay liên kết trong mục Gmail trên trang chủ bằng URL cửa hàng. Gói ZIP phải được tạo lại sau mỗi lần sửa `browser-extension/` bằng `scripts/deployment/package-gmail-extension.ps1`.
 
-ZIP tiện ích 1.2 phải được đóng gói lại từ `browser-extension/` trước khi tạo gói VPS. Bản 1.2 thêm kiểm tra URL khi người dùng bấm và giữ luồng quét Gmail của bản 1.1.
+ZIP tiện ích 1.3.1 phải được đóng gói lại từ `browser-extension/` trước khi tạo gói VPS. Bản 1.3 thêm menu chuột phải và bảng kiểm tra cạnh trang; backend phải có `POST /api/context-check` trước khi phát hành ZIP. API này kết hợp quy tắc và Gemini khi AI khả dụng, không lưu vào lịch sử quét. Liên kết trong menu chuột phải còn được đối chiếu với Google Safe Browsing. Bản 1.2 đã thêm kiểm tra URL, còn luồng Gmail tiếp tục hoạt động như trước.
 
 ## Giới hạn hiện tại
 
