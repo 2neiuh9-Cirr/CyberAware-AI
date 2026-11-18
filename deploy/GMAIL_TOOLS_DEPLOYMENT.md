@@ -9,10 +9,14 @@ Trong WinSCP, tải ZIP vào `/root/` trên VPS. Kiểm tra SHA-256 và `unzip -
 Trên server (tại thư mục bản mới), dùng Node.js 24 trở lên:
 
 ```sh
-npm ci --legacy-peer-deps
+npm ci --include=dev --legacy-peer-deps
 npm run lint
 npm run build
+npm prune --omit=dev --legacy-peer-deps
+npm audit --omit=dev --audit-level=high
 ```
+
+Vite và các plugin chỉ phục vụ build, nên được gỡ khỏi `node_modules` của bản chạy sau khi tạo `dist/`. Giữ `tsx` vì dịch vụ vẫn khởi động từ `server.ts`. `npm audit` không có `--omit=dev` vẫn báo các lỗ hổng của công cụ build trong lockfile cho tới khi thư viện có bản vá; không dùng `npm audit fix --force` để hạ Vite. Sau bước prune, kiểm tra `node_modules/vite` không còn và chạy thử `/api/health` trước khi đổi bản chạy.
 
 Kiểm tra các thư mục trong bản mới có quyền đi qua (`x`) cho tài khoản chạy dịch vụ `cyberaware`, đặc biệt là `backend/routes/`. Script đóng gói hiện tại tạo ZIP với quyền thư mục Linux `755`. Sau khi kiểm tra, dừng `cyberaware.service`, đổi tên thư mục `app` thành một thư mục giữ bản cũ, chuyển bản mới thành `app`, rồi khởi động dịch vụ và kiểm tra `http://127.0.0.1:3000/api/health`. Nếu kiểm tra thất bại, chuyển lại bản cũ ngay.
 
