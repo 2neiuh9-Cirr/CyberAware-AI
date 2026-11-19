@@ -9,6 +9,9 @@ node_modules/
 dist/
 build/
 coverage/
+test-results/
+playwright-report/
+/.e2e-temp-path
 
 # Temporary and generated files
 tmp/

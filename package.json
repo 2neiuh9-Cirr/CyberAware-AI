@@ -17,6 +17,8 @@
     "test:ai": "tsx --test tests/risk-calibration.test.ts",
     "verify:ai:live": "tsx scripts/verification/verify-gemini-live.ts",
     "test:auth": "tsx tests/auth-smoke.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "admin": "tsx scripts/admin/set-admin.ts",
     "admin:bootstrap": "tsx scripts/admin/bootstrap-admin.ts"
   },
@@ -37,15 +39,16 @@
     "zustand": "^5.0.16"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/vite": "^4.3.3",
-    "@vitejs/plugin-react": "^6.1.1",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
     "@types/nodemailer": "^8.0.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "autoprefixer": "^10.4.21",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.27.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.0"
