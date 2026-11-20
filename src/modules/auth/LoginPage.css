@@ -1,0 +1,58 @@
+.login-page-card {
+  animation: login-card-enter .58s cubic-bezier(.2,.75,.25,1) both;
+  box-shadow: 0 24px 60px -38px rgb(14 55 104 / .45), 0 4px 14px rgb(15 23 42 / .05);
+}
+
+.login-credentials-panel {
+  background-image: radial-gradient(ellipse at 11% 0%, rgb(219 234 254 / .82), transparent 44%);
+}
+
+.login-trust-card {
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+.login-trust-card:hover {
+  transform: translateY(-2px);
+  border-color: #bfdbfe;
+  box-shadow: 0 10px 20px -15px rgb(0 74 198 / .36);
+}
+
+.login-field { border-radius: .8rem; transition: transform .2s ease; }
+.login-field:focus-within { transform: translateY(-1px); }
+.login-field-icon { transition: color .2s ease, transform .2s ease, filter .2s ease; }
+.login-field:focus-within .login-field-icon { color: #004ac6; transform: scale(1.08); }
+.login-field--password:focus-within .login-field-icon { filter: drop-shadow(0 0 5px rgb(0 74 198 / .32)); }
+
+.login-social-button { transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease; }
+.login-social-button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px -12px rgb(15 23 42 / .42); }
+.login-social-button:active { transform: translateY(0) scale(.995); }
+
+.login-submit-button { position: relative; isolation: isolate; overflow: hidden; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
+.login-submit-button::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0 auto 0 -45%;
+  width: 35%;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / .27), transparent);
+  content: '';
+  transition: left .55s ease;
+}
+.login-submit-button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 24px -14px rgb(0 74 198 / .7); }
+.login-submit-button:hover:not(:disabled)::before { left: 120%; }
+.login-submit-button:active:not(:disabled) { transform: translateY(0) scale(.995); }
+
+@keyframes login-card-enter {
+  from { opacity: 0; transform: translateY(10px) scale(.994); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-page-card { animation: none; }
+  .login-trust-card,
+  .login-field,
+  .login-field-icon,
+  .login-social-button,
+  .login-submit-button,
+  .login-submit-button::before { transition: none; }
+  .login-submit-button::before { display: none; }
+}

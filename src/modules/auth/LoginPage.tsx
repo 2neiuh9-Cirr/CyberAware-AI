@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
 import { api } from '../../api';
 import { ComingSoonDialog } from '../../components/common/ComingSoonDialog';
+import { LoginSecurityVisual } from './LoginSecurityVisual';
+import './LoginPage.css';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -74,9 +76,9 @@ export const LoginPage: React.FC = () => {
         <div className="absolute -bottom-20 w-80 h-80 bg-blue-200/40 rounded-full blur-3xl pointer-events-none -z-10" />
 
         {/* Main Card Shell: asymmetric desktop split for civic trust & security */}
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 rounded-2xl shadow-xl overflow-hidden bg-white border border-slate-200/80">
+        <div className="login-page-card w-full grid grid-cols-1 lg:grid-cols-12 rounded-2xl shadow-xl overflow-hidden bg-white border border-slate-200/80">
           {/* Left Column: Security Credentials & Platform Mission (Hidden on mobile) */}
-          <div className="hidden lg:flex lg:col-span-5 flex-col justify-between p-10 bg-slate-50 border-r border-slate-200/70 text-slate-800 relative">
+          <div className="login-credentials-panel hidden lg:flex lg:col-span-5 flex-col justify-between p-10 bg-slate-50 border-r border-slate-200/70 text-slate-800 relative">
             <div className="relative z-10 flex flex-col gap-6">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white text-[#004AC6] font-semibold text-xs w-fit shadow-xs border border-blue-100">
                 <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -96,7 +98,7 @@ export const LoginPage: React.FC = () => {
 
               {/* Trust Metric Cards */}
               <div className="space-y-3 mt-4">
-                <div className="p-4 rounded-xl bg-white border border-slate-200/80 flex items-start gap-3 shadow-xs">
+                <div className="login-trust-card p-4 rounded-xl bg-white border border-slate-200/80 flex items-start gap-3 shadow-xs">
                   <span className="material-symbols-outlined text-[#004AC6] text-2xl shrink-0 mt-0.5">
                     shield
                   </span>
@@ -108,7 +110,7 @@ export const LoginPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-white border border-slate-200/80 flex items-start gap-3 shadow-xs">
+                <div className="login-trust-card p-4 rounded-xl bg-white border border-slate-200/80 flex items-start gap-3 shadow-xs">
                   <span className="material-symbols-outlined text-emerald-600 text-2xl shrink-0 mt-0.5">
                     lock_open_right
                   </span>
@@ -120,6 +122,7 @@ export const LoginPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+              <LoginSecurityVisual />
             </div>
 
             {/* Trust footer on left panel */}
@@ -178,11 +181,11 @@ export const LoginPage: React.FC = () => {
             )}
 
             <div className="mb-6 space-y-3">
-              <button type="button" onClick={() => startSocial('google')} className="flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50">
+              <button type="button" onClick={() => startSocial('google')} className="login-social-button flex h-12 w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50">
                 <span aria-hidden="true" className="text-xl font-extrabold" style={{ background: 'conic-gradient(#4285F4 0deg 90deg, #34A853 90deg 180deg, #FBBC05 180deg 270deg, #EA4335 270deg)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>G</span>
                 Tiếp tục với Google
               </button>
-              <button type="button" onClick={() => setFacebookNoticeOpen(true)} className="flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-[#1877F2] text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1468d6]">
+              <button type="button" onClick={() => setFacebookNoticeOpen(true)} className="login-social-button flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-[#1877F2] text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1468d6]">
                 <span aria-hidden="true" className="text-2xl font-extrabold leading-none">f</span>
                 Tiếp tục với Facebook
               </button>
@@ -196,8 +199,8 @@ export const LoginPage: React.FC = () => {
                 <label className="block text-xs font-bold text-[#0F172A] uppercase tracking-wide" htmlFor="email">
                   Địa chỉ Email <span className="text-red-600">*</span>
                 </label>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-3.5 text-slate-400 pointer-events-none text-xl">
+                <div className="login-field relative flex items-center">
+                  <span className="login-field-icon material-symbols-outlined absolute left-3.5 text-slate-400 pointer-events-none text-xl">
                     mail
                   </span>
                   <input
@@ -218,8 +221,8 @@ export const LoginPage: React.FC = () => {
                 <label className="block text-xs font-bold text-[#0F172A] uppercase tracking-wide" htmlFor="password">
                   Mật khẩu <span className="text-red-600">*</span>
                 </label>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-3.5 text-slate-400 pointer-events-none text-xl">
+                <div className="login-field login-field--password relative flex items-center">
+                  <span className="login-field-icon material-symbols-outlined absolute left-3.5 text-slate-400 pointer-events-none text-xl">
                     key
                   </span>
                   <input
@@ -269,7 +272,7 @@ export const LoginPage: React.FC = () => {
               <div className="pt-2">
                 <button
                   disabled={isLoading}
-                  className="w-full h-12 bg-[#004AC6] hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="login-submit-button w-full h-12 bg-[#004AC6] hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                   type="submit"
                 >
                   {isLoading ? (

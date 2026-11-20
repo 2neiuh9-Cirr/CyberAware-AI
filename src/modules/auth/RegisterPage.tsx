@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, json } from '../../api';
 import { useAppStore } from '../../store/useAppStore';
+import './RegisterPage.css';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -125,10 +126,10 @@ export const RegisterPage: React.FC = () => {
           <div className="absolute -bottom-10 -right-10 w-72 h-72 bg-emerald-200/40 rounded-full blur-3xl pointer-events-none -z-10" />
 
           {/* Main Registration Card */}
-          <div className="relative bg-white rounded-2xl shadow-xl p-6 sm:p-10 w-full overflow-hidden border border-slate-200/80">
+          <div className="register-card relative bg-white rounded-2xl shadow-xl p-6 sm:p-10 w-full overflow-hidden border border-slate-200/80">
             {/* Top Decorative Pill & Security Badge */}
-            <div className="flex items-center justify-between gap-4 mb-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-[#004AC6] rounded-full text-xs font-bold border border-blue-100">
+            <div className="register-card__topline flex items-center justify-between gap-4 mb-6">
+              <div className="register-card__security-badge inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-[#004AC6] rounded-full text-xs font-bold border border-blue-100">
                 <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                   verified_user
                 </span>
@@ -140,18 +141,18 @@ export const RegisterPage: React.FC = () => {
             </div>
 
             {/* Header Section */}
-            <div className="mb-7">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight mb-1.5">
+            <div className="register-card__header mb-7">
+              <h1 className="register-card__title text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight mb-1.5">
                 Tạo tài khoản CyberAware AI
               </h1>
-              <p className="text-sm text-slate-500">
+              <p className="register-card__description text-sm text-slate-500">
                 Theo dõi lịch sử kiểm tra và lộ trình học tập tự vệ số miễn phí
               </p>
             </div>
 
             {/* Error Message */}
             {errorMessage && (
-              <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm font-medium flex items-center gap-2 animate-in fade-in duration-150">
+              <div className="register-card__error mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm font-medium flex items-center gap-2 animate-in fade-in duration-150">
                 <span className="material-symbols-outlined text-base shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>
                   error
                 </span>
@@ -167,9 +168,9 @@ export const RegisterPage: React.FC = () => {
                 {deliveryMode === 'local' && <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">Máy chủ phát triển chưa cấu hình SMTP. Mã được ghi vào <code>data/dev-verification-codes.log</code>.</p>}
                 <form onSubmit={verifyEmail} className="space-y-4">
                   <label htmlFor="emailVerificationCode" className="block text-sm font-semibold text-slate-900">Mã xác minh email</label>
-                  <input id="emailVerificationCode" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" maxLength={8} required value={verificationCode} onChange={event => setVerificationCode(event.target.value.replace(/\D/g, '').slice(0, 8))} className="w-full h-12 rounded-xl border border-slate-200 px-4 text-center text-lg font-mono tracking-[0.25em] focus:outline-none focus:ring-2 focus:ring-[#004AC6]" placeholder="00000000" />
+                  <input id="emailVerificationCode" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" maxLength={8} required value={verificationCode} onChange={event => setVerificationCode(event.target.value.replace(/\D/g, '').slice(0, 8))} className="register-field-input w-full h-12 rounded-xl border border-slate-200 px-4 text-center text-lg font-mono tracking-[0.25em] focus:outline-none focus:ring-2 focus:ring-[#004AC6]" placeholder="00000000" />
                   <p className="text-xs text-slate-600">Còn {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}. Nếu không thấy email, hãy kiểm tra thư rác.</p>
-                  <button disabled={isVerifying || remaining === 0 || verificationCode.length !== 8 || isSuccess} type="submit" className="w-full h-12 rounded-xl bg-[#004AC6] text-white font-semibold disabled:opacity-50">{isVerifying ? 'Đang xác minh...' : 'Xác minh và hoàn tất đăng ký'}</button>
+                  <button disabled={isVerifying || remaining === 0 || verificationCode.length !== 8 || isSuccess} type="submit" className="register-submit-button w-full h-12 rounded-xl bg-[#004AC6] text-white font-semibold disabled:opacity-50">{isVerifying ? 'Đang xác minh...' : 'Xác minh và hoàn tất đăng ký'}</button>
                 </form>
                 <div className="flex flex-wrap gap-3 text-sm">
                   <button type="button" onClick={resendVerification} disabled={isResending} className="text-[#004AC6] font-semibold disabled:opacity-50">{isResending ? 'Đang gửi...' : 'Gửi lại mã'}</button>
@@ -179,18 +180,18 @@ export const RegisterPage: React.FC = () => {
             )}
 
             {/* Registration Form */}
-            {!verificationPending && <form className="space-y-5" onSubmit={handleSubmit}>
+            {!verificationPending && <form className="register-form space-y-5" onSubmit={handleSubmit}>
               {/* Full Name Field */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wide" htmlFor="fullname">
                   Họ và tên
                 </label>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-3.5 text-slate-400 text-[20px] pointer-events-none">
+                <div className="register-field relative flex items-center">
+                  <span className="register-field__icon material-symbols-outlined absolute left-3.5 text-slate-400 text-[20px] pointer-events-none">
                     person
                   </span>
                   <input
-                    className="w-full h-11 pl-11 pr-4 bg-slate-50 text-slate-900 placeholder:text-slate-400 rounded-xl text-sm border border-slate-200 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#004AC6] shadow-xs"
+                    className="register-field-input w-full h-11 pl-11 pr-4 bg-slate-50 text-slate-900 placeholder:text-slate-400 rounded-xl text-sm border border-slate-200 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#004AC6] shadow-xs"
                     id="fullname"
                     placeholder="Nguyễn Văn A"
                     required
@@ -206,12 +207,12 @@ export const RegisterPage: React.FC = () => {
                 <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wide" htmlFor="email">
                   Email
                 </label>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-3.5 text-slate-400 text-[20px] pointer-events-none">
+                <div className="register-field relative flex items-center">
+                  <span className="register-field__icon material-symbols-outlined absolute left-3.5 text-slate-400 text-[20px] pointer-events-none">
                     mail
                   </span>
                   <input
-                    className="w-full h-11 pl-11 pr-4 bg-slate-50 text-slate-900 placeholder:text-slate-400 rounded-xl text-sm border border-slate-200 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#004AC6] shadow-xs"
+                    className="register-field-input w-full h-11 pl-11 pr-4 bg-slate-50 text-slate-900 placeholder:text-slate-400 rounded-xl text-sm border border-slate-200 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#004AC6] shadow-xs"
                     id="email"
                     placeholder="nguyenvana@example.com"
                     required
@@ -234,12 +235,12 @@ export const RegisterPage: React.FC = () => {
                     </span>
                   )}
                 </div>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-3.5 text-slate-400 text-[20px] pointer-events-none">
+                <div className="register-field register-field--password relative flex items-center">
+                  <span className="register-field__icon material-symbols-outlined absolute left-3.5 text-slate-400 text-[20px] pointer-events-none">
                     lock
                   </span>
                   <input
-                    className="w-full h-11 pl-11 pr-12 bg-slate-50 text-slate-900 placeholder:text-slate-400 rounded-xl text-sm border border-slate-200 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#004AC6] shadow-xs"
+                    className="register-field-input w-full h-11 pl-11 pr-12 bg-slate-50 text-slate-900 placeholder:text-slate-400 rounded-xl text-sm border border-slate-200 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#004AC6] shadow-xs"
                     id="password"
                     placeholder="Nhập mật khẩu an toàn"
                     required
@@ -260,7 +261,7 @@ export const RegisterPage: React.FC = () => {
                 </div>
 
                 {/* Inline Password Criteria Validation */}
-                <div className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl mt-1 space-y-2">
+                <div className="register-password-criteria bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl mt-1 space-y-2">
                   <p className="text-xs font-bold text-[#0F172A] mb-1">Mật khẩu cần đáp ứng:</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                     <div className={`flex items-center gap-1.5 transition-colors ${hasLength ? 'text-emerald-700 font-semibold' : 'text-slate-500'}`}>
@@ -296,12 +297,12 @@ export const RegisterPage: React.FC = () => {
                 <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wide" htmlFor="confirmPassword">
                   Xác nhận mật khẩu
                 </label>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-3.5 text-slate-400 text-[20px] pointer-events-none">
+                <div className="register-field register-field--password relative flex items-center">
+                  <span className="register-field__icon material-symbols-outlined absolute left-3.5 text-slate-400 text-[20px] pointer-events-none">
                     lock_reset
                   </span>
                   <input
-                    className="w-full h-11 pl-11 pr-12 bg-slate-50 text-slate-900 placeholder:text-slate-400 rounded-xl text-sm border border-slate-200 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#004AC6] shadow-xs"
+                    className="register-field-input w-full h-11 pl-11 pr-12 bg-slate-50 text-slate-900 placeholder:text-slate-400 rounded-xl text-sm border border-slate-200 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#004AC6] shadow-xs"
                     id="confirmPassword"
                     placeholder="Nhập lại mật khẩu"
                     required
@@ -332,7 +333,7 @@ export const RegisterPage: React.FC = () => {
 
               {/* Terms and Privacy Policy Agreement */}
               <div className="pt-1">
-                <label className="flex items-start gap-3 cursor-pointer select-none">
+                <label className="register-terms flex items-start gap-3 cursor-pointer select-none">
                   <input
                     className="mt-0.5 w-4 h-4 rounded text-[#004AC6] focus:ring-[#004AC6] cursor-pointer accent-[#004AC6]"
                     id="termsCheckbox"
@@ -359,7 +360,7 @@ export const RegisterPage: React.FC = () => {
               <div className="pt-2">
                 <button
                   disabled={isSubmitting}
-                  className={`w-full h-12 text-white font-semibold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  className={`register-submit-button w-full h-12 text-white font-semibold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer ${
                     isSuccess
                       ? 'bg-emerald-600'
                       : 'bg-[#004AC6] hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50'
@@ -390,7 +391,7 @@ export const RegisterPage: React.FC = () => {
             </form>}
 
             {/* Bottom Trust Note & Quick Links */}
-            <div className="mt-8 pt-5 bg-slate-50 border border-slate-100 rounded-xl p-3 text-center">
+            <div className="register-card__trust mt-8 pt-5 bg-slate-50 border border-slate-100 rounded-xl p-3 text-center">
               <p className="text-xs sm:text-sm text-slate-600">
                 Đã có tài khoản?{' '}
                 <Link

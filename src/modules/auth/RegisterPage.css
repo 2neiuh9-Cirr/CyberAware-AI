@@ -1,0 +1,58 @@
+.register-card {
+  box-shadow: 0 24px 60px -38px rgb(14 55 104 / .4), 0 4px 14px rgb(15 23 42 / .05);
+  animation: register-card-enter .58s cubic-bezier(.2,.75,.25,1) both;
+}
+.register-card__topline,
+.register-card__header,
+.register-form,
+.register-card__trust { animation: register-content-enter .5s cubic-bezier(.2,.7,.25,1) both; }
+.register-card__topline { animation-delay: .04s; }
+.register-card__header { animation-delay: .09s; }
+.register-form { animation-delay: .14s; }
+.register-card__security-badge { box-shadow: 0 4px 12px -10px rgb(0 74 198 / .42); }
+.register-card__title { text-wrap: balance; }
+.register-card__trust { transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease; }
+.register-card__trust:hover { border-color: #bfdbfe; box-shadow: 0 10px 22px -18px rgb(0 74 198 / .35); }
+
+.register-field { border-radius: .8rem; transition: transform .2s ease; }
+.register-field:focus-within { transform: translateY(-1px); }
+.register-field__icon { transition: color .2s ease, transform .2s ease, filter .2s ease; }
+.register-field:focus-within .register-field__icon { color: #004ac6; transform: scale(1.08); }
+.register-field--password:focus-within .register-field__icon { filter: drop-shadow(0 0 5px rgb(0 74 198 / .32)); }
+.register-field-input { transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease; }
+.register-field-input:focus { border-color: #93c5fd; box-shadow: 0 0 0 4px rgb(0 74 198 / .09), 0 6px 16px -12px rgb(0 74 198 / .38); }
+.register-password-criteria { transition: border-color .2s ease, box-shadow .2s ease; }
+.register-field--password:focus-within + .register-password-criteria,
+.register-password-criteria:focus-within { border-color: #bfdbfe; }
+.register-terms input { transition: box-shadow .18s ease; }
+.register-terms input:focus-visible { box-shadow: 0 0 0 4px rgb(0 74 198 / .12); }
+
+.register-submit-button { position: relative; isolation: isolate; overflow: hidden; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
+.register-submit-button::before { position: absolute; z-index: -1; inset: 0 auto 0 -45%; width: 35%; transform: skewX(-20deg); background: linear-gradient(90deg, transparent, rgb(255 255 255 / .27), transparent); content: ''; transition: left .55s ease; }
+.register-submit-button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 24px -14px rgb(0 74 198 / .62); }
+.register-submit-button:hover:not(:disabled)::before { left: 120%; }
+.register-submit-button:active:not(:disabled) { transform: translateY(0) scale(.995); }
+
+@keyframes register-card-enter { from { opacity: 0; transform: translateY(10px) scale(.994); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes register-content-enter { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 639px) {
+  .register-card__topline { align-items: flex-start; }
+  .register-card__security-badge { font-size: .67rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .register-card,
+  .register-card__topline,
+  .register-card__header,
+  .register-form,
+  .register-card__trust { animation: none !important; }
+  .register-card__trust,
+  .register-field,
+  .register-field__icon,
+  .register-field-input,
+  .register-terms input,
+  .register-submit-button,
+  .register-submit-button::before { transition: none !important; }
+  .register-submit-button::before { display: none; }
+}

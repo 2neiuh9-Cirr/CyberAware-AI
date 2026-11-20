@@ -18,7 +18,10 @@ export async function api<T = any>(path: string, options: RequestInit = {}): Pro
     if (response.status === 401 && !path.startsWith('/auth/')) window.dispatchEvent(new Event('cyberaware-session-expired'));
     const retryAfterSeconds = Number(response.headers.get('retry-after'));
     const failure = new HttpError(response.status, data.error || 'Yêu cầu không thành công.', Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0 ? retryAfterSeconds : undefined);
-    if (!(response.status === 401 && path === '/me')) notify(failure.message, 'error');
+    const isExpectedUnauthorized = response.status === 401 && (
+      path === '/me' || path === '/auth/reset-password/status'
+    );
+    if (!isExpectedUnauthorized) notify(failure.message, 'error');
     throw failure;
   }
   return data as T;
