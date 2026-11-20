@@ -27,20 +27,45 @@ export function publicChatSources(sources: ChatKnowledgeSource[]): PublicChatSou
 }
 
 export function formatChatAnswer(value: string): string {
-  const answer = value.trim();
-  const markers = [...answer.matchAll(/(^|\s)([1-9]\d?)[.)]\s+(?=\p{L})/gu)];
-  if (markers.length < 2 || markers.some((match, index) => Number(match[2]) !== index + 1)) return answer;
+  let answer = value.replace(/\r\n?/g, '\n').trim();
+  if (!answer) return '';
 
-  let formatted = answer;
-  for (let index = markers.length - 1; index >= 0; index--) {
-    const marker = markers[index];
-    const position = marker.index + marker[1].length;
-    if (position === 0 || marker[1].includes('\n')) continue;
-    const before = formatted.slice(0, position).trimEnd();
-    const after = formatted.slice(position);
-    formatted = before + (index === 0 ? '\n\n' : '\n') + after;
+  // Put inline list markers and common section labels on their own lines.
+  answer = answer
+    .replace(/([^\n])\s+([•●▪])\s+(?=\S)/g, '$1\n$2 ')
+    .replace(/([^\n])\s+-\s+(?=[\p{Lu}\p{N}])/gu, '$1\n- ')
+    .replace(/\s+(?=(?:Dấu hiệu(?: trong nội dung)?|Việc nên làm ngay|Khuyến nghị|Lưu ý|Cách xử lý|Các bước|Kết luận)\s*:)/giu, '\n\n');
+
+  const markers = [...answer.matchAll(/(^|\s)([1-9]\d?)[.)]\s+(?=\p{L})/gu)];
+  if (markers.length >= 2 && markers.every((match, index) => Number(match[2]) === index + 1)) {
+    for (let index = markers.length - 1; index >= 0; index--) {
+      const marker = markers[index];
+      const position = marker.index + marker[1].length;
+      if (position === 0 || marker[1].includes('\n')) continue;
+      const before = answer.slice(0, position).trimEnd();
+      const after = answer.slice(position);
+      answer = before + (index === 0 ? '\n\n' : '\n') + after;
+    }
   }
-  return formatted;
+
+  // Long, sentence-heavy paragraphs are easier to scan when broken into pairs.
+  return answer.split(/\n\s*\n+/).map(block => {
+    const lines = block.split('\n');
+    if (lines.length > 1 || /^\s*(?:[-•●▪]|\d{1,2}[.)])\s/u.test(block)) return block.trim();
+    const sentences = block.split(/(?<=[.!?])\s+(?=[\p{Lu}“"'])/gu).map(sentence => sentence.trim()).filter(Boolean);
+    if (sentences.length < 3 && block.length <= 360) return block.trim();
+    const groups: string[] = [];
+    let group = '';
+    for (const sentence of sentences) {
+      if (group && (group.length + sentence.length > 240 || /^(?:Ngoài ra|Bên cạnh đó|Đồng thời|Tuy nhiên|Tiếp theo|Cuối cùng|Lưu ý|Hãy|Bạn nên|Nếu bạn)\b/i.test(sentence))) {
+        groups.push(group);
+        group = '';
+      }
+      group = group ? `${group} ${sentence}` : sentence;
+    }
+    if (group) groups.push(group);
+    return groups.join('\n\n');
+  }).join('\n\n');
 }
 
 export function sanitizeChatAnswer(value: string, sources: ChatKnowledgeSource[]): string {

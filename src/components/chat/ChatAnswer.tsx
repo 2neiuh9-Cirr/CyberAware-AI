@@ -15,6 +15,9 @@ export function ChatAnswer({ content }: { content: string }) {
         );
         const bullet = line.match(/^[-•]\s+(.+)$/);
         if (bullet) return <p key={index} className="pl-2 before:mr-2 before:text-[#004AC6] before:content-['•']">{bullet[1]}</p>;
+        if (/^(?:Dấu hiệu(?: trong nội dung)?|Việc nên làm ngay|Khuyến nghị|Lưu ý|Cách xử lý|Các bước|Kết luận)\s*:?$/i.test(line)) {
+          return <p key={index} className="pt-1 font-bold text-[#0F172A]">{line.replace(/\s*:$/, '')}</p>;
+        }
         if (line.endsWith(':') && line.length <= 80) return <p key={index} className="font-semibold text-[#0F172A]">{line}</p>;
         return <p key={index}>{line}</p>;
       })}

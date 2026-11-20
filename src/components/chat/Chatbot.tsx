@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Bot, ChevronLeft, CircleHelp, ImagePlus, Info, LogOut, Maximize2,
-  MessageSquare, Minus, Plus, Send, Settings, ShieldAlert, Sparkles,
+  Bot, ChevronLeft, CircleHelp, FileText, ImagePlus, Info, LogOut, Maximize2,
+  MessageSquare, Minus, Paperclip, Plus, Send, Settings, ShieldAlert, Sparkles,
   TriangleAlert, Truck, X,
 } from 'lucide-react';
 
-import { api, json } from '../../api';
+import { api, HttpError, json } from '../../api';
 import { useAppStore } from '../../store/useAppStore';
-import type { ChatMessage, ChatConversation, ChatCapabilities } from '../../types';
+import type { ChatAttachment, ChatMessage, ChatConversation, ChatCapabilities } from '../../types';
 import { OPEN_CHAT_FULL_EVENT } from './chatEvents';
 import { ChatAnswer } from './ChatAnswer';
 import { ConfirmDialog } from '../common/ConfirmDialog';
@@ -16,6 +16,22 @@ import { notify } from '../common/toast';
 
 type ChatMode = 'closed' | 'compact' | 'full';
 type Conversation = ChatConversation;
+type QueuedChatRequest = { conversationKey: string; message: string; file: File | null; isMember: boolean; userMessageId: string; responseId: string };
+
+const allowedExtensions = new Set(['png','jpg','jpeg','webp','pdf','docx','xlsx']);
+const mimeByExtension: Record<string,string> = {
+  png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', webp:'image/webp', pdf:'application/pdf',
+  docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+};
+function attachmentForFile(file: File, preview?: string): ChatAttachment {
+  const extension=file.name.split('.').pop()?.toLowerCase() || '';
+  const mimeType=mimeByExtension[extension] || file.type || 'application/octet-stream';
+  return {kind:mimeType.startsWith('image/')?'image':'document',name:file.name,mimeType,...(preview?{preview}:{})};
+}
+function fileAttachmentKind(file: File | null): ChatAttachment['kind'] {
+  return file ? attachmentForFile(file).kind : 'document';
+}
 
 const suggestions = [
   { title: 'Tư vấn thủ đoạn giao hàng', detail: 'Cách nhận biết shipper giả mạo', icon: Truck, prompt: 'Làm sao nhận biết thủ đoạn giả mạo nhân viên giao hàng?' },
@@ -33,10 +49,12 @@ export const Chatbot: React.FC = () => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [file,setFile] = useState<File | null>(null);
-  const imageName = file?.name || '';
+  const attachmentName = file?.name || '';
   const member = useAppStore(s=>s.currentUser?.id);
   const [caps,setCaps] = useState<ChatCapabilities | null>(null);
   const [busy,setBusy] = useState(false);
+  const [processing,setProcessing] = useState(false);
+  const [queuedCount,setQueuedCount] = useState(0);
   const [showDelivery,setShowDelivery] = useState(false);
   const [notice,setNotice] = useState('');
   const [listCursor,setListCursor] = useState<string|null>(null);
@@ -51,7 +69,7 @@ export const Chatbot: React.FC = () => {
     if(!opened)return;
     let alive=true;
     api<ChatCapabilities>('/chat/capabilities').then(v=>{if(alive)setCaps(v)}).catch(e=>{if(alive)setNotice(e.message)});
-    if(member) api('/chat/conversations').then(v=>{if(alive){setListCursor(v.nextCursor);setConversations(rows=>v.items.map((c:Conversation)=>({...c,messages:rows.find(r=>r.id===c.id)?.messages || []})))}}).catch(e=>{if(alive)setNotice(e.message)});
+    if(member) api('/chat/conversations').then(v=>{if(alive){setListCursor(v.nextCursor);updateConversations(rows=>[...v.items.map((c:Conversation)=>({...c,messages:rows.find(r=>r.id===c.id)?.messages || []})),...rows.filter(r=>!v.items.some((c:Conversation)=>c.id===r.id))])}}).catch(e=>{if(alive)setNotice(e.message)});
     return ()=>{alive=false};
   },[opened,member]);
   const [showNotice, setShowNotice] = useState(true);
@@ -60,8 +78,36 @@ export const Chatbot: React.FC = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const conversationRef = useRef<Conversation[]>([]);
+  const messagesRef = useRef<Map<string,ChatMessage[]>>(new Map());
+  const serverConversationIdsRef = useRef<Map<string,string>>(new Map());
+  const requestQueueRef = useRef<QueuedChatRequest[]>([]);
+  const processingRef = useRef(false);
 
   const active = conversations.find(item => item.id === activeId);
+  conversationRef.current=conversations;
+
+  function updateConversations(update:(rows:Conversation[])=>Conversation[]) {
+    const next=update(conversationRef.current);
+    conversationRef.current=next;
+    setConversations(next);
+  }
+
+  function updateConversationMessages(key:string, update:(messages:ChatMessage[])=>ChatMessage[], serverId?:string) {
+    const old=messagesRef.current.get(key)||[];
+    const messages=update(old);
+    messagesRef.current.set(key,messages);
+    if(serverId)messagesRef.current.set(serverId,messages);
+    updateConversations(rows=>{
+      let found=false;
+      const next=rows.map(row=>{
+        if(row.id!==key&&row.id!==serverId)return row;
+        found=true;
+        return {...row,id:serverId||row.id,messages,messageCount:messages.length};
+      });
+      return found?next:[{id:serverId||key,title:messages.find(message=>message.role==='user')?.content.slice(0,60)||'Hội thoại mới',messageCount:messages.length,messages},...next];
+    });
+  }
 
   useEffect(() => {
     if (mode !== 'full') return;
@@ -86,6 +132,7 @@ export const Chatbot: React.FC = () => {
     setActiveId(null);
     setDraft('');
     setFile(null);
+    if(fileRef.current)fileRef.current.value='';
     setNotice('');
     inputRef.current?.focus();
   };
@@ -100,40 +147,116 @@ export const Chatbot: React.FC = () => {
           const page:{messages:ChatMessage[];nextCursor:number|null}=await api('/chat/conversations/'+id+'?limit=100'+(cursor?'&cursor='+cursor:''));
           messages.unshift(...page.messages);cursor=page.nextCursor;
         }while(cursor);
-        setConversations(rows=>rows.map(r=>r.id===id?{...r,messages}:r));
+        messagesRef.current.set(id,messages);
+        updateConversations(rows=>rows.map(r=>r.id===id?{...r,messages}:r));
       }
-      setActiveId(id);setDraft('');setFile(null);
+      setActiveId(id);setDraft('');setFile(null);if(fileRef.current)fileRef.current.value='';
     }catch(e){setNotice((e as Error).message)}finally{setBusy(false)}
   }
   async function deleteCurrent(){
-    if(!pendingDelete || busy)return;
+    if(!pendingDelete || busy || processingRef.current || requestQueueRef.current.length)return;
     setBusy(true);
     try{if(member)await api('/chat/conversations/'+pendingDelete.id,{method:'DELETE'});
-      setConversations(rows=>rows.filter(r=>r.id!==pendingDelete.id));
-      if(activeId===pendingDelete.id){setActiveId(null);setDraft('');setFile(null);setNotice('');}
+      messagesRef.current.delete(pendingDelete.id);
+      updateConversations(rows=>rows.filter(r=>r.id!==pendingDelete.id));
+      if(activeId===pendingDelete.id){setActiveId(null);setDraft('');setFile(null);if(fileRef.current)fileRef.current.value='';setNotice('');}
       setPendingDelete(null);
       notify('Hội thoại đã được xóa.', 'success');
     }catch(e){setNotice((e as Error).message)}finally{setBusy(false)}
   }
-  async function submitMessage(){
+  function submitMessage(){
     if(busy||!caps?.enabled||(!draft.trim()&&!file))return;
-    setBusy(true);setNotice('');
+    if(requestQueueRef.current.length+(processingRef.current?1:0)>=5){setNotice('Đã đủ 5 tin nhắn đang chờ. Hãy đợi chatbot xử lý bớt rồi gửi tiếp.');return;}
+    const selectedFile=file;
+    const fileAttachment=selectedFile?attachmentForFile(selectedFile):undefined;
+    const preview=fileAttachment?.kind==='image'&&selectedFile?URL.createObjectURL(selectedFile):undefined;
+    const message=draft.trim() || (fileAttachment?.kind==='image'
+      ?'Hãy nhận xét dấu hiệu đáng ngờ trong ảnh.'
+      :'Hãy đọc và phân tích nội dung tài liệu đính kèm. Trả lời dựa trên nội dung tệp.');
+    const conversationKey=activeId || `local-${crypto.randomUUID()}`;
+    const messageId=crypto.randomUUID();
+    const responseId=crypto.randomUUID();
+    const createdAt=new Date().toISOString();
+    const userMessage:ChatMessage={id:messageId,role:'user',content:message,createdAt,sources:[],deliveryState:'sending',...(fileAttachment?{attachment:{...fileAttachment,...(preview?{preview}:{})}}:{})};
+    const pendingReply:ChatMessage={id:responseId,role:'assistant',content:'',createdAt,sources:[],deliveryState:'sending'};
+    const prior=messagesRef.current.get(conversationKey) || conversationRef.current.find(row=>row.id===conversationKey)?.messages || [];
+    const optimistic=[...prior,userMessage,pendingReply];
+    messagesRef.current.set(conversationKey,optimistic);
+    updateConversations(rows=>{
+      const existing=rows.find(row=>row.id===conversationKey);
+      const title=existing?.title || message.slice(0,60);
+      const next=rows.filter(row=>row.id!==conversationKey);
+      return [{id:conversationKey,title,messages:optimistic,messageCount:optimistic.length},...next];
+    });
+    if(!activeId)setActiveId(conversationKey);
+
+    requestQueueRef.current.push({conversationKey,message,file:selectedFile,isMember:!!member,userMessageId:messageId,responseId});
+    setQueuedCount(requestQueueRef.current.length+(processingRef.current?1:0));
+    setDraft('');setFile(null);setNotice('');
+    if(fileRef.current)fileRef.current.value='';
+    void processRequestQueue();
+  }
+
+  async function processRequestQueue(){
+    if(processingRef.current)return;
+    processingRef.current=true;setProcessing(true);
     try{
-      const body={requestId:crypto.randomUUID(),message:draft.trim(),conversationId:member?activeId:null,
-        history:member?[]:(active?.messages || []).slice(-6).map(({role,content})=>({role,content}))};
-      let options=json('POST',body);
-      if(file){
-        const form=new FormData();form.set('image',file);form.set('message',body.message);form.set('requestId',body.requestId);
-        if(body.conversationId)form.set('conversationId',body.conversationId);
-        form.set('history',JSON.stringify(body.history));options={method:'POST',body:form};
+      while(requestQueueRef.current.length){
+        const item=requestQueueRef.current.shift()!;
+        setQueuedCount(requestQueueRef.current.length+1);
+        try{
+          let reply:any;
+          let retry=0;
+          while(true){
+            const currentMessages=messagesRef.current.get(item.conversationKey)||[];
+            const history=item.isMember?[]:currentMessages.filter(message=>message.id!==item.userMessageId&&!message.deliveryState).slice(-6).map(({role,content})=>({role,content}));
+            const serverConversationId=item.isMember?(serverConversationIdsRef.current.get(item.conversationKey)||(item.conversationKey.startsWith('local-')?undefined:item.conversationKey)):undefined;
+            const body={requestId:crypto.randomUUID(),message:item.message,conversationId:serverConversationId,guestSessionId:item.isMember?undefined:item.conversationKey.replace(/^local-/,'')||undefined,history};
+            let options=json('POST',body);
+            if(item.file){
+              const form=new FormData();form.set('attachment',item.file,item.file.name);form.set('message',body.message);form.set('requestId',body.requestId);
+              if(body.conversationId)form.set('conversationId',body.conversationId);
+              if(body.guestSessionId)form.set('guestSessionId',body.guestSessionId);
+              form.set('history',JSON.stringify(body.history));options={method:'POST',body:form};
+            }
+            try{
+              reply=await api('/chat/messages',{...options,signal:AbortSignal.timeout(115000)});
+              break;
+            }catch(error){
+              const retryAfter=error instanceof HttpError?error.retryAfterSeconds:undefined;
+              if(error instanceof HttpError&&error.status===429&&retry<1&&retryAfter&&retryAfter<=60&&!/hết hạn chat hôm nay/i.test(error.message)){
+                retry++;setNotice('Chatbot đang chờ hạn mức yêu cầu được làm mới; tin nhắn của bạn vẫn đang xếp hàng.');
+                updateConversationMessages(item.conversationKey,messages=>messages.map(message=>message.id===item.responseId?{...message,content:'Đang chờ lượt xử lý…'}:message));
+                await new Promise(resolve=>setTimeout(resolve,(retryAfter+1)*1000));
+                continue;
+              }
+              throw error;
+            }
+          }
+
+          const serverId=item.isMember?reply.conversationId:undefined;
+          if(serverId)serverConversationIdsRef.current.set(item.conversationKey,serverId);
+          updateConversationMessages(item.conversationKey,messages=>messages.map(message=>{
+            if(message.id===item.userMessageId)return reply.userMessage as ChatMessage;
+            if(message.id===item.responseId)return reply.assistantMessage as ChatMessage;
+            return message;
+          }),serverId);
+          if(serverId)setActiveId(current=>current===item.conversationKey?serverId:current);
+          setCaps(current=>current&&({...current,usage:{...current.usage,turnsRemainingToday:Math.max(0,current.usage.turnsRemainingToday-1),tokensRemainingToday:reply.usage.remainingTokensToday}}));
+          setNotice(item.file&&reply.attachmentContextSaved===false?'Tệp đã được phân tích cho lượt này nhưng chưa được giữ làm ngữ cảnh hỏi tiếp. Hãy đính kèm lại nếu muốn hỏi sâu hơn.':'');
+        }catch(error){
+          const message=(error as Error)?.message||'Không gửi được tin nhắn.';
+          updateConversationMessages(item.conversationKey,messages=>messages.map(entry=>{
+            if(entry.id===item.userMessageId)return {...entry,deliveryState:'failed'};
+            if(entry.id===item.responseId)return {...entry,content:`Chưa nhận được câu trả lời. ${message}`,deliveryState:'failed'};
+            return entry;
+          }));
+          setNotice(message);
+        }
       }
-      const reply=await api('/chat/messages',{...options,signal:AbortSignal.timeout(55000)});
-      const id=reply.conversationId || activeId || crypto.randomUUID();
-      const messages=[...(active?.messages||[]),reply.userMessage,reply.assistantMessage];
-      setConversations(rows=>[{id,title:active?.title || reply.userMessage.content.slice(0,60),messages,messageCount:messages.length},...rows.filter(r=>r.id!==id)]);
-      setActiveId(id);setFile(null);setDraft('');
-      setCaps(v=>v && ({...v,usage:{...v.usage,turnsRemainingToday:Math.max(0,v.usage.turnsRemainingToday-1),tokensRemainingToday:reply.usage.remainingTokensToday}}));
-    }catch(e){setNotice((e as Error).message)}finally{setBusy(false)}
+    }finally{
+      processingRef.current=false;setProcessing(false);setQueuedCount(0);
+    }
   }
   const closeAndNavigate = (path: string) => {
     setMode('closed');
@@ -157,17 +280,17 @@ export const Chatbot: React.FC = () => {
   const deliveryQuestions = showDelivery && <div className="mt-2 grid gap-1" aria-label="Chọn tình huống giao hàng">{['Đơn thanh toán khi nhận nhưng người giao yêu cầu chuyển khoản trước. Tôi nên làm gì?', 'Có tin nhắn yêu cầu quét QR để hoàn phí giao hàng. Làm sao kiểm tra?'].map(q=><button key={q} type="button" className="rounded-lg bg-blue-50 px-3 py-2 text-left text-xs" onClick={()=>{setDraft(q);setShowDelivery(false);inputRef.current?.focus()}}>{q}</button>)}</div>;
   const composer = (compact: boolean) => (
     <div className={compact ? 'border-t border-slate-100 bg-white px-3 py-3' : 'border-t border-slate-100 bg-white px-5 py-4'}>
-      <div className="mb-1 text-xs text-slate-500" role="status">{notice || (busy?'Đang xử lý…':caps?.enabled?`Còn ${caps.usage.turnsRemainingToday} lượt hôm nay`:caps?'Trợ lý AI đang tắt.':'Đang kiểm tra kết nối…')}</div>
+      <div className="mb-1 text-xs text-slate-500" role="status">{notice || (busy?'Đang tải hội thoại…':processing?`AI đang xử lý${queuedCount>1?` · ${queuedCount-1} tin nhắn đang chờ`:''}`:caps?.enabled?`Còn ${caps.usage.turnsRemainingToday} lượt hôm nay`:caps?'Trợ lý AI đang tắt.':'Đang kiểm tra kết nối…')}</div>
       {member && <p className="text-[11px] text-slate-500">Hội thoại được lưu 30 ngày.</p>}
-      {file && <p className="mb-1 text-xs">Khi gửi, ảnh được chuyển đến Gemini. Hãy che OTP và thông tin cá nhân.</p>}
-      {imageName && <div className="mb-2 flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-[#003896]"><ImagePlus size={15} /><span className="min-w-0 flex-1 truncate">{imageName}</span><button type="button" onClick={() => setFile(null)} aria-label="Bỏ ảnh đã chọn"><X size={15} /></button></div>}
+      {file && <p className="mb-1 text-xs">Tệp được gửi đến Gemini và có thể được giữ làm ngữ cảnh hỏi tiếp tối đa 30 ngày (tài khoản) hoặc 24 giờ (khách). Hãy che OTP và dữ liệu riêng tư.</p>}
+      {attachmentName && <div className="mb-2 flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-[#003896]">{fileAttachmentKind(file)==='image'?<ImagePlus size={15}/>:<FileText size={15}/>}<span className="min-w-0 flex-1 truncate">{attachmentName}</span><button type="button" onClick={() => {setFile(null);if(fileRef.current)fileRef.current.value='';}} aria-label="Bỏ tệp đã chọn"><X size={15} /></button></div>}
       <div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-sm focus-within:border-[#004AC6]">
-        <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={event=>{const f=event.target.files?.[0];if(f && f.size<=2097152)setFile(f);else if(f){setNotice('Ảnh vượt 2 MiB.');notify('Ảnh vượt 2 MiB.', 'error');}event.target.value=''}} aria-label="Chọn ảnh" />
-        <button type="button" disabled={busy || !caps?.imagesEnabled || !caps.enabled} onClick={() => fileRef.current?.click()} className="rounded-xl p-2 text-slate-500 hover:bg-white hover:text-[#003EA8]" aria-label="Đính kèm ảnh"><ImagePlus size={22} /></button>
+        <input ref={fileRef} type="file" accept=".png,.jpg,.jpeg,.webp,.pdf,.docx,.xlsx,image/png,image/jpeg,image/webp,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="hidden" onChange={event=>{const f=event.target.files?.[0];if(f){const ext=f.name.split('.').pop()?.toLowerCase()||'';const kind=fileAttachmentKind(f);const max=kind==='image'?2097152:8388608;if(!allowedExtensions.has(ext)){setFile(null);setNotice('Chọn ảnh PNG/JPG/WEBP, tệp PDF/DOCX hoặc bảng tính XLSX.');notify('Định dạng tệp chưa được hỗ trợ.','error');}else if(f.size>max){setFile(null);setNotice(kind==='image'?'Ảnh vượt 2 MiB.':'Tài liệu vượt 8 MiB.');notify('Tệp vượt dung lượng cho phép.','error');}else if(kind==='image'&&!caps?.imagesEnabled){setFile(null);setNotice('Phân tích ảnh hiện đang tắt. Bạn vẫn có thể gửi PDF, DOCX hoặc XLSX.');notify('Phân tích ảnh hiện đang tắt.','error');}else{setFile(f);setNotice('');}}event.target.value=''}} aria-label="Chọn ảnh hoặc tài liệu" />
+        <button type="button" disabled={busy || !caps?.enabled} onClick={() => fileRef.current?.click()} className="rounded-xl p-2 text-slate-500 hover:bg-white hover:text-[#003EA8]" aria-label="Đính kèm ảnh hoặc tài liệu"><Paperclip size={22} /></button>
         <textarea disabled={busy} ref={inputRef} value={draft} onChange={event => setDraft(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); submitMessage(); } }}
           rows={1} maxLength={2000} placeholder={compact ? 'Nhập tin nhắn…' : 'Nhập câu hỏi hoặc dán tin nhắn nghi ngờ…'} aria-label="Tin nhắn cho trợ lý"
           className="max-h-28 min-h-10 min-w-0 flex-1 resize-none bg-transparent px-1 py-2.5 text-sm text-slate-800 outline-none placeholder:text-slate-400" />
-        <button type="button" onClick={submitMessage} disabled={busy || !caps?.enabled || (!draft.trim() && !file)} className="rounded-xl bg-[#004AC6] p-2.5 text-white transition hover:bg-[#003EA8] disabled:bg-slate-200 disabled:text-slate-400" aria-label="Gửi tin nhắn">{busy?<span aria-label="Đang xử lý">…</span>:<Send size={19} />}</button>
+        <button type="button" onClick={submitMessage} disabled={busy || !caps?.enabled || (!draft.trim() && !file)} className="rounded-xl bg-[#004AC6] p-2.5 text-white transition hover:bg-[#003EA8] disabled:bg-slate-200 disabled:text-slate-400" aria-label="Gửi tin nhắn"><Send size={19} /></button>
       </div>
       {!compact && <p className="mt-2 text-center text-[11px] text-slate-400">Trợ lý AI có thể mắc sai sót. Hãy kiểm chứng thông tin quan trọng.</p>}
     </div>
@@ -177,12 +300,17 @@ export const Chatbot: React.FC = () => {
     <div className="mx-auto flex w-full max-w-[980px] flex-col gap-4 px-4 py-5 sm:px-8" aria-live="polite">
       {active?.messages.map(m => (
         <div key={m.id} className={m.role === 'user' ? 'self-end rounded-xl bg-[#004AC6] p-3 text-sm text-white' : 'self-start rounded-xl bg-blue-50 p-3 text-sm'}>
-          {m.role === 'assistant' ? <ChatAnswer content={m.content} /> : <p className="whitespace-pre-wrap break-words">{m.content}</p>}
+          {m.attachment?.kind==='image'&&m.attachment.preview&&<img src={m.attachment.preview} alt={`Ảnh người dùng gửi: ${m.attachment.name}`} className="mb-2 max-h-72 max-w-full rounded-lg object-contain" />}
+          {m.attachment?.kind==='document'&&<div className="mb-2 flex max-w-full items-center gap-2 rounded-lg bg-white/90 px-3 py-2 text-xs text-slate-700"><FileText size={17} className="shrink-0 text-[#004AC6]"/><span className="break-all">{m.attachment.name}</span></div>}
+          {m.content&& (m.role === 'assistant' ? <ChatAnswer content={m.content} /> : <p className="whitespace-pre-wrap break-words">{m.content}</p>)}
+          {m.role==='assistant'&&m.deliveryState==='sending'&&<p className="flex items-center gap-2 text-slate-500"><span className="inline-block h-2 w-2 animate-pulse rounded-full bg-[#004AC6]"/>Đang phân tích và soạn câu trả lời…</p>}
+          {m.deliveryState==='sending'&&m.role==='user'&&<small className="mt-2 block text-[11px] opacity-70">Tin nhắn đang chờ gửi đến AI…</small>}
+          {m.deliveryState==='failed'&&m.role==='user'&&<small className="mt-2 block text-[11px] opacity-80">Tin nhắn chưa được xử lý.</small>}
           {m.sources?.length > 0 && <div className="mt-3 space-y-1 border-t border-blue-100 pt-2 text-xs">
             <p className="font-semibold text-slate-600">Nguồn tham khảo</p>
             {m.sources.map(s => <a key={`${s.kind}:${s.url}:${s.title}`} className="block text-[#004AC6] underline underline-offset-2" href={s.url} target="_blank" rel="noreferrer">{s.title}</a>)}
           </div>}
-          {m.role === 'assistant' && <div className="mt-3 flex gap-3 text-xs"><button className="underline" onClick={() => closeAndNavigate('/kiem-tra')}>Kiểm tra dấu hiệu</button><button className="underline" onClick={() => closeAndNavigate('/bao-cao')}>Báo cáo</button></div>}
+          {m.role === 'assistant' && !m.deliveryState && <div className="mt-3 flex gap-3 text-xs"><button className="underline" onClick={() => closeAndNavigate('/kiem-tra')}>Kiểm tra dấu hiệu</button><button className="underline" onClick={() => closeAndNavigate('/bao-cao')}>Báo cáo</button></div>}
           <small className="mt-2 block text-[11px] opacity-70">{new Date(m.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</small>
         </div>
       ))}
@@ -213,11 +341,11 @@ export const Chatbot: React.FC = () => {
       <div className="flex min-w-0 flex-1 flex-col"><header className="shrink-0 border-b border-slate-100 bg-white px-4 py-4 sm:px-6"><div className="flex items-center gap-3"><div className="flex min-w-0 flex-1 items-center gap-3">{!showSidebar && <button type="button" onClick={() => setShowSidebar(true)} className="hidden rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:block" aria-label="Hiện thanh bên"><MessageSquare size={20} /></button>}<h2 className="truncate text-lg font-bold sm:text-xl">Trợ lý AI CyberAware</h2></div><button type="button" onClick={newConversation} className="rounded-lg p-2 text-[#003EA8] hover:bg-blue-50 lg:hidden" aria-label="Hội thoại mới"><Plus size={22} /></button><button type="button" onClick={() => setMode('compact')} className="flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-sm font-semibold hover:bg-slate-200"><Minus size={18} /><span className="hidden sm:inline">Thu nhỏ</span></button><button type="button" onClick={() => setMode('closed')} className="flex items-center gap-2 rounded-xl bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-100"><LogOut size={18} /><span className="hidden sm:inline">Thoát</span></button></div><div className="mt-4 flex items-center gap-2 overflow-x-auto pb-1">
         {conversations.length>0 && <select disabled={busy} aria-label="Hội thoại gần đây" value={activeId || ''} onChange={e=>void openConversation(e.target.value)} className="max-w-44 lg:hidden"><option value="" disabled>Gần đây</option>{conversations.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select>}
         {listCursor && <button onClick={async()=>{try{const p=await api('/chat/conversations?cursor='+encodeURIComponent(listCursor));setListCursor(p.nextCursor);setConversations(rows=>[...rows,...p.items.filter((c:Conversation)=>!rows.some(r=>r.id===c.id)).map((c:Conversation)=>({...c,messages:[]}))])}catch(e){setNotice((e as Error).message)}}}>Tải thêm</button>}
-        {active && <button disabled={busy} className="shrink-0 text-xs text-rose-700" onClick={()=>setPendingDelete(active)}>Xóa hội thoại</button>}<span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-semibold text-[#003EA8]"><Bot size={18} /> AI</span><span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-600">Phòng tránh lừa đảo</span><span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-600">Hướng dẫn xử lý</span></div></header>
+        {active && <button disabled={busy||processing||requestQueueRef.current.length>0} className="shrink-0 text-xs text-rose-700 disabled:text-slate-300" onClick={()=>setPendingDelete(active)}>Xóa hội thoại</button>}<span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-semibold text-[#003EA8]"><Bot size={18} /> AI</span><span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-600">Phòng tránh lừa đảo</span><span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-600">Hướng dẫn xử lý</span></div></header>
         <div className="min-h-0 flex-1 overflow-y-auto bg-[#F8FAFC]">{active?.messages.length ? messages(false) : <div className="mx-auto flex min-h-full w-full max-w-[1020px] flex-col justify-center px-5 py-10 sm:px-8"><div className="mb-8"><span className="mb-4 flex h-20 w-20 items-center justify-center rounded-[26px] bg-blue-50 text-[#004AC6] shadow-sm"><Bot size={34} /></span><h1 className="text-2xl font-bold leading-tight text-slate-950 sm:text-4xl">Chào bạn, Trợ lý AI có thể giúp gì?</h1><p className="mt-3 text-base text-slate-500 sm:text-xl">Hỗ trợ nhận biết rủi ro và tìm hiểu cách phòng chống lừa đảo trực tuyến.</p></div>{suggestionButtons(false)}{deliveryQuestions}{showNotice && <div className="mt-8 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-medium text-slate-600"><ShieldAlert size={20} className="shrink-0 text-slate-400" /><span className="flex-1">Không gửi mã OTP, mật khẩu hoặc thông tin thẻ ngân hàng tại đây.</span><button type="button" onClick={() => setShowNotice(false)} aria-label="Đóng lưu ý" className="text-slate-400 hover:text-slate-700"><X size={19} /></button></div>}</div>}</div>
         <div className="mx-auto w-full max-w-[1040px]">{composer(false)}</div>
       </div>
     </section>}
-    {pendingDelete && <ConfirmDialog title="Xóa hội thoại?" description={`Hội thoại “${pendingDelete.title}” sẽ bị xóa vĩnh viễn và không thể khôi phục.`} confirmLabel="Xóa hội thoại" busy={busy} onConfirm={() => void deleteCurrent()} onCancel={() => setPendingDelete(null)} />}
+    {pendingDelete && <ConfirmDialog title="Xóa hội thoại?" description={`Hội thoại “${pendingDelete.title}” sẽ bị xóa vĩnh viễn và không thể khôi phục.`} confirmLabel="Xóa hội thoại" busy={busy||processing||requestQueueRef.current.length>0} onConfirm={() => void deleteCurrent()} onCancel={() => setPendingDelete(null)} />}
   </>;
 };

@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "description": "Vietnamese retrieval cases for semantic paraphrases and specific cybersecurity evidence. Each expected ID is a published lesson, scenario, or reviewed threat record.",
+  "cases": [
+    {
+      "id": "delivery-qr-refund",
+      "query": "Người giao hàng báo giao nhầm đơn rồi bảo quét mã để nhận lại khoản thu hộ. Tôi cần kiểm tra gì?",
+      "relevantSourceIds": ["scenario-scam-shipper"]
+    },
+    {
+      "id": "bank-one-time-code",
+      "query": "Nhân viên ngân hàng gọi xin mã dùng một lần để hủy giao dịch lạ, có nên đọc không?",
+      "relevantSourceIds": ["course-banking-guidance", "course-banking-b1"]
+    },
+    {
+      "id": "https-is-not-proof",
+      "query": "Trang đăng nhập có ổ khóa trên trình duyệt thì đã đủ tin là trang ngân hàng thật chưa?",
+      "relevantSourceIds": ["course-banking-b2"]
+    },
+    {
+      "id": "credential-exposure-response",
+      "query": "Tôi lỡ nhập thông tin đăng nhập vào trang giả. Việc nào cần làm trước để bảo vệ tài khoản?",
+      "relevantSourceIds": ["course-crisis-guidance", "course-crisis-c2"]
+    },
+    {
+      "id": "fake-captcha-command",
+      "query": "Một CAPTCHA yêu cầu mở cửa sổ lệnh và dán nội dung vào máy tính để xác minh. Có bình thường không?",
+      "relevantSourceIds": ["intel-official-fake-captcha-2026"]
+    },
+    {
+      "id": "recovery-fee-scam",
+      "query": "Người lạ hứa lấy lại khoản tiền đã mất nhưng bắt nộp phí trước, cần xử lý ra sao?",
+      "relevantSourceIds": ["scenario-scam-recovery", "intel-official-mistaken-transfer-recovery-2026"]
+    },
+    {
+      "id": "tampered-payment-qr",
+      "query": "Mã thanh toán bị dán đè ở quầy có thể khiến khoản chuyển tới nhầm người không?",
+      "relevantSourceIds": ["scenario-scam-qr"]
+    },
+    {
+      "id": "deepfake-relative-call",
+      "query": "Cuộc gọi video trông giống người thân thúc chuyển khoản khẩn cấp thì xác minh độc lập bằng cách nào?",
+      "relevantSourceIds": ["course-deepfake-guidance"]
+    }
+  ]
+}

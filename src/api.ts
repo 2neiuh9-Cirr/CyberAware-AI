@@ -1,7 +1,7 @@
 import { notify } from './components/common/toast';
 
 export class HttpError extends Error {
-  constructor(public status: number, message: string) { super(message); }
+  constructor(public status: number, message: string, public retryAfterSeconds?: number) { super(message); }
 }
 export async function api<T = any>(path: string, options: RequestInit = {}): Promise<T> {
   let response: Response;
@@ -16,7 +16,8 @@ export async function api<T = any>(path: string, options: RequestInit = {}): Pro
   const data = await response.json().catch(() => ({ error: 'Phản hồi máy chủ không hợp lệ.' }));
   if (!response.ok) {
     if (response.status === 401 && !path.startsWith('/auth/')) window.dispatchEvent(new Event('cyberaware-session-expired'));
-    const failure = new HttpError(response.status, data.error || 'Yêu cầu không thành công.');
+    const retryAfterSeconds = Number(response.headers.get('retry-after'));
+    const failure = new HttpError(response.status, data.error || 'Yêu cầu không thành công.', Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0 ? retryAfterSeconds : undefined);
     if (!(response.status === 401 && path === '/me')) notify(failure.message, 'error');
     throw failure;
   }

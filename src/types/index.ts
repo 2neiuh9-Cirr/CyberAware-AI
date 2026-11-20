@@ -97,6 +97,7 @@ export interface User {
 }
 
 export interface ChatSource { kind: string; title: string; url: string; sourceDate?: string }
-export interface ChatMessage { id: string; role: 'user' | 'assistant'; content: string; createdAt: string; sources: ChatSource[] }
+export interface ChatAttachment { kind: 'image' | 'document'; name: string; mimeType: string; preview?: string }
+export interface ChatMessage { id: string; role: 'user' | 'assistant'; content: string; createdAt: string; sources: ChatSource[]; attachment?: ChatAttachment; deliveryState?: 'sending' | 'failed' }
 export interface ChatConversation { id: string; title: string; messageCount: number; messages: ChatMessage[] }
-export interface ChatCapabilities { enabled: boolean; imagesEnabled: boolean; limits: { maxImageBytes: number; maxMessageChars: number }; usage: { turnsRemainingToday: number; tokensRemainingToday: number; imagesRemainingToday: number } }
+export interface ChatCapabilities { enabled: boolean; imagesEnabled: boolean; limits: { maxImageBytes: number; maxDocumentBytes: number; maxFilesPerTurn: number; maxMessageChars: number; maxUserTokens?: number }; usage: { turnsRemainingToday: number; tokensRemainingToday: number; imagesRemainingToday: number } }
