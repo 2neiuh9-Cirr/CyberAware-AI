@@ -109,5 +109,7 @@ Với VPS, dùng `NODE_ENV=production`, cài phụ thuộc, build và khởi đ�
 ## Tài liệu và giới hạn
 
 - `docs/guides/`: hướng dẫn cấu hình và vận hành; `docs/plans/`: kế hoạch; `docs/reports/`: báo cáo; `docs/archive/`: bản nháp lưu trữ.
+- [Mô tả chi tiết chatbot](docs/guides/chatbot.md): kiến trúc hỏi đáp, nguồn truy xuất, xử lý ảnh/tài liệu, lưu ngữ cảnh, hạn mức, cấu hình và kiểm thử.
+- [Tích hợp AI và phương án dự phòng](docs/guides/ai-integration.md): cấu hình khóa, phân tích URL/tin nhắn, Gemini, chatbot, timeout, lỗi và bằng chứng kiểm thử.
 - [Danh mục SRS](docs/specifications/README.md) xác định v2.3 là bản tài liệu mới nhất trong thư mục chính, nhưng bản này đối chiếu mã ở một commit cũ và chưa bao quát đầy đủ tính năng Gmail. Mã nguồn và các README theo chức năng mô tả trạng thái triển khai hiện tại.
 - Kết quả phân tích không thay cho việc xác minh trực tiếp với tổ chức, ngân hàng hoặc người gửi bằng kênh chính thức. AI và tài nguyên Gmail ngoài hệ thống cần cấu hình, quyền và dịch vụ tương ứng để dùng thực tế.

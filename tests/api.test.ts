@@ -9,7 +9,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { Writer } from 'protobufjs';
 import { passwordChangedMail, resetCodeMail, verificationCodeMail } from '../backend/securityMail';
 import { decodeSafeBrowsingResponse } from '../backend/analysis/safeBrowsing';
-import { formatChatAnswer } from '../shared/chatAnswer';
+import { formatChatAnswer, groundObservedSigns } from '../shared/chatAnswer';
 process.env.AUTH_DATA_DIR = mkdtempSync(path.join(tmpdir(), 'cyberaware-api-'));
 process.env.AUTH_JWT_SECRET = 'isolated-test-secret-at-least-32-bytes-long';
 process.env.NODE_ENV = 'test';
@@ -74,6 +74,15 @@ test('chat answer separates inline numbered ideas without forcing a single point
     'Tôi có thể giúp bạn:\n\n1. Kiểm tra tin nhắn.\n2. Hướng dẫn xử lý.\n3. Gợi ý phòng tránh.',
   );
   assert.equal(formatChatAnswer('Bước 1. Hãy kiểm tra nguồn gửi.'), 'Bước 1. Hãy kiểm tra nguồn gửi.');
+});
+
+test('chat observed signs do not borrow a link from retrieved examples', () => {
+  const answer='Dấu hiệu\n• Tin nhắn yêu cầu cung cấp mã OTP.\n• Tin nhắn chứa đường liên kết lạ.\n\nViệc nên làm ngay\n• Không cung cấp OTP.\n• Không bấm vào liên kết lạ nếu có.';
+  const question='Nếu nhận được tin nhắn yêu cầu cung cấp mã OTP để nhận quà, tôi nên làm gì?';
+  const grounded=groundObservedSigns(answer,question);
+  assert.doesNotMatch(grounded,/^• Tin nhắn chứa đường liên kết lạ\./m);
+  assert.match(grounded,/^• Không bấm vào liên kết lạ nếu có\./m);
+  assert.equal(groundObservedSigns(answer,question+' Có kèm đường liên kết lạ.'),answer);
 });
 
 test('health, safe error contract and anonymous access', async () => {

@@ -16,6 +16,7 @@
     "test": "tsx --test tests/api.test.ts tests/chat-retrieval.test.ts tests/extension-context.test.ts tests/qr.test.ts",
     "test:ai": "tsx --test tests/risk-calibration.test.ts",
     "evaluate:chat:retrieval": "tsx scripts/verification/evaluate-chat-retrieval.ts",
+    "evaluate:sms": "tsx scripts/verification/evaluate-sms-risk.ts",
     "verify:ai:live": "tsx scripts/verification/verify-gemini-live.ts",
     "test:auth": "tsx tests/auth-smoke.ts",
     "test:e2e": "playwright test",

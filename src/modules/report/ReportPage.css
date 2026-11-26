@@ -1,4 +1,4 @@
-.report-page { position: relative; isolation: isolate; }
+.report-page { position: relative; isolation: isolate; overflow-x: clip; }
 .report-page::before,
 .report-page::after { position: absolute; z-index: -1; width: 17rem; height: 17rem; border-radius: 50%; background: radial-gradient(circle, rgb(191 219 254 / .32), transparent 68%); content: ''; pointer-events: none; animation: report-ambient 10s ease-in-out infinite; }
 .report-page::before { top: -6rem; left: -9rem; }

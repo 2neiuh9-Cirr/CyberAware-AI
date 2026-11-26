@@ -69,13 +69,14 @@ function smsSignals(raw: string) {
   const links = [...raw.matchAll(/https?:\/\/[^\s<>"']+|\bwww\.[^\s<>"']+/gi)].map(match => match[0].replace(/[.,;!?)]$/, ''));
   const advisory = /(?:khong|dung|tuyet doi khong|canh giac|canh bao).{0,35}(?:cung cap|chia se|gui|bam|nhap|chuyen tien|chuyen khoan|quet ma)/.test(plain);
   const action = /(?:vui long|hay|yeu cau|can|phai|lap tuc|ngay|de nhan|de duoc|truy cap|bam vao|nhan vao|gui|nhap|cung cap|chuyen|nap|cai dat|tai ve|quet)/.test(plain);
-  const credential = /\b(?:otp|ma xac thuc|mat khau|ma pin|cvv|so the|cum tu khoi phuc|seed phrase|private key)\b/.test(plain);
+  const credential = /\b(?:otp|ma xac thuc|mat khau|ma pin|cvv|so the|cum tu khoi phuc|ma khoi phuc vi|seed phrase|private key)\b/.test(plain);
   const payment = !/(?:da|vua) chuyen (?:tien|khoan)/.test(plain) && (/(?:chuyen tien|chuyen khoan|nap tien|dong phi|nop tien|dat coc|thanh toan).{0,60}(?:tai khoan|de nhan|de rut|de mo|de xac minh|phi|thue|don hang|ngay|gap)/.test(plain)
     || /(?:de nhan|de rut|de mo|de xac minh|phi|thue).{0,60}(?:chuyen tien|chuyen khoan|nap tien|dong phi|nop tien|dat coc)/.test(plain));
   const install = /(?:cai dat|tai ve|cap quyen|bat quyen).{0,50}(?:apk|ung dung|tro nang|accessibility|anydesk|teamviewer|rustdesk|dieu khien tu xa)/.test(plain);
   const pressure = /(?:trong \d+ (?:phut|gio)|neu khong|khoa tai khoan|cat dien|truy to|lenh bat|phat nguoi)/.test(plain);
   const prize = /(?:chuc mung|trung\s+(?:\d+\s*)?(?:thuong|xe|giai|qua)|may man\s+trung|khach hang may man|nguoi may man|nhan giai thuong)/.test(plain);
-  const prizeFee = prize && /(?:nop|dong|chuyen|thanh toan)\s+(?:tien\s+)?(?:thue|phi|le phi|tien).{0,70}(?:stk|so tai khoan|tai khoan|\d{4,})/.test(plain);
+  const prizeFee = prize && /(?:nop|dong|chuyen|thanh toan)\s+(?:(?:\d+(?:[.,]\d+)?\s*(?:trieu|nghin|ngan|dong)\s*)?(?:tien\s+)?(?:thue|phi|le phi|tien)|\d+(?:[.,]\d+)?\s*(?:trieu|nghin|ngan|dong)\s+(?:tien\s+)?(?:thue|phi|le phi)).{0,70}(?:stk|so tai khoan|tai khoan|\d{4,})/.test(plain);
+  const urgentFriendTransfer = /\b(?:can tien gap|gap tien)\b/.test(plain) && /\b(?:chuyen giup|chuyen ho|chuyen cho)\b/.test(plain) && /\b(?:tai khoan moi|dung goi|khong goi|khong duoc goi)\b/.test(plain);
   const lure = prize || /(?:nhan qua|hoan tien|loi nhuan|hoa hong|viec nhe luong cao|lam nhiem vu|hoan thue|tro cap)/.test(plain);
   const bankLock = /\b(?:tai khoan(?: ngan hang)?|the(?: ngan hang)?|giao dich)\b.{0,100}\b(?:bi khoa|khoa tam thoi|khoa vinh vien|dinh chi|ngung hoat dong)\b/.test(plain);
   const verifyAtLink = /\b(?:vui long|hay|can|phai)\s+(?:xac minh|dang nhap|cap nhat thong tin)\b/.test(plain) && links.length > 0;
@@ -90,6 +91,7 @@ function smsSignals(raw: string) {
   }
   if (lure) { score += advisory ? 0 : 10; if (!advisory) flags.push('Nội dung dùng phần thưởng, lợi nhuận hoặc quyền lợi để thu hút.'); }
   if (!advisory && prizeFee) { score += 65; flags.push('Thông báo trúng thưởng nhưng yêu cầu nộp thuế hoặc phí vào tài khoản để nhận giải.'); }
+  if (!advisory && urgentFriendTransfer) { score += 45; flags.push('Người tự nhận quen biết yêu cầu chuyển tiền gấp và hạn chế xác minh qua cuộc gọi; cần gọi lại số quen thuộc trước khi chuyển.'); }
   if (!advisory && prize && action && links.length) { score += 50; flags.push('Thông báo trúng giải bất ngờ và yêu cầu mở liên kết để nhận thưởng.'); }
   if (links.length) {
     score += advisory ? 0 : 8;

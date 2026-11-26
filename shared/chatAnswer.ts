@@ -78,3 +78,19 @@ export function sanitizeChatAnswer(value: string, sources: ChatKnowledgeSource[]
   answer = answer.replace(/\[(?:course|scenario|intel)-[a-z0-9_-]+\]/gi, '');
   return formatChatAnswer(answer.replace(/\s+([.,;:!?])/g, '$1'));
 }
+
+// Retrieved examples can describe details that were never reported by the user.
+// Keep those examples as advice, but do not present them as observed signs.
+export function groundObservedSigns(answer: string, userContext: string): string {
+  if (/\b(?:url|link|https?:\/\/|www\.)\b|liên kết|đường dẫn|trang web|website/iu.test(userContext)) return answer;
+  const lines = answer.split('\n');
+  let inSigns = false;
+  return lines.filter(line => {
+    if (/^\s*Dấu hiệu(?: trong nội dung)?\s*:?[\s]*$/iu.test(line)) {
+      inSigns = true;
+      return true;
+    }
+    if (inSigns && /^\s*(?:Việc nên làm ngay|Khuyến nghị|Lưu ý|Cách xử lý|Các bước|Kết luận)\s*:?\s*$/iu.test(line)) inSigns = false;
+    return !(inSigns && /^\s*(?:[-•●▪]|\d{1,2}[.)])\s+/u.test(line) && /liên kết|đường dẫn|\blink\b|\burl\b|trang web|website/iu.test(line));
+  }).join('\n').replace(/\n{3,}/g, '\n\n');
+}
