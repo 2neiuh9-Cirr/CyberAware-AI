@@ -21,16 +21,19 @@ flowchart LR
     S --> DB[(SQLite: hội thoại tài khoản, embeddings và ngữ cảnh tệp)]
 ```
 
-Mã chính nằm ở [backend/chat/chat.ts](../../backend/chat/chat.ts), [backend/chat/chatKnowledge.ts](../../backend/chat/chatKnowledge.ts), [backend/chat/chatSemantic.ts](../../backend/chat/chatSemantic.ts) và [backend/chat/attachments.ts](../../backend/chat/attachments.ts). Giao diện nằm ở [src/components/chat/Chatbot.tsx](../../src/components/chat/Chatbot.tsx).
+API được chia theo trách nhiệm trong `backend/chat/`. Giao diện điều phối ở [Chatbot.tsx](../../src/components/chat/Chatbot.tsx); [ChatMessageList.tsx](../../src/components/chat/ChatMessageList.tsx) hiển thị tin nhắn ở cả hai chế độ.
 
 ## Các tệp trong `backend/chat/`
 
 | Tệp | Trách nhiệm |
 | --- | --- |
-| [`chat.ts`](../../backend/chat/chat.ts) | **Điều phối chính của API chatbot.** Tạo/cập nhật các bảng SQLite, dọn dữ liệu hết hạn, đọc cấu hình và hạn mức; nhận diện khách/tài khoản; kiểm tra request, quota, lịch sử và quyền sở hữu hội thoại; gọi các phần xử lý tệp và truy xuất nguồn; đếm token, gọi Gemini, kiểm tra đầu ra rồi lưu hội thoại/ngữ cảnh. Các route công khai như `/capabilities`, `/messages` và các route lịch sử hội thoại cũng được khai báo tại đây. |
+| [`chat.ts`](../../backend/chat/chat.ts) | **Khai báo route.** Cung cấp khả năng chatbot, đọc/xóa hội thoại và gắn middleware cho `/messages`. Giữ các export cũ để các nơi gọi hiện tại không phải đổi. |
+| [`chatState.ts`](../../backend/chat/chatState.ts) | **Trạng thái và hạn mức.** Tạo/nâng cấp bảng SQLite, dọn dữ liệu hết hạn, đọc/sửa cấu hình, nhận diện người dùng, kiểm tra quyền sở hữu, tính và giữ chỗ quota. |
+| [`chatPrompt.ts`](../../backend/chat/chatPrompt.ts) | **Quy tắc trả lời.** Chứa system instruction gửi Gemini, tách khỏi logic xử lý request để dễ đọc và cập nhật. |
+| [`chatRequest.ts`](../../backend/chat/chatRequest.ts) | **Xử lý một lượt chat.** Đọc JSON/multipart, kiểm tra đầu vào, tải lịch sử và ngữ cảnh tệp, truy xuất nguồn, đếm token, gọi Gemini, chuẩn hóa kết quả và lưu hội thoại/ngữ cảnh/usage. |
 | [`chatKnowledge.ts`](../../backend/chat/chatKnowledge.ts) | **Chuẩn bị dữ liệu tri thức và xếp hạng nguồn.** Đọc tình huống, bài học đã phát hành và cảnh báo đã duyệt; tách nội dung thành các đoạn; tính điểm từ khóa, cosine similarity và điểm kết hợp; cung cấp tìm từ khóa dự phòng khi embeddings không khả dụng. Tệp này không gọi Gemini. |
 | [`chatSemantic.ts`](../../backend/chat/chatSemantic.ts) | **Tạo và sử dụng embeddings cho truy xuất.** Gọi `gemini-embedding-001` cho đoạn tài liệu và câu hỏi, lưu vector theo fingerprint trong `chat_knowledge_embeddings`, nạp vector đã lưu và gọi hàm xếp hạng trong `chatKnowledge.ts`. Nếu bước embedding lỗi, nó trả về kết quả từ tìm từ khóa. |
-| [`attachments.ts`](../../backend/chat/attachments.ts) | **Kiểm tra và đọc tệp đính kèm.** Kiểm tra định dạng/chữ ký/kích thước; chuẩn hóa ảnh; trích xuất PDF, DOCX, XLSX; giữ vị trí trang, đoạn hoặc ô; chọn phần tài liệu liên quan khi văn bản quá dài. Tệp này không gọi Gemini và không lưu tệp vào DB; `chat.ts` quyết định nội dung nào được đưa vào prompt hoặc giữ làm ngữ cảnh. |
+| [`attachments.ts`](../../backend/chat/attachments.ts) | **Kiểm tra và đọc tệp đính kèm.** Kiểm tra định dạng/chữ ký/kích thước; chuẩn hóa ảnh; trích xuất PDF, DOCX, XLSX; giữ vị trí trang, đoạn hoặc ô; chọn phần tài liệu liên quan khi văn bản quá dài. Tệp này không gọi Gemini và không lưu tệp vào DB; `chatRequest.ts` quyết định nội dung nào được đưa vào prompt hoặc giữ làm ngữ cảnh. |
 
 ### Các tệp hỗ trợ nằm ngoài `backend/chat/`
 
@@ -41,10 +44,11 @@ Mã chính nằm ở [backend/chat/chat.ts](../../backend/chat/chat.ts), [backen
 
 ### Luồng gọi giữa các tệp
 
-1. `chat.ts` nhận request. Nếu có tệp, nó gọi `attachments.ts` để xác thực, trích xuất và chọn nội dung.
-2. `chat.ts` gọi `chatSemantic.ts` để truy vấn tri thức. `chatSemantic.ts` lấy dữ liệu/đoạn và xếp hạng qua `chatKnowledge.ts`.
-3. `chat.ts` ghép câu hỏi, lịch sử, nguồn và ngữ cảnh tệp thành prompt rồi gọi Gemini.
-4. Khi nhận đầu ra, `chat.ts` dùng `shared/chatAnswer.ts` để làm sạch nội dung và nguồn, sau đó lưu kết quả cho tài khoản hoặc trả về khách.
+1. `chat.ts` nhận request và gọi `chatRequest.ts`; `chatState.ts` kiểm tra người dùng, cấu hình và hạn mức.
+2. Nếu có tệp, `chatRequest.ts` gọi `attachments.ts` để xác thực, trích xuất và chọn nội dung.
+3. `chatRequest.ts` gọi `chatSemantic.ts` để truy vấn tri thức. `chatSemantic.ts` lấy dữ liệu/đoạn và xếp hạng qua `chatKnowledge.ts`.
+4. `chatRequest.ts` ghép câu hỏi, lịch sử, nguồn, ngữ cảnh tệp và `chatPrompt.ts`, rồi gọi Gemini.
+5. Khi nhận đầu ra, `chatRequest.ts` dùng `shared/chatAnswer.ts` để làm sạch nội dung và nguồn, sau đó lưu kết quả cho tài khoản hoặc trả về khách.
 
 ## Nguồn dữ liệu chatbot truy xuất
 

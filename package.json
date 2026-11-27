@@ -13,7 +13,7 @@
     "preview": "vite preview",
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
     "lint": "tsc --noEmit",
-    "test": "tsx --test tests/api.test.ts tests/chat-retrieval.test.ts tests/extension-context.test.ts tests/qr.test.ts",
+    "test": "tsx --test tests/api.test.ts tests/chat-retrieval.test.ts tests/chat-ui.test.ts tests/extension-context.test.ts tests/qr.test.ts",
     "test:ai": "tsx --test tests/risk-calibration.test.ts",
     "evaluate:chat:retrieval": "tsx scripts/verification/evaluate-chat-retrieval.ts",
     "evaluate:sms": "tsx scripts/verification/evaluate-sms-risk.ts",
