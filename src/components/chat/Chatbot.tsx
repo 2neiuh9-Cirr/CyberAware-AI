@@ -16,8 +16,11 @@ import { notify } from '../common/toast';
 
 type ChatMode = 'closed' | 'compact' | 'full';
 type Conversation = ChatConversation;
+
+// Tin nhắn được xếp hàng cùng ID tạm để giao diện hiện ngay trước khi API trả lời.
 type QueuedChatRequest = { conversationKey: string; message: string; file: File | null; isMember: boolean; userMessageId: string; responseId: string };
 
+// Dựa vào phần mở rộng để hiển thị tệp ngay cả khi trình duyệt không cung cấp MIME.
 const allowedExtensions = new Set(['png','jpg','jpeg','webp','pdf','docx','xlsx']);
 const mimeByExtension: Record<string,string> = {
   png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', webp:'image/webp', pdf:'application/pdf',
@@ -33,6 +36,7 @@ function fileAttachmentKind(file: File | null): ChatAttachment['kind'] {
   return file ? attachmentForFile(file).kind : 'document';
 }
 
+// Các câu hỏi gợi ý được đưa vào ô nhập; người dùng vẫn quyết định lúc nào gửi.
 const suggestions = [
   { title: 'Tư vấn thủ đoạn giao hàng', detail: 'Cách nhận biết shipper giả mạo', icon: Truck, prompt: 'Làm sao nhận biết thủ đoạn giả mạo nhân viên giao hàng?' },
   { title: 'Phân tích ảnh chụp', detail: 'Chuẩn bị ảnh tin nhắn để kiểm tra', icon: ImagePlus, prompt: 'Tôi muốn kiểm tra ảnh chụp một tin nhắn đáng ngờ.' },
@@ -43,6 +47,8 @@ const suggestions = [
 const timeLabel = () => new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 
 export const Chatbot: React.FC = () => {
+
+  // Trạng thái giao diện, hội thoại hiện tại, tệp chọn và hạn mức từ backend.
   const navigate = useNavigate();
   const [mode, setMode] = useState<ChatMode>('closed');
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -60,11 +66,15 @@ export const Chatbot: React.FC = () => {
   const [listCursor,setListCursor] = useState<string|null>(null);
   const [pendingDelete,setPendingDelete] = useState<Conversation | null>(null);
   const opened = mode !== 'closed';
+
+  // Nhận yêu cầu mở toàn màn hình từ các trang khác qua chatEvents.ts.
   useEffect(() => {
     const openFullScreen = () => setMode('full');
     window.addEventListener(OPEN_CHAT_FULL_EVENT, openFullScreen);
     return () => window.removeEventListener(OPEN_CHAT_FULL_EVENT, openFullScreen);
   }, []);
+
+  // Khi mở chatbot, lấy khả năng/hạn mức; thành viên còn tải danh sách hội thoại đã lưu.
   useEffect(()=>{
     if(!opened)return;
     let alive=true;
@@ -75,6 +85,7 @@ export const Chatbot: React.FC = () => {
   const [showNotice, setShowNotice] = useState(true);
   const [showSidebar, setShowSidebar] = useState(true);
 
+  // Refs giữ trạng thái mới nhất cho hàng đợi bất đồng bộ, tránh dùng giá trị React đã cũ.
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -87,12 +98,14 @@ export const Chatbot: React.FC = () => {
   const active = conversations.find(item => item.id === activeId);
   conversationRef.current=conversations;
 
+  // Cập nhật đồng thời ref và state để hàng đợi có thể đọc ngay dữ liệu vừa thay đổi.
   function updateConversations(update:(rows:Conversation[])=>Conversation[]) {
     const next=update(conversationRef.current);
     conversationRef.current=next;
     setConversations(next);
   }
 
+  // Ghép ID hội thoại tạm với ID từ server, giữ nguyên tin nhắn đã hiện trên màn hình.
   function updateConversationMessages(key:string, update:(messages:ChatMessage[])=>ChatMessage[], serverId?:string) {
     const old=messagesRef.current.get(key)||[];
     const messages=update(old);
@@ -109,6 +122,7 @@ export const Chatbot: React.FC = () => {
     });
   }
 
+  // Chế độ toàn màn hình khóa cuộn trang nền; Escape đóng chatbot.
   useEffect(() => {
     if (mode !== 'full') return;
     const previous = document.body.style.overflow;
@@ -127,6 +141,7 @@ export const Chatbot: React.FC = () => {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [active?.messages.length, mode]);
 
+  // Tạo vùng chat mới trên giao diện và xóa nội dung/tệp đang soạn.
   const newConversation = () => {
     if(busy)return;
     setActiveId(null);
@@ -137,6 +152,7 @@ export const Chatbot: React.FC = () => {
     inputRef.current?.focus();
   };
 
+  // Thành viên tải từng trang tin nhắn từ server trước khi chuyển sang hội thoại đã chọn.
   async function openConversation(id:string){
     if(busy)return;
     setBusy(true);setNotice('');
@@ -153,6 +169,8 @@ export const Chatbot: React.FC = () => {
       setActiveId(id);setDraft('');setFile(null);if(fileRef.current)fileRef.current.value='';
     }catch(e){setNotice((e as Error).message)}finally{setBusy(false)}
   }
+
+  // Chỉ xóa khi không còn yêu cầu đang xử lý; thành viên xóa cả bản ghi ở server.
   async function deleteCurrent(){
     if(!pendingDelete || busy || processingRef.current || requestQueueRef.current.length)return;
     setBusy(true);
@@ -164,6 +182,8 @@ export const Chatbot: React.FC = () => {
       notify('Hội thoại đã được xóa.', 'success');
     }catch(e){setNotice((e as Error).message)}finally{setBusy(false)}
   }
+
+  // Hiển thị ngay câu hỏi và ô trả lời đang chờ, rồi thêm yêu cầu vào hàng đợi.
   function submitMessage(){
     if(busy||!caps?.enabled||(!draft.trim()&&!file))return;
     if(requestQueueRef.current.length+(processingRef.current?1:0)>=5){setNotice('Đã đủ 5 tin nhắn đang chờ. Hãy đợi chatbot xử lý bớt rồi gửi tiếp.');return;}
@@ -197,6 +217,7 @@ export const Chatbot: React.FC = () => {
     void processRequestQueue();
   }
 
+  // Gửi lần lượt để câu hỏi sau nhận đúng lịch sử/ID hội thoại của câu hỏi trước.
   async function processRequestQueue(){
     if(processingRef.current)return;
     processingRef.current=true;setProcessing(true);
@@ -208,11 +229,15 @@ export const Chatbot: React.FC = () => {
           let reply:any;
           let retry=0;
           while(true){
+
+            // Khách gửi lịch sử kèm request; lịch sử thành viên do backend đọc từ DB.
             const currentMessages=messagesRef.current.get(item.conversationKey)||[];
             const history=item.isMember?[]:currentMessages.filter(message=>message.id!==item.userMessageId&&!message.deliveryState).slice(-6).map(({role,content})=>({role,content}));
             const serverConversationId=item.isMember?(serverConversationIdsRef.current.get(item.conversationKey)||(item.conversationKey.startsWith('local-')?undefined:item.conversationKey)):undefined;
             const body={requestId:crypto.randomUUID(),message:item.message,conversationId:serverConversationId,guestSessionId:item.isMember?undefined:item.conversationKey.replace(/^local-/,'')||undefined,history};
             let options=json('POST',body);
+
+            // Có tệp thì dùng multipart; chỉ có chữ thì gửi JSON.
             if(item.file){
               const form=new FormData();form.set('attachment',item.file,item.file.name);form.set('message',body.message);form.set('requestId',body.requestId);
               if(body.conversationId)form.set('conversationId',body.conversationId);
@@ -223,6 +248,8 @@ export const Chatbot: React.FC = () => {
               reply=await api('/chat/messages',{...options,signal:AbortSignal.timeout(115000)});
               break;
             }catch(error){
+
+              // Thử lại một lần khi giới hạn ngắn hạn có Retry-After, không tự thử khi hết quota ngày.
               const retryAfter=error instanceof HttpError?error.retryAfterSeconds:undefined;
               if(error instanceof HttpError&&error.status===429&&retry<1&&retryAfter&&retryAfter<=60&&!/hết hạn chat hôm nay/i.test(error.message)){
                 retry++;setNotice('Chatbot đang chờ hạn mức yêu cầu được làm mới; tin nhắn của bạn vẫn đang xếp hàng.');
@@ -234,6 +261,7 @@ export const Chatbot: React.FC = () => {
             }
           }
 
+          // Thay tin tạm bằng dữ liệu server trả về và cập nhật số token/lượt còn lại.
           const serverId=item.isMember?reply.conversationId:undefined;
           if(serverId)serverConversationIdsRef.current.set(item.conversationKey,serverId);
           updateConversationMessages(item.conversationKey,messages=>messages.map(message=>{
@@ -245,6 +273,8 @@ export const Chatbot: React.FC = () => {
           setCaps(current=>current&&({...current,usage:{...current.usage,turnsRemainingToday:Math.max(0,current.usage.turnsRemainingToday-1),tokensRemainingToday:reply.usage.remainingTokensToday}}));
           setNotice(item.file&&reply.attachmentContextSaved===false?'Tệp đã được phân tích cho lượt này nhưng chưa được giữ làm ngữ cảnh hỏi tiếp. Hãy đính kèm lại nếu muốn hỏi sâu hơn.':'');
         }catch(error){
+
+          // Giữ câu hỏi trên màn hình, đánh dấu thất bại và hiện lý do để người dùng biết.
           const message=(error as Error)?.message||'Không gửi được tin nhắn.';
           updateConversationMessages(item.conversationKey,messages=>messages.map(entry=>{
             if(entry.id===item.userMessageId)return {...entry,deliveryState:'failed'};
@@ -263,6 +293,7 @@ export const Chatbot: React.FC = () => {
     navigate(path);
   };
 
+  // Các khối giao diện được dùng lại ở cả cửa sổ nhỏ và chế độ toàn màn hình.
   const suggestionButtons = (compact: boolean) => (
     <div className={compact ? 'flex flex-wrap gap-2' : 'grid grid-cols-1 gap-3 sm:grid-cols-2'}>
       {suggestions.slice(0, compact ? 3 : 4).map(({ title, detail, icon: Icon, prompt }) => (
@@ -278,6 +309,8 @@ export const Chatbot: React.FC = () => {
   );
 
   const deliveryQuestions = showDelivery && <div className="mt-2 grid gap-1" aria-label="Chọn tình huống giao hàng">{['Đơn thanh toán khi nhận nhưng người giao yêu cầu chuyển khoản trước. Tôi nên làm gì?', 'Có tin nhắn yêu cầu quét QR để hoàn phí giao hàng. Làm sao kiểm tra?'].map(q=><button key={q} type="button" className="rounded-lg bg-blue-50 px-3 py-2 text-left text-xs" onClick={()=>{setDraft(q);setShowDelivery(false);inputRef.current?.focus()}}>{q}</button>)}</div>;
+
+  // Ô soạn hiển thị trạng thái xử lý, tệp đã chọn và kiểm tra loại/dung lượng trước khi gửi.
   const composer = (compact: boolean) => (
     <div className={compact ? 'border-t border-slate-100 bg-white px-3 py-3' : 'border-t border-slate-100 bg-white px-5 py-4'}>
       <div className="mb-1 text-xs text-slate-500" role="status">{notice || (busy?'Đang tải hội thoại…':processing?`AI đang xử lý${queuedCount>1?` · ${queuedCount-1} tin nhắn đang chờ`:''}`:caps?.enabled?`Còn ${caps.usage.turnsRemainingToday} lượt hôm nay`:caps?'Trợ lý AI đang tắt.':'Đang kiểm tra kết nối…')}</div>
@@ -296,6 +329,7 @@ export const Chatbot: React.FC = () => {
     </div>
   );
 
+  // Tin người dùng và phản hồi AI có kiểu hiển thị riêng; nguồn tham khảo nằm dưới phản hồi.
   const messages = (compact: boolean) => (
     <div className="mx-auto flex w-full max-w-[980px] flex-col gap-4 px-4 py-5 sm:px-8" aria-live="polite">
       {active?.messages.map(m => (
@@ -319,6 +353,7 @@ export const Chatbot: React.FC = () => {
     </div>
   );
 
+  // Chọn một trong ba chế độ: nút mở, cửa sổ nhỏ hoặc toàn màn hình.
   return <>
     {mode === 'closed' && <button type="button" onClick={() => setMode('compact')} aria-label="Mở trợ lý AI" title="Mở trợ lý AI"
       className="fixed bottom-4 right-4 z-[70] flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#004AC6] to-[#003896] text-white shadow-[0_10px_24px_rgba(0,74,198,0.28)] transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#004AC6] sm:bottom-6 sm:right-8">

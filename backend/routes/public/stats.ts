@@ -3,6 +3,7 @@ import { me } from '../../auth';
 import { db } from '../../database';
 import { now, user, item, progress } from './shared';
 
+// Thống kê chung từ dữ liệu SQLite và thống kê cá nhân theo tài khoản hiện tại.
 export function registerStatsRoutes(router: Router) {
   router.get('/stats/overview', (_req, res) => {
     const counts = db.prepare("SELECT COUNT(*) AS total, COALESCE(SUM(date(created_at, '+7 hours') = date('now', '+7 hours')),0) AS today, AVG(json_extract(result,'$.analysisTimeMs')) AS average FROM scans").get()!;

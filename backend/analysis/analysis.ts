@@ -5,9 +5,11 @@ import { db } from '../database';
 import { evaluateStoredRules, matchReviewedIntel } from './intelligence';
 import { canTryAnotherModel, modelCandidates } from '../ai/modelFallback';
 
+// Cờ quản trị bật/tắt bước đánh giá bổ sung bằng AI trong luồng quét.
 db.exec("CREATE TABLE IF NOT EXISTS analysis_settings (id INTEGER PRIMARY KEY CHECK(id = 1), ai_enabled INTEGER NOT NULL DEFAULT 1)");
 db.prepare('INSERT OR IGNORE INTO analysis_settings (id,ai_enabled) VALUES (1,1)').run();
 
+// Chỉ chấp nhận bốn loại đầu vào mà bộ phân tích có quy tắc xử lý.
 export function scanType(value: unknown): ScanType {
   if (!['url', 'sms', 'phone', 'bank'].includes(value as string)) throw new ApiError(400, 'type phải là url, sms, phone hoặc bank.');
   return value as ScanType;
@@ -41,6 +43,7 @@ const brandDomains: Record<string, string[]> = {
   techcombank: ['techcombank.com', 'techcombank.com.vn'], mbbank: ['mbbank.com.vn'], vneid: ['vneid.gov.vn'],
 };
 
+// URL được đánh giá từ chuỗi địa chỉ, không tải nội dung trang đích.
 function urlSignals(raw: string) {
   const url = new URL(raw);
   const host = url.hostname.toLowerCase().replace(/^www\./, '');
@@ -63,6 +66,7 @@ function urlSignals(raw: string) {
   return { score: Math.min(score, 95), flags, host };
 }
 
+// Phân biệt lời dụ thao tác với lời cảnh báo/trích dẫn trước khi tính điểm tin nhắn.
 function smsSignals(raw: string) {
   const plain = raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
   const flags: string[] = [];
@@ -169,6 +173,7 @@ function additionalSmsSignals(raw: string) {
   return { score: Math.min(score, 70), flags };
 }
 
+// Ghép bằng chứng đã duyệt, quy tắc và tín hiệu theo loại đầu vào thành kết quả quét có giới hạn rõ ràng.
 export async function analyze(type: ScanType, query: string, approvedReport: boolean, allowAi = true): Promise<ScanResult> {
   const start = performance.now();
   const relatedWarnings = matchReviewedIntel(type, query);
@@ -229,6 +234,8 @@ export async function analyze(type: ScanType, query: string, approvedReport: boo
     source: approvedReport ? 'rules+community' : exactIntelMatch ? 'rules+intel' : 'rules', confidence: 'limited', aiStatus: 'disabled',
     scannedAt: new Date().toISOString(), analysisTimeMs: 0,
   };
+
+  // AI chỉ được gọi cho URL/tin nhắn khi có khóa và được quản trị cho phép.
   if (allowAi && (type === 'url' || type === 'sms') && process.env.GEMINI_API_KEY && db.prepare('SELECT ai_enabled FROM analysis_settings WHERE id = 1').get()?.ai_enabled === 1) {
     try {
       const { GoogleGenAI } = await import('@google/genai');
@@ -262,12 +269,14 @@ Với URL, chỉ phân tích ký tự của URL: tên miền, cấu trúc, đư�
   return result;
 }
 
+// Lỗi từ provider không làm mất kết quả tính bằng quy tắc đã có.
 function markGeminiUnavailable(result: ScanResult, error: unknown) {
   result.aiStatus = 'unavailable';
   const status = typeof error === 'object' && error !== null && 'status' in error ? error.status : undefined;
   console.warn('Gemini analysis unavailable', { status, reason: status ? 'api-error' : 'invalid-response-or-network' });
 }
 
+// Thử lần lượt model dự phòng trong cùng thời hạn quét nếu lỗi có thể khôi phục.
 export async function applyGeminiWithFallback(
   result: ScanResult,
   primaryModel: string,
@@ -296,6 +305,7 @@ export async function applyGeminiWithFallback(
   }
 }
 
+// Chỉ dùng đánh giá AI sau khi kiểm tra schema và trích dẫn có thật trong đầu vào.
 export function applyAiAssessment(result: ScanResult, data: unknown) {
   if (!data || typeof data !== 'object') throw new Error('Invalid AI response');
   const ai = data as Record<string, unknown>;

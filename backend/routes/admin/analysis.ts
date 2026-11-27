@@ -4,6 +4,7 @@ import { db } from '../../database';
 import { ApiError, textField } from '../../http';
 import { stamp, n, admin, audit, json } from './shared';
 
+// Quản trị cờ AI, quy tắc phát hiện và kho cảnh báo đã duyệt.
 export function registerAdminAnalysisRoutes(router: Router) {
   router.get('/analysis/settings', (_req, res) => {
     const configured = !!process.env.GEMINI_API_KEY?.trim();
@@ -18,7 +19,7 @@ export function registerAdminAnalysisRoutes(router: Router) {
     res.json({ configured: !!process.env.GEMINI_API_KEY?.trim(), enabled: req.body.enabled, active: !!process.env.GEMINI_API_KEY?.trim() && req.body.enabled, model: process.env.GEMINI_MODEL || 'gemini-3.6-flash' });
   });
 
-  // Curated rule and warning corpus. Keep source and review status with every imported warning.
+  // Quản lý quy tắc có trọng số; mỗi thao tác ghi audit để truy ra thay đổi.
   router.get('/analysis/rules', (req, res) => {
     admin(req);
     const items = db.prepare('SELECT id,type,title,terms,weight,enabled,updated_at AS updatedAt FROM scam_rules ORDER BY type,id').all().map((row: any) => ({ ...row, terms: JSON.parse(row.terms) }));
@@ -63,6 +64,8 @@ export function registerAdminAnalysisRoutes(router: Router) {
     audit(req, 'analysis.rule.delete', 'analysis_rule', req.params.id);
     res.json({ success: true });
   });
+
+  // Kho cảnh báo lưu nguồn HTTPS, ngày công bố, từ khóa và chỉ dấu đối chiếu.
   router.get('/analysis/intel', (req, res) => {
     admin(req);
     const items = db.prepare('SELECT id,title,category,summary,source_name AS sourceName,source_url AS sourceUrl,source_date AS sourceDate,terms,indicators,status,created_at AS createdAt FROM threat_intel ORDER BY source_date DESC,id').all().map((row: any) => ({ ...row, terms: JSON.parse(row.terms), indicators: JSON.parse(row.indicators) }));

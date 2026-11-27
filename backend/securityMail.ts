@@ -1,9 +1,11 @@
+// Các email bảo mật luôn có cả bản thuần văn bản và HTML.
 type SecurityMail = { subject: string; text: string; html: string };
 
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, character => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 })[character]!);
 
+// Khung HTML chung; nội dung do người dùng cung cấp phải được escape trước khi chèn vào.
 function layout(preheader: string, heading: string, content: string): string {
   return `<!doctype html>
 <html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -25,6 +27,7 @@ function layout(preheader: string, heading: string, content: string): string {
 </body></html>`;
 }
 
+// Mẫu mã đặt lại mật khẩu, gồm thời hạn và hướng dẫn không chia sẻ mã.
 export function resetCodeMail(name: string, code: string): SecurityMail {
   const safeName = escapeHtml(name);
   const safeCode = escapeHtml(code);
@@ -50,6 +53,7 @@ export function resetCodeMail(name: string, code: string): SecurityMail {
   };
 }
 
+// Mẫu mã xác minh email khi đăng ký tài khoản.
 export function verificationCodeMail(name: string, code: string): SecurityMail {
   return {
     subject: '[CyberAware AI] Xác minh email đăng ký',
@@ -65,6 +69,7 @@ export function verificationCodeMail(name: string, code: string): SecurityMail {
   };
 }
 
+// Thông báo sau khi đổi mật khẩu và thu hồi các phiên cũ.
 export function passwordChangedMail(name: string): SecurityMail {
   const safeName = escapeHtml(name);
   return {

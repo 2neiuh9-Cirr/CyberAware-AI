@@ -2,6 +2,7 @@ import type { Course } from '../../src/types';
 
 type Question = [string, [string, string, string, string], number, string];
 
+// Tạo cấu trúc bài kiểm tra thống nhất từ các câu hỏi của khóa học mới.
 const createQuiz = (courseId: string, items: Question[]) => ({
   id: `${courseId}-quiz`, courseId,
   questions: items.map(([question, options, correctIndex, explanation], index) => ({
@@ -13,6 +14,7 @@ const createQuiz = (courseId: string, items: Question[]) => ({
   })),
 });
 
+// Nội dung khóa học bổ sung được catalog.ts ghép vào danh sách công khai.
 export const newCourses: Course[] = [
   {
     id: 'course-phishing', title: 'Nhận diện tin nhắn giả mạo và bảo vệ tài khoản',
@@ -60,6 +62,7 @@ export const newCourses: Course[] = [
   },
 ];
 
+// Bộ câu hỏi tương ứng từng khóa học bổ sung.
 export const newQuizzes = [
   createQuiz('course-phishing', [
     ['Tin nhắn báo tài khoản sẽ bị khóa trong 5 phút và kèm liên kết đăng nhập. Bạn làm gì?', ['Đăng nhập ngay qua liên kết', 'Tự mở ứng dụng chính thức để kiểm tra', 'Gửi mật khẩu để được hỗ trợ', 'Chuyển tiếp liên kết cho bạn bè thử'], 1, 'Kiểm tra trong ứng dụng chính thức mà bạn tự mở, không dùng liên kết trong tin nhắn.'],

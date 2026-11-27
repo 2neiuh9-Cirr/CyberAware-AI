@@ -1,3 +1,4 @@
+// Mỗi tình huống gồm câu hỏi, bốn lựa chọn, đáp án, giải thích và phản hồi theo từng lựa chọn.
 type Situation = [string, [string, string, string, string], number, string, [string, string, string, string]];
 
 // Câu 6–10 của mỗi khóa: tình huống đời thường, tập trung vào quyết định an toàn.
@@ -32,6 +33,7 @@ const situations: Record<string, Situation[]> = {
   ],
 };
 
+// Chuyển dữ liệu tình huống thành câu hỏi có ID ổn định theo từng khóa học.
 export const extraQuestions = Object.fromEntries(Object.entries(situations).map(([courseId, items]) => [
   courseId,
   items.map(([question, options, correctIndex, explanation, optionExplanations], index) => ({

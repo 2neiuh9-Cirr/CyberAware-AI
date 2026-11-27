@@ -2,6 +2,7 @@ import type { Router } from 'express';
 import { db } from '../../database';
 import { now } from './shared';
 
+// Dữ liệu trang chủ: tình trạng DB, cảnh báo nổi bật đã duyệt và video được chọn sẵn.
 export function registerHomeRoutes(router: Router) {
   router.get('/health', (_req, res) => { db.prepare('SELECT 1').get(); res.json({ status: 'ok', database: 'ok', timestamp: now() }); });
   router.get('/public-warnings/featured', (_req, res) => {

@@ -3,6 +3,7 @@ import { lessonExtras, answerDetails, thirdChoices } from './education';
 import { extraQuestions } from './education-extra-questions';
 import { newCourses, newQuizzes } from './education-new-courses';
 
+// Tình huống bổ sung và các bản cập nhật nội dung được ghép với catalog gốc ở cuối file.
 const extraScenarios = [
   ['shipper', 'Mạo danh người giao hàng', 'Quà tặng ảo', 'gift', 'Người gọi báo giao nhầm hàng và yêu cầu quét QR hoàn tiền.', 'Không quét mã hoặc chuyển tiền để nhận khoản hoàn chưa được xác minh.'],
   ['investment', 'Đầu tư cam kết lãi cao', 'Lừa làm CTV', 'job', 'Nhóm đầu tư hứa lợi nhuận cố định rồi yêu cầu phí rút tiền.', 'Kiểm tra tổ chức qua kênh độc lập và dừng nạp tiền khi bị yêu cầu phí mở khóa.'],
@@ -29,6 +30,7 @@ export const scenarios = [
   })),
 ];
 // Teaching content only. No fabricated ratings, learner counts or verification claims.
+// Nội dung bài học theo mã khóa học; thứ tự phần tử tương ứng thứ tự module.
 const lessons: Record<string, string[]> = {
   'course-deepfake': [
     'AI có thể tạo hoặc chỉnh sửa khuôn mặt và giọng nói. Một cuộc gọi trông giống người thân chưa đủ để xác minh người gọi. Không kết luận thật/giả chỉ bằng độ dài cuộc gọi hay một dấu hiệu hình ảnh.',
@@ -50,6 +52,8 @@ const lessons: Record<string, string[]> = {
     'Đổi mật khẩu từ thiết bị an toàn, thu hồi phiên đăng nhập và kiểm tra quyền ứng dụng. Giữ ảnh chụp, biên lai và thời điểm sự việc để trình báo. Không trả phí cho người hứa chắc chắn lấy lại tiền.',
   ],
 };
+
+// Câu hỏi, lựa chọn, đáp án và giải thích đi kèm từng khóa học.
 const questionSets: Record<string, [string, string[], number, string][]> = {
   'course-deepfake': [
     ['Người giống em bạn gọi video xin chuyển tiền gấp. Bạn làm gì?', ['Chuyển ngay', 'Gọi lại số đã lưu từ trước', 'Xin thêm video trong cùng cuộc chat'], 1, 'Cần xác minh qua kênh độc lập đã biết.'],
@@ -80,6 +84,8 @@ const questionSets: Record<string, [string, string[], number, string][]> = {
     ['Chỉ bấm một liên kết có chứng minh máy nhiễm mã độc?', ['Chắc chắn có', 'Không, cần đánh giá thêm'], 1, 'Phân biệt việc mở trang, nhập thông tin và cài ứng dụng.'],
   ],
 };
+
+// Hướng dẫn xử lý sau sự cố được gắn vào khóa học tương ứng.
 const incidentGuidance: Record<string, { title: string; intro: string; steps: string[] }> = {
   'course-deepfake': {
     title: 'Ứng phó với cuộc gọi giả mạo người thân',
@@ -138,6 +144,8 @@ const updatedModuleTitles: Record<string, string> = {
   c2: 'Liên hệ ngân hàng khi lộ thông tin hoặc mất tiền',
   c3: 'Bảo vệ lại tài khoản và lưu bằng chứng',
 };
+
+// Xuất catalog hoàn chỉnh sau khi ghép bài học, câu hỏi và khóa học mới.
 export const courses = [...COURSES.map(course => ({
   ...course, incidentGuidance: incidentGuidance[course.id], title: course.title.replace('an toàn tuyệt đối', 'an toàn'), rating: 0, learnersCount: 0,
   description: updatedDescriptions[course.id],

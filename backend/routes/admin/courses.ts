@@ -4,6 +4,7 @@ import { catalogItem, catalogItems } from '../../database';
 import { ApiError, textField } from '../../http';
 import { stamp, n, audit, pick, json, course, quiz, courseView, allQuestions, csv } from './shared';
 
+// Quản lý khóa học: thống kê, lọc/xuất, nội dung, bài học và bài kiểm tra.
 export function registerAdminCourseRoutes(router: Router) {
   function filteredCourses(req: Request) {
     const q = String(req.query.q || '').trim().toLowerCase();
@@ -43,6 +44,8 @@ export function registerAdminCourseRoutes(router: Router) {
     }
     return { title, description, topic, topicKey, code, incidentGuidance };
   }
+
+  // Khóa mới được tạo từ dữ liệu đã kiểm tra, sau đó lưu vào catalog và audit.
   router.post('/courses', (req, res) => {
     const id = randomUUID();
     const body = courseBody(req);
@@ -70,6 +73,8 @@ export function registerAdminCourseRoutes(router: Router) {
     json('course', c.id, c); audit(req, 'course.status', 'course', c.id, status);
     res.json(courseView(c));
   });
+
+  // Module bài học và bài kiểm tra được gắn vào khóa học theo ID riêng.
   router.post('/courses/:id/lessons', (req, res) => {
     const c = course(req.params.id);
     const title = textField(req.body?.title, 'Tiêu đề bài học', 200, 3);
@@ -91,6 +96,8 @@ export function registerAdminCourseRoutes(router: Router) {
     json('course', c.id, c); audit(req, 'exam.create', 'course', c.id);
     res.status(201).json(exam);
   });
+
+  // Tìm module trong khóa học và vị trí của nó để cập nhật/xóa/sắp xếp.
   function lesson(courseId: string, lessonId: string) {
     const c = course(courseId);
     const index = c.modules.findIndex((m: any) => m.id === lessonId);
@@ -123,6 +130,8 @@ export function registerAdminCourseRoutes(router: Router) {
     c.updatedAt = stamp(); json('course', c.id, c); audit(req, 'lesson.reorder', 'course', c.id);
     res.json({ lessons: c.modules.filter((m: any) => m.type !== 'quiz') });
   });
+
+  // Gán câu hỏi cùng khóa học cho một module sau khi kiểm tra ID và phần tử trùng.
   router.put('/courses/:id/lessons/:lessonId/questions', (req, res) => {
     const c = course(req.params.id);
     const index = c.modules.findIndex((module: any) => module.id === req.params.lessonId);

@@ -3,6 +3,7 @@ import { db, catalogItems } from '../../database';
 import { integer } from '../../http';
 import { stamp, n, audit, pick, json, course, allQuestions } from './shared';
 
+// Tổng quan người dùng, lượt quét, khóa học và báo cáo đang chờ.
 export function registerAdminOverviewRoutes(router: Router) {
   router.get('/overview', (_req, res) => {
     const since = new Date(Date.now() - 30 * 86400_000).toISOString();
@@ -11,6 +12,7 @@ export function registerAdminOverviewRoutes(router: Router) {
   });
 }
 
+// Tra cứu audit, thống kê mối đe dọa, sức khỏe hệ thống và log request.
 export function registerAdminSystemRoutes(router: Router) {
   router.get('/audit-events', (req, res) => {
     const rows = db.prepare('SELECT a.*,u.name AS actor_name FROM admin_audit a LEFT JOIN users u ON u.id = a.actor_id ORDER BY a.created_at DESC').all();

@@ -1,6 +1,7 @@
 import { ApiError } from '../http';
 import { analyze, normalizeQuery } from './analysis';
 
+// Giới hạn nội dung email trước khi chuyển sang bộ phân tích tin nhắn dùng chung.
 const MAX_BODY = 4500;
 const MAX_LINKS = 10;
 
@@ -9,6 +10,7 @@ function limitedText(value: unknown, max: number): string {
   return value.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, max);
 }
 
+// Bổ sung dấu hiệu riêng của email: người gửi, tên miền liên kết và lời yêu cầu chuyển tiền gấp.
 export async function analyzeEmail(input: unknown, allowAi = false) {
   const mail = input && typeof input === 'object' ? input as Record<string, unknown> : {};
   const subject = limitedText(mail.subject, 300);
@@ -22,6 +24,8 @@ export async function analyzeEmail(input: unknown, allowAi = false) {
   const result = await analyze('sms', query, false, allowAi);
   const flags = [...result.flags];
   let score = result.riskScore;
+
+  // So tên miền liên kết với địa chỉ người gửi, không mở liên kết để xác minh.
   const senderAddress = sender.match(/<([^<>\s]+@[^<>\s]+)>/)?.[1] || sender.match(/[\w.+-]+@[\w.-]+/)?.[0] || '';
   const senderDomain = senderAddress.split('@')[1]?.toLowerCase();
   const domains = links.flatMap(link => { try { const url = new URL(link); return ['http:', 'https:'].includes(url.protocol) ? [url.hostname.toLowerCase()] : []; } catch { return []; } });

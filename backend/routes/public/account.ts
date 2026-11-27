@@ -6,6 +6,7 @@ import { db, catalogItem } from '../../database';
 import { ApiError, textField } from '../../http';
 import { now, avatarDir, privacy, purgeExpiredScans, ensureCertificates, user } from './shared';
 
+// Hồ sơ tài khoản: thông tin cơ bản, ảnh đại diện, quyền riêng tư và chứng chỉ.
 export function registerAccountRoutes(router: Router) {
   router.get('/me', me);
   router.patch('/me/profile', (req, res) => {
@@ -24,6 +25,7 @@ export function registerAccountRoutes(router: Router) {
     res.json({ success: true, user: publicUser(updated) });
   });
 
+  // Kiểm tra MIME, chữ ký và kích thước ảnh trước khi lưu bằng ID tài khoản.
   router.put('/me/avatar', (req, res) => {
     const account = user(req);
     const input = req.body?.dataUrl;
@@ -49,6 +51,7 @@ export function registerAccountRoutes(router: Router) {
     res.type(mime).send(image);
   });
 
+  // Thay đổi cài đặt riêng tư có thể kích hoạt xóa ngay lịch sử quét quá hạn.
   router.get('/me/privacy-settings', (req, res) => res.json(privacy(user(req).id)));
   router.patch('/me/privacy-settings', (req, res) => {
     const account = user(req);
@@ -61,6 +64,7 @@ export function registerAccountRoutes(router: Router) {
     res.json({ success: true, settings: privacy(account.id) });
   });
 
+  // Đồng bộ chứng chỉ trước khi trả danh sách cho người học.
   router.get('/me/certificates', (req, res) => {
     const account = user(req);
     ensureCertificates(account.id);

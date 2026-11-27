@@ -4,9 +4,12 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
+// SQLite lưu tài khoản và phiên đăng nhập trong thư mục dữ liệu riêng của ứng dụng.
 export const DATA_DIR = path.resolve(process.env.AUTH_DATA_DIR || 'data');
 mkdirSync(DATA_DIR, { recursive: true });
 export const db = new DatabaseSync(path.join(DATA_DIR, 'auth.sqlite'));
+
+// Tạo bảng xác thực, khôi phục mật khẩu, đăng ký chờ xác minh và liên kết OAuth.
 db.exec(`
   PRAGMA journal_mode = WAL;
   PRAGMA foreign_keys = ON;
@@ -46,6 +49,8 @@ db.exec(`
     PRIMARY KEY(provider, provider_user_id), UNIQUE(provider, user_id)
   );
 `);
+
+// Mở rộng schema cho dữ liệu cũ bằng cách chỉ thêm những cột còn thiếu.
 const columns = (table: string) => new Set(db.prepare(`PRAGMA table_info(${table})`).all().map(row => String(row.name)));
 if (!columns('users').has('phone')) db.exec('ALTER TABLE users ADD COLUMN phone TEXT');
 if (!columns('users').has('status')) db.exec("ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active'");
@@ -60,6 +65,7 @@ for (const row of db.prepare('SELECT token_hash FROM sessions WHERE id IS NULL')
 }
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS sessions_id ON sessions(id)');
 
+// Khóa ký token được giữ ổn định qua lần khởi động và tạo mới nếu chưa tồn tại.
 const secretFile = path.join(DATA_DIR, 'jwt-secret');
 function getJwtSecret(): Buffer {
   const configured = process.env.AUTH_JWT_SECRET;

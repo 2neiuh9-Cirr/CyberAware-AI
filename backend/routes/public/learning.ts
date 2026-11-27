@@ -5,7 +5,9 @@ import { db, catalogItems } from '../../database';
 import { ApiError, integer, rateLimit, textField } from '../../http';
 import { now, ensureCertificates, user, item, progress, examPassed, publicCourse, activeQuizQuestions } from './shared';
 
+// Tuyến học tập: catalog công khai, câu hỏi bài học, bài kiểm tra và tiến độ cá nhân.
 export function registerLearningRoutes(router: Router) {
+  // Danh sách tình huống/khóa học dùng cùng cơ chế lọc và phân trang.
   for (const [route, kind] of [['scenarios', 'scenario'], ['courses', 'course']]) {
     router.get(`/${route}`, (req, res) => {
       const q = req.query.q === undefined ? '' : textField(req.query.q, 'q', 200, 0).toLocaleLowerCase('vi');
@@ -17,6 +19,8 @@ export function registerLearningRoutes(router: Router) {
     });
     router.get(`/${route}/:id`, (req, res) => { const value = item(kind, req.params.id); if (kind === 'course' && (value.status || 'published') !== 'published') throw new ApiError(404, 'Không tìm thấy khóa học đã phát hành.'); res.json(kind === 'course' ? publicCourse(value) : value); });
   }
+
+  // Khi đọc bài học, ẩn đáp án trước khi người học nộp câu trả lời.
   router.get('/courses/:id/lessons/:lessonId', (req, res) => {
     const course = item('course', req.params.id); const lesson = course.modules.find((l: any) => l.id === req.params.lessonId);
     if ((course.status || 'published') !== 'published') throw new ApiError(404, 'Không tìm thấy khóa học đã phát hành.');
@@ -30,6 +34,8 @@ export function registerLearningRoutes(router: Router) {
     const account = currentUser(req);
     res.json({ ...lesson, quiz, ...(lesson.type === 'quiz' ? { passed: !!account && examPassed(account.id, lesson) } : {}) });
   });
+
+  // Trả phản hồi cho câu hỏi trong bài; người đăng nhập được lưu lựa chọn để theo dõi hoàn thành.
   router.post('/courses/:id/lessons/:lessonId/questions/:questionId/answer', rateLimit(120, 60_000), (req, res) => {
     const course = item('course', req.params.id);
     if ((course.status || 'published') !== 'published') throw new ApiError(404, 'Không tìm thấy khóa học đã phát hành.');
@@ -49,6 +55,8 @@ export function registerLearningRoutes(router: Router) {
     }
     res.json({ questionId: question.id, selectedIndex, correctIndex: question.correctIndex, correct: selectedIndex === question.correctIndex, explanation: question.explanation, optionExplanations: question.optionExplanations, answeredAll });
   });
+
+  // Chấm bài kiểm tra theo câu hỏi đang hoạt động và lưu điểm từng lần nộp.
   router.post('/quizzes/:id/submissions', rateLimit(30, 60_000), (req, res) => {
     const account = user(req); const [quizId, moduleId] = req.params.id.split('::'); const quiz = item('quiz', quizId); const answers = req.body?.answers;
     const quizCourse = item('course', quiz.courseId);
@@ -64,6 +72,8 @@ export function registerLearningRoutes(router: Router) {
     db.prepare('INSERT INTO submissions VALUES (?,?,?,?,?,?,?)').run(result.id, account.id, submissionQuizId, quiz.courseId, score, JSON.stringify(result), result.submittedAt);
     res.status(201).json(result);
   });
+
+  // Chỉ đánh dấu hoàn thành khóa sau khi đủ bài học và các bài kiểm tra đạt tối thiểu 80%.
   router.get('/me/learning-progress', (req, res) => res.json(progress(user(req).id)));
   router.put('/me/learning-progress/:courseId', (req, res) => {
     const account = user(req); const course = item('course', req.params.courseId);

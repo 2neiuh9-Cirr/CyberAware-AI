@@ -5,6 +5,7 @@ import { db } from '../../database';
 import { ApiError, rateLimit, textField } from '../../http';
 import { stamp, n, admin, audit, pick, json, userRow, userView, csv } from './shared';
 
+// Quản lý tài khoản: lọc/xuất, mời người dùng, đổi quyền và khóa/mở khóa.
 export function registerAdminUserRoutes(router: Router) {
   router.get('/users/summary', (_req, res) => {
     const rows = db.prepare('SELECT role,status,COUNT(*) AS count FROM users GROUP BY role,status').all();
@@ -23,6 +24,8 @@ export function registerAdminUserRoutes(router: Router) {
   }
   router.get('/users', (req, res) => res.json(pick(filteredUsers(req), req)));
   router.get('/users/:id', (req, res) => res.json(userView(userRow(req.params.id))));
+
+  // Tạo tài khoản với mật khẩu tạm ngẫu nhiên, sau đó gửi mã để chủ tài khoản tự thiết lập.
   router.post('/users', rateLimit(10, 15 * 60_000), async (req, res, next) => {
     try {
     const name = textField(req.body?.name, 'Họ tên', 100, 2);
@@ -49,6 +52,8 @@ export function registerAdminUserRoutes(router: Router) {
     }
     } catch (error) { next(error); }
   });
+
+  // Khi đổi vai trò, tăng phiên bản mật khẩu và xóa phiên để quyền cũ không còn hiệu lực.
   router.patch('/users/:id/role', (req, res) => {
     const row = userRow(req.params.id); const role = req.body?.role;
     if (!['member','reviewer','admin'].includes(role)) throw new ApiError(400, 'Vai trò không hợp lệ.');
@@ -64,6 +69,8 @@ export function registerAdminUserRoutes(router: Router) {
     } catch (error) { db.exec('ROLLBACK'); throw error; }
     res.json({ user: userView(userRow(row.id)) });
   });
+
+  // Khóa tài khoản kèm lý do và thu hồi phiên trong cùng giao dịch.
   router.post('/users/:id/lock', (req, res) => {
     const row = userRow(req.params.id);
     if (row.id === admin(req).id) throw new ApiError(409, 'Không thể tự khóa tài khoản quản trị đang dùng.');
@@ -79,6 +86,8 @@ export function registerAdminUserRoutes(router: Router) {
     } catch (error) { db.exec('ROLLBACK'); throw error; }
     res.json({ user: userView(userRow(row.id)) });
   });
+
+  // Mở khóa tài khoản và xóa lý do khóa đã lưu.
   router.post('/users/:id/unlock', (req, res) => {
     const row = userRow(req.params.id);
     db.exec('BEGIN IMMEDIATE');

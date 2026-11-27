@@ -17,8 +17,10 @@ export interface ChatKnowledgeChunk extends ChatKnowledgeDocument {
 
 export interface ChatKnowledgeSource extends ChatKnowledgeDocument {}
 
+// Bỏ các từ hỏi phổ biến trước khi chấm điểm khớp từ khóa.
 const stopWords = new Set(['toi','ban','cua','nhung','nhu','the','nao','gi','voi','mot','cho','nay','muon','lam','hay','can']);
 
+// Gom ba loại nguồn nội bộ có thể dẫn chứng: tình huống, bài học đã xuất bản và cảnh báo đã duyệt.
 export function chatKnowledgeDocuments(): ChatKnowledgeDocument[] {
   const items: ChatKnowledgeDocument[] = [];
   for (const scenario of catalogItems('scenario')) {
@@ -38,6 +40,8 @@ export function chatKnowledgeDocuments(): ChatKnowledgeDocument[] {
       items.push({ id: `${course.id}-guidance`, kind: 'lesson', title: course.incidentGuidance.title, text: course.incidentGuidance.steps.join(' '), url: '/hoc-tap' });
     }
   }
+
+  // Chỉ dùng cảnh báo đã duyệt và có liên kết HTTPS để trả về nguồn công khai hợp lệ.
   for (const row of db.prepare("SELECT id,title,summary,source_url,source_date FROM threat_intel WHERE status='reviewed'").all()) {
     if (String(row.source_url).startsWith('https://')) {
       items.push({
@@ -66,6 +70,7 @@ function splitAtWords(value: string, maxChars: number) {
   return chunks;
 }
 
+// Chia tài liệu thành các đoạn ngắn, giữ ranh giới đoạn/từ khi có thể để tạo embedding và gửi đúng phần liên quan.
 export function chunkKnowledgeDocuments(documents: ChatKnowledgeDocument[], maxChars = 1200): ChatKnowledgeChunk[] {
   const chunks: ChatKnowledgeChunk[] = [];
   for (const document of documents) {
@@ -96,11 +101,13 @@ function queryWords(question: string) {
   return [...new Set(normalizedText(question).match(/[a-z0-9]{2,}/g) || [])].filter(word => !stopWords.has(word));
 }
 
+// Tên nguồn được cộng điểm cao hơn nội dung để ưu tiên bài học/cảnh báo khớp rõ với câu hỏi.
 export function keywordScore(question: string, document: Pick<ChatKnowledgeDocument, 'title' | 'text'>) {
   return queryWords(question).reduce((score, word) =>
     score + Number(normalizedText(document.title).includes(word)) * 3 + Number(normalizedText(document.text).includes(word)), 0);
 }
 
+// So độ gần nhau giữa hai embedding; vector thiếu hoặc sai kích thước không được tính là khớp.
 export function cosineSimilarity(a: number[], b: number[]) {
   if (!a.length || a.length !== b.length) return 0;
   let dot = 0;
@@ -114,6 +121,7 @@ export function cosineSimilarity(a: number[], b: number[]) {
   return normA && normB ? dot / Math.sqrt(normA * normB) : 0;
 }
 
+// Kết hợp độ tương đồng ngữ nghĩa và từ khóa, lọc nguồn yếu rồi lấy tối đa `limit` tài liệu khác nhau.
 export function rankHybridKnowledge(
   question: string,
   chunks: ChatKnowledgeChunk[],
@@ -130,6 +138,7 @@ export function rankHybridKnowledge(
   }).filter(item => item.semantic >= 0.30 || item.lexical >= 3)
     .sort((a, b) => b.score - a.score || a.chunk.chunkIndex - b.chunk.chunkIndex);
 
+  // Nhiều chunk cùng tài liệu được gộp để tránh lặp nguồn và giữ thêm ngữ cảnh liên quan.
   const merged = new Map<string, ChatKnowledgeSource>();
   for (const item of scored) {
     const existing = merged.get(item.chunk.id);
@@ -152,6 +161,7 @@ export function rankHybridKnowledge(
   return [...merged.values()];
 }
 
+// Đường dự phòng khi dịch vụ embedding lỗi: tìm trực tiếp trên tài liệu bằng từ khóa.
 export function chatKnowledge(question: string) {
   return chatKnowledgeDocuments().map(item => ({ item, score: keywordScore(question, item) }))
     .filter(result => result.score > 1)

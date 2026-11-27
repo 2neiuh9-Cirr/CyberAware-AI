@@ -4,6 +4,7 @@ import { ApiError, rateLimit } from './http';
 import { currentUser } from './auth';
 import { adminUiPhrases } from '../src/site/adminUiPhrases';
 
+// Tuyến dịch giao diện; đường dẫn và cụm từ quản trị được giới hạn rõ để tránh dịch dữ liệu tùy ý.
 export const siteTranslationRouter = Router();
 
 const publicPaths = new Set(['/', '/kiem-tra', '/canh-bao', '/hoc-tap', '/gioi-thieu']);
@@ -13,6 +14,7 @@ const cache = new Map<string, string>();
 let dailyCalls = 0;
 let callDay = '';
 
+// Giới hạn số lần gọi model dịch trong ngày UTC, độc lập với rate limit theo IP.
 function dailyAllowance() {
   const today = new Date().toISOString().slice(0, 10);
   if (callDay !== today) { callDay = today; dailyCalls = 0; }
@@ -20,6 +22,7 @@ function dailyAllowance() {
   dailyCalls += 1;
 }
 
+// Kiểm tra dữ liệu đầu vào và quyền quản trị trước khi gửi những cụm từ chưa có trong cache tới Gemini.
 siteTranslationRouter.post('/', rateLimit(40, 60_000), async (req, res, next) => {
   try {
     const { path, texts } = req.body || {};
@@ -35,6 +38,7 @@ siteTranslationRouter.post('/', rateLimit(40, 60_000), async (req, res, next) =>
     }
     if (!process.env.GEMINI_API_KEY?.trim()) throw new ApiError(503, 'Dịch tự động chưa được cấu hình.');
 
+    // Gộp cụm trùng để giảm token, xác minh số bản dịch rồi trả theo đúng thứ tự ban đầu.
     const distinct = [...new Set<string>(texts)];
     const missing = distinct.filter(value => !cache.has(value));
     if (missing.length) {

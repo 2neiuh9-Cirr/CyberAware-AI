@@ -1,3 +1,4 @@
+// Phần bài học mở rộng theo mã khóa học và vị trí module.
 export const lessonExtras: Record<string, string[]> = {
   'course-deepfake': [
     'Tình huống: một tài khoản quen gọi video xin tiền cấp cứu. Công nghệ tạo giọng và khuôn mặt có thể làm cuộc gọi rất thuyết phục; tài khoản của người thân cũng có thể bị chiếm. Đừng dựa vào độ rõ của video, cách chớp mắt hay việc người gọi biết tên bạn. Hãy tạm dừng giao dịch và gọi lại số điện thoại đã lưu từ trước. Nếu không liên hệ được, hỏi thêm người thân khác qua kênh độc lập. Chỉ quyết định sau khi xác minh được người nhận tiền.',
@@ -20,6 +21,7 @@ export const lessonExtras: Record<string, string[]> = {
   ]
 };
 // Each entry: fourth option and the explanation for A, B, C, D.
+// Giải thích lựa chọn đáp án, dùng khi hiển thị phản hồi sau câu hỏi.
 export const answerDetails: Record<string, [string, string, string, string, string][]> = {
  'course-deepfake': [
   ['Hỏi lại trong cùng tài khoản mạng xã hội', 'Sai: chuyển ngay bỏ qua xác minh người nhận.', 'Đúng: số đã lưu trước là kênh độc lập với cuộc gọi đáng ngờ.', 'Sai: video bổ sung vẫn có thể do cùng đối tượng tạo.', 'Sai: tài khoản nhắn tin có thể đã bị chiếm.'],
@@ -50,6 +52,8 @@ export const answerDetails: Record<string, [string, string, string, string, stri
   ['Chỉ có nếu trang trông đáng ngờ', 'Sai: chỉ bấm link chưa đủ để kết luận nhiễm mã độc.', 'Đúng: cần biết có nhập thông tin hay cài ứng dụng không.', 'Sai: cảnh báo trình duyệt không phải phép thử duy nhất.', 'Sai: vẻ ngoài trang không xác định thiết bị có nhiễm mã độc.']
  ]
 };
+
+// Lựa chọn thứ ba của bộ câu hỏi được tách riêng để hoàn thiện dữ liệu học tập.
 export const thirdChoices: Record<string, string[]> = {
   'course-deepfake': ['', 'Có nếu gọi trên ứng dụng quen thuộc', 'Có nếu biết địa chỉ nhà', 'Có nếu video rất mượt', 'Gọi số trong tin nhắn vừa nhận'],
   'course-banking': ['Có nếu họ nói đang khóa giao dịch', '', '', 'Chỉ kiểm tra số lượng mã QR', 'Gửi OTP cho người gọi để hỏi'],

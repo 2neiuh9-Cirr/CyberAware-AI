@@ -1,5 +1,6 @@
 import type { ScamScenario, Course, ScamReport } from '../../src/types';
 
+// Các tình huống lừa đảo mẫu dùng trong trang cảnh báo và kho kiến thức chatbot.
 export const SCAM_SCENARIOS: ScamScenario[] = [
   {
     id: 'scam-bank',
@@ -105,6 +106,7 @@ export const SCAM_SCENARIOS: ScamScenario[] = [
   },
 ];
 
+// Bản gốc các khóa học; database.ts dùng làm mốc để chỉ cập nhật nội dung chưa bị chỉnh sửa.
 export const COURSES: Course[] = [
   {
     id: 'course-deepfake',
@@ -177,6 +179,7 @@ export const COURSES: Course[] = [
   },
 ];
 
+// Dữ liệu báo cáo mẫu ban đầu, tách khỏi báo cáo do người dùng gửi.
 export const INITIAL_REPORTS: ScamReport[] = [
   {
     id: 'rep-01',

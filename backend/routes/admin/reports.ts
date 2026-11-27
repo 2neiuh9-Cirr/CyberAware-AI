@@ -4,6 +4,7 @@ import { ApiError, textField } from '../../http';
 import { normalizeQuery, scanType } from '../../analysis/analysis';
 import { stamp, n, admin, audit, page, json, reportRow, reportView } from './shared';
 
+// Danh sách báo cáo cho quản trị viên và các thao tác kiểm duyệt/hiển thị.
 export function registerAdminReportRoutes(router: Router) {
   router.get('/reports', (req, res) => {
     const status = String(req.query.status || 'all');
@@ -24,6 +25,8 @@ export function registerAdminReportRoutes(router: Router) {
     const summary = db.prepare("SELECT COUNT(*) AS total, SUM(status = 'pending') AS pending, SUM(status = 'approved' AND is_hidden = 0) AS approved, SUM(status = 'rejected') AS rejected, SUM(is_hidden = 1) AS hidden FROM reports").get() as any;
     res.json({ items: rows.map(reportView), total, ...p, summary: { total: Number(summary.total), pending: Number(summary.pending || 0), approved: Number(summary.approved || 0), rejected: Number(summary.rejected || 0), hidden: Number(summary.hidden || 0) } });
   });
+
+  // Chỉnh sửa nội dung sẽ đưa báo cáo về trạng thái chờ duyệt và ghi audit.
   router.patch('/reports/:id', (req, res) => {
     const old = reportRow(req.params.id);
     const type = scanType(req.body?.type);
@@ -45,6 +48,8 @@ export function registerAdminReportRoutes(router: Router) {
     } catch (error) { db.exec('ROLLBACK'); throw error; }
     res.json({ report: reportView(reportRow(old.id)) });
   });
+
+  // Ẩn/hiện báo cáo độc lập với trạng thái kiểm duyệt.
   router.patch('/reports/:id/visibility', (req, res) => {
     const row = reportRow(req.params.id);
     if (typeof req.body?.hidden !== 'boolean') throw new ApiError(400, 'Trạng thái hiển thị không hợp lệ.');
@@ -56,6 +61,8 @@ export function registerAdminReportRoutes(router: Router) {
     } catch (error) { db.exec('ROLLBACK'); throw error; }
     res.json({ report: reportView(reportRow(row.id)) });
   });
+
+  // Xóa báo cáo và dữ liệu liên quan trong giao dịch, đồng thời ghi hành động xóa mới.
   router.delete('/reports/:id', (req, res) => {
     const row = reportRow(req.params.id);
     db.exec('BEGIN IMMEDIATE');

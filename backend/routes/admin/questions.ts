@@ -4,6 +4,7 @@ import { db } from '../../database';
 import { ApiError } from '../../http';
 import { stamp, n, audit, pick, json, course, quiz, allQuestions, questionLocation, questionView, questionBody, saveQuestion, csv } from './shared';
 
+// Ngân hàng câu hỏi: thống kê, sửa, duyệt, lưu trữ và nhập hàng loạt.
 export function registerAdminQuestionRoutes(router: Router) {
   router.get('/questions/summary', (_req, res) => {
     const questions = allQuestions();
@@ -23,6 +24,8 @@ export function registerAdminQuestionRoutes(router: Router) {
     const found = questionLocation(req.params.id);
     res.json(questionView({ ...found.question, courseId: found.quiz.courseId, quizId: found.quiz.id }));
   });
+
+  // Câu hỏi mới bắt đầu ở trạng thái review trước khi được dùng trong bài học.
   router.post('/questions', (req, res) => {
     const body = questionBody(req);
     const id = randomUUID();
@@ -50,6 +53,8 @@ export function registerAdminQuestionRoutes(router: Router) {
     saveQuestion(found.quiz.courseId, q); audit(req, 'question.duplicate', 'question', q.id, found.question.id);
     res.status(201).json(questionView({ ...q, courseId: found.quiz.courseId }));
   });
+
+  // Không rút câu hỏi hoạt động cuối cùng khỏi khóa học đang phát hành.
   router.patch('/questions/:id/status', (req, res) => {
     const found = questionLocation(req.params.id);
     const status = req.body?.status;
@@ -69,6 +74,8 @@ export function registerAdminQuestionRoutes(router: Router) {
   router.get('/questions/import/template', (_req, res) => {
     res.type('text/csv; charset=utf-8').attachment('cyberaware-question-template.csv').send('\uFEFFcourseId,question,A,B,C,D,correct,explanation,explanationA,explanationB,explanationC,explanationD,difficulty\r\n');
   });
+
+  // Dùng cùng bộ kiểm tra đầu vào cho cả xem trước và ghi dữ liệu nhập hàng loạt.
   function importRows(req: Request) {
     const rows = req.body?.rows;
     if (!Array.isArray(rows) || !rows.length || rows.length > 100) throw new ApiError(400, 'Cần từ 1 đến 100 câu hỏi mỗi lần nhập.');
@@ -81,6 +88,8 @@ export function registerAdminQuestionRoutes(router: Router) {
     const rows = importRows(req);
     res.json({ valid: true, count: rows.length, items: rows.map(row => ({ courseId: row.courseId, question: row.question, difficulty: row.difficulty })) });
   });
+
+  // Ghi toàn bộ câu hỏi nhập và audit trong một giao dịch.
   router.post('/questions/import/commit', (req, res) => {
     const rows = importRows(req);
     const ids: string[] = [];

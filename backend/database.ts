@@ -2,6 +2,7 @@ import { db } from './auth';
 import { courses, quizzes, scenarios } from './content/catalog';
 import { COURSES } from './content/catalog-base';
 
+// Các bảng nghiệp vụ: kết quả quét, báo cáo/kiểm duyệt, giáo trình và tiến độ học.
 db.exec(`
   PRAGMA busy_timeout = 5000;
   CREATE TABLE IF NOT EXISTS scans (seq INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT NOT NULL UNIQUE, user_id TEXT REFERENCES users(id), result TEXT NOT NULL, created_at TEXT NOT NULL);
@@ -17,16 +18,20 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS submissions_user ON submissions(user_id,course_id);
   CREATE TABLE IF NOT EXISTS lesson_answers (user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, course_id TEXT NOT NULL, lesson_id TEXT NOT NULL, question_id TEXT NOT NULL, selected_index INTEGER NOT NULL, answered_at TEXT NOT NULL, PRIMARY KEY(user_id,course_id,lesson_id,question_id));
 `);
+
+// Bổ sung cột cho cơ sở dữ liệu cũ trước khi tạo chỉ mục theo trạng thái hiển thị.
 if (!db.prepare('PRAGMA table_info(reports)').all().some(column => column.name === 'is_hidden')) {
   db.exec('ALTER TABLE reports ADD COLUMN is_hidden INTEGER NOT NULL DEFAULT 0');
 }
 db.exec('CREATE INDEX IF NOT EXISTS reports_visibility_status ON reports(is_hidden, status, created_at)');
-// Seed curriculum. Real user reports require moderation.
+
+// Nạp giáo trình mẫu trong giao dịch; báo cáo thật của người dùng vẫn cần kiểm duyệt.
 const insert = db.prepare('INSERT OR IGNORE INTO catalog (kind,id,data) VALUES (?,?,?)');
 db.exec('BEGIN');
 try {
   for (const [kind, items] of Object.entries({ scenario: scenarios, course: courses, quiz: quizzes })) for (const item of items) insert.run(kind, item.id, JSON.stringify(item));
-  // Upgrade existing databases without replacing questions edited by administrators.
+
+  // Bổ sung câu hỏi mới mà không thay câu hỏi quản trị viên đã chỉnh sửa.
   for (const seeded of quizzes) {
     const row = db.prepare("SELECT data FROM catalog WHERE kind = 'quiz' AND id = ?").get(seeded.id);
     if (!row) continue;
@@ -38,6 +43,8 @@ try {
       db.prepare("UPDATE catalog SET data = ? WHERE kind = 'quiz' AND id = ?").run(JSON.stringify(current), seeded.id);
     }
   }
+
+  // Các migration có tên chỉ chạy một lần để cập nhật bộ câu hỏi đã phát hành.
   const migrationName = 'everyday-situations-q6-q10-v1';
   if (!db.prepare('SELECT 1 FROM catalog_migrations WHERE name = ?').get(migrationName)) {
     for (const seeded of quizzes) {
@@ -78,7 +85,8 @@ try {
     }
     if (changed) db.prepare("UPDATE catalog SET data = ? WHERE kind = 'course' AND id = ?").run(JSON.stringify(current), seeded.id);
   }
-  // Update only text that still matches the original curriculum; preserve admin edits.
+
+  // Chỉ cập nhật nội dung còn giống bản gốc; giữ lại chỉnh sửa của quản trị viên.
   const curriculumMigration = 'curriculum-clarity-and-new-courses-v1';
   if (!db.prepare('SELECT 1 FROM catalog_migrations WHERE name = ?').get(curriculumMigration)) {
     for (const original of COURSES) {
@@ -223,6 +231,8 @@ try {
     }
     db.prepare('INSERT INTO catalog_migrations (name, applied_at) VALUES (?, ?)').run(practicalBankingQuiz, new Date().toISOString());
   }
+
+  // Gỡ các báo cáo minh họa chưa xác minh khỏi dữ liệu đang hiển thị.
   const removeSamples = 'remove-five-unverified-demo-reports-v1';
   if (!db.prepare('SELECT 1 FROM catalog_migrations WHERE name = ?').get(removeSamples)) {
     const sampleIds = ['delivery', 'relative', 'deposit', 'prize', 'travel'].map(name => `sample-unverified-${name}`);
@@ -234,6 +244,8 @@ try {
   }
   db.exec('COMMIT');
 } catch (error) { db.exec('ROLLBACK'); throw error; }
+
+// Các hàm đọc catalog dùng chung cho API học tập và truy xuất kiến thức chatbot.
 export function catalogItems(kind: string): any[] { return db.prepare('SELECT data FROM catalog WHERE kind = ? ORDER BY rowid').all(kind).map(row => JSON.parse(String(row.data))); }
 export function catalogItem(kind: string, id: string): any | undefined {
   const row = db.prepare('SELECT data FROM catalog WHERE kind = ? AND id = ?').get(kind, id);

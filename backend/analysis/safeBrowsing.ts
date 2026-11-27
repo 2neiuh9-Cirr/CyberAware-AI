@@ -27,6 +27,7 @@ export type SafeBrowsingResult =
 
 const cache = new Map<string, { expiresAt: number; result: SafeBrowsingResult }>();
 
+// Giải mã protobuf từ Safe Browsing và lấy thời hạn cache do dịch vụ cung cấp.
 export function decodeSafeBrowsingResponse(bytes: Uint8Array): { threatTypes: string[]; cacheSeconds: number } {
   const response = searchResponse.toObject(searchResponse.decode(bytes), { longs: String, arrays: true }) as {
     threats?: Array<{ threatTypes?: number[] }>;
@@ -44,6 +45,7 @@ export function decodeSafeBrowsingResponse(bytes: Uint8Array): { threatTypes: st
   return { threatTypes, cacheSeconds: Math.min(86400, seconds + nanos / 1e9) };
 }
 
+// Tra cứu URL qua Safe Browsing; cache kết quả để tránh gọi lại trong thời hạn hợp lệ.
 export async function checkSafeBrowsing(url: string): Promise<SafeBrowsingResult> {
   const cached = cache.get(url);
   if (cached && cached.expiresAt > Date.now()) return cached.result;

@@ -7,7 +7,9 @@ import { analyze, normalizeQuery, scanType } from '../../analysis/analysis';
 import { checkSafeBrowsing } from '../../analysis/safeBrowsing';
 import { user } from './shared';
 
+// Các tuyến kiểm tra nhanh và quét có lưu lịch sử cho tài khoản đăng nhập.
 export function registerScanRoutes(router: Router) {
+  // Kiểm tra URL kết hợp Safe Browsing, báo cáo đã duyệt và bộ phân tích nội bộ; văn bản dùng nhánh tin nhắn.
   router.post('/context-check', rateLimit(15, 60_000), async (req, res, next) => {
     try {
       if (req.body?.kind === 'url') {
@@ -35,6 +37,8 @@ export function registerScanRoutes(router: Router) {
       }
     } catch (error) { next(error); }
   });
+
+  // Endpoint danh tiếng URL không gọi bước AI để trả kết quả dựa trên nguồn/quy tắc.
   router.post('/url-reputation', rateLimit(15, 60_000), async (req, res, next) => {
     try {
       const url = normalizeQuery('url', req.body?.url);
@@ -51,6 +55,8 @@ export function registerScanRoutes(router: Router) {
       res.json({ url, overall, google, cyberAware });
     } catch (error) { next(error); }
   });
+
+  // Quét đầy đủ và lưu bản kết quả; khách không được lưu nội dung nhạy cảm.
   router.post('/analyze', rateLimit(30, 60_000), async (req, res, next) => {
     try {
       const type = scanType(req.body?.type); const query = normalizeQuery(type, req.body?.query);
@@ -63,6 +69,8 @@ export function registerScanRoutes(router: Router) {
       res.json(result);
     } catch (error) { next(error); }
   });
+
+  // Chỉ chủ tài khoản được đọc danh sách và chi tiết lần quét của mình.
   router.get('/scans', (req, res) => {
     const account = user(req); const limit = integer(req.query.limit, 20, 100);
     const cursor = integer(req.query.cursor, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER);

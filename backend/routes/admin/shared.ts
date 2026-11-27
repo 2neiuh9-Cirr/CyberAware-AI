@@ -5,7 +5,10 @@ import { db, catalogItem, catalogItems } from '../../database';
 import { ApiError, integer, textField } from '../../http';
 import '../../analysis/intelligence';
 
+// Hàm dùng chung của trang quản trị: quyền truy cập, audit, catalog và định dạng dữ liệu.
 export const stamp = () => new Date().toISOString();
+
+// Lưu dấu vết thay đổi và trạng thái khóa tài khoản để có thể tra cứu sau này.
 db.exec(`
   CREATE TABLE IF NOT EXISTS admin_audit (id TEXT PRIMARY KEY, actor_id TEXT NOT NULL, action TEXT NOT NULL, target_type TEXT NOT NULL, target_id TEXT NOT NULL, detail TEXT NOT NULL, created_at TEXT NOT NULL);
   CREATE INDEX IF NOT EXISTS admin_audit_time ON admin_audit(created_at);
@@ -14,16 +17,22 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS admin_user_locks (user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, reason TEXT NOT NULL, actor_id TEXT NOT NULL, updated_at TEXT NOT NULL);
 `);
 export const n = (sql: string, ...values: any[]) => Number(db.prepare(sql).get(...values)!.n);
+
+// Chặn yêu cầu không đăng nhập hoặc không có vai trò quản trị.
 export function admin(req: Request) {
   const account = currentUser(req);
   if (!account) throw new ApiError(401, 'Vui lòng đăng nhập.');
   if (account.role !== 'admin') throw new ApiError(403, 'Chỉ quản trị viên được thực hiện thao tác này.');
   return account;
 }
+
+// Ghi ai thay đổi loại dữ liệu nào, bản ghi nào và thời điểm thay đổi.
 export function audit(req: Request, action: string, kind: string, id: string, detail = '') {
   const actor = admin(req);
   db.prepare('INSERT INTO admin_audit VALUES (?,?,?,?,?,?,?)').run(randomUUID(), actor.id, action, kind, id, detail, stamp());
 }
+
+// Phân trang các danh sách quản trị sau khi lọc.
 export function page(req: Request) {
   return { page: integer(req.query.page, 1, 100000), pageSize: integer(req.query.pageSize, 20, 100) };
 }
@@ -31,6 +40,8 @@ export function pick<T>(items: T[], req: Request) {
   const p = page(req);
   return { items: items.slice((p.page - 1) * p.pageSize, p.page * p.pageSize), total: items.length, ...p };
 }
+
+// Lưu đối tượng catalog dưới dạng JSON theo loại và ID.
 export function json(kind: string, id: string, value: unknown) {
   db.prepare('INSERT INTO catalog(kind,id,data) VALUES (?,?,?) ON CONFLICT(kind,id) DO UPDATE SET data=excluded.data').run(kind, id, JSON.stringify(value));
 }
@@ -44,6 +55,8 @@ export function quiz(id: string): any {
   if (!value) throw new ApiError(404, 'Không tìm thấy bài kiểm tra.');
   return value;
 }
+
+// Các hàm View chỉ trả trường cần cho giao diện quản trị, kèm số liệu liên quan.
 export function courseView(c: any) {
   const questions = catalogItems('quiz').filter(q => q.courseId === c.id).flatMap(q => q.questions);
   return { id: c.id, code: c.code || c.id, title: c.title, description: c.description || '', topic: c.topic || c.category || 'Khác', topicKey: c.topicKey || 'other', incidentGuidance: c.incidentGuidance || null, status: c.status || 'published', updatedAt: c.updatedAt || null, microLessonsCount: c.modules.filter((m: any) => m.type !== 'quiz').length, quizCount: questions.filter((q: any) => q.status !== 'archived').length };
@@ -73,6 +86,8 @@ export function reportView(row: any) {
     votes: n('SELECT COUNT(*) AS n FROM votes WHERE report_id = ?', row.id),
   };
 }
+
+// Gom câu hỏi từ các quiz để tìm kiếm và thống kê toàn hệ thống.
 export function allQuestions() {
   return catalogItems('quiz').flatMap(q => q.questions.map((question: any) => ({ ...question, courseId: q.courseId, quizId: q.id, status: question.status || 'active', difficulty: question.difficulty || 'Cơ bản' })));
 }
@@ -92,6 +107,8 @@ export function questionView(q: any) {
   correct += lessonAnswers.filter(row => Number(row.selected_index) === q.correctIndex).length;
   return { ...q, accuracyRate: total ? Math.round(100 * correct / total) : null, attempts: total };
 }
+
+// Kiểm tra đủ bốn lựa chọn, đáp án và giải thích trước khi tạo/cập nhật câu hỏi.
 export function questionBody(req: Request, base?: any) {
   const body = req.body || {};
   const courseId = typeof body.courseId === 'string' ? body.courseId : base?.courseId;
@@ -111,6 +128,8 @@ export function questionBody(req: Request, base?: any) {
   if (!['review','active','archived'].includes(status)) throw new ApiError(400, 'Trạng thái câu hỏi không hợp lệ.');
   return { courseId, question, options: options.map(value => value.trim()), correctIndex, explanation, optionExplanations: optionExplanations.map(value => value.trim()), difficulty, status };
 }
+
+// Đưa câu hỏi vào quiz của khóa học, tạo quiz nếu chưa tồn tại.
 export function saveQuestion(courseId: string, q: any) {
   const c = course(courseId);
   const quizId = c.modules.find((m: any) => m.type === 'quiz')?.quizId || `${courseId}-quiz`;
@@ -121,6 +140,8 @@ export function saveQuestion(courseId: string, q: any) {
   data.questions.push(q);
   json('quiz', quizId, data);
 }
+
+// Xuất CSV có BOM cho Excel; ô bắt đầu bằng ký tự công thức được escape.
 export function csv(rows: Record<string, unknown>[], keys: string[]) {
   const cell = (value: unknown) => {
     const s = String(value ?? '');

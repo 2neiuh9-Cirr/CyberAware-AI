@@ -26,6 +26,7 @@ type DbUser = {
 type RecoveryCode = { user_id: string; code_hash: string; expires_at: number; attempts: number };
 type RecoveryGrant = { user_id: string; expires_at: number };
 
+// Ký định danh khách của chatbot để không thể tự đổi cookie nhằm làm mới hạn mức.
 export const chatDigest = (value: string) => createHmac('sha256',jwtSecret).update('chat-guest:'+value).digest('hex');
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -45,6 +46,7 @@ const normalizeEmail = (value: unknown) => typeof value === 'string' ? value.tri
 const validPassword = (value: unknown): value is string => typeof value === 'string' && value.length >= 8 && value.length <= 128;
 const sha256 = (value: string) => createHmac('sha256', jwtSecret).update(value).digest('hex');
 
+// Mật khẩu được băm bằng scrypt với salt riêng; phần so sánh dùng timingSafeEqual.
 export function hashPassword(password: string): string {
   const salt = randomBytes(16);
   const hash = scryptSync(password, salt, 64);
@@ -59,10 +61,12 @@ function verifyPassword(password: string, stored: string): boolean {
   return timingSafeEqual(actual, expected);
 }
 
+// Chỉ đưa những trường tài khoản được phép về giao diện, không trả hash hay dữ liệu phiên.
 export function publicUser(user: DbUser) {
   return { id: user.id, name: user.name, email: user.email, role: user.role, level: user.level, avatar: user.avatar, phone: user.phone || '', emailVerified: user.email_verified === 1, citizenVerified: false, gmailShieldActive: false };
 }
 
+// Access token mang phiên và phiên bản mật khẩu để có thể thu hồi sau khi đổi mật khẩu.
 function signAccessToken(user: DbUser, sessionId: string): string {
   const now = Math.floor(Date.now() / 1000);
   const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString('base64url');
@@ -100,6 +104,7 @@ function setCookie(res: Response, name: string, value: string, maxAgeSeconds: nu
   res.append('Set-Cookie', `${name}=${encodeURIComponent(value)}; HttpOnly; SameSite=Lax; Path=${cookiePath}${maxAgeSeconds >= 0 ? `; Max-Age=${maxAgeSeconds}` : ''}${secure}`);
 }
 
+// Lưu hash của cookie phiên, thời hạn và thông tin thiết bị; token thô chỉ gửi về trình duyệt.
 function createSession(req: Request, res: Response, user: DbUser, remember: boolean): string {
   const token = randomBytes(32).toString('base64url');
   const id = randomUUID();
@@ -127,6 +132,8 @@ function renewRememberCookie(req: Request, res: Response) {
   const row = db.prepare('SELECT remembered, expires_at FROM sessions WHERE token_hash = ?').get(sha256(token)) as { remembered: number; expires_at: number } | undefined;
   if (row?.remembered && row.expires_at > Date.now()) setCookie(res, 'cyberaware_session', token, Math.floor(REMEMBER_MS / 1000), '/api');
 }
+
+// Gia hạn cookie ghi nhớ khi người dùng hoạt động, dựa trên phiên còn hợp lệ trong DB.
 export function refreshRememberedSession(req: Request, res: Response) {
   if (sessionUser(req)) renewRememberCookie(req, res);
 }
@@ -135,6 +142,7 @@ function getUserByEmail(email: string): DbUser | undefined {
   return db.prepare('SELECT * FROM users WHERE email = ?').get(email) as DbUser | undefined;
 }
 
+// Gửi email bảo mật; môi trường phát triển có hộp thư cục bộ nhưng không trả mã qua API.
 async function sendResetMail(email: string, name: string, code: string) {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM } = process.env;
   if (SMTP_HOST && SMTP_USER && SMTP_PASSWORD && SMTP_FROM) {
@@ -170,6 +178,7 @@ async function sendVerificationMail(email: string, name: string, code: string) {
   appendFileSync(path.join(DATA_DIR, 'dev-verification-codes.log'), `${new Date().toISOString()} ${email} ${code}\n`, { mode: 0o600 });
 }
 
+// Cấp mã thiết lập tài khoản cho người dùng do quản trị viên tạo.
 export async function sendAccountSetupCode(userId: string) {
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId) as DbUser | undefined;
   if (!user) throw new Error('Không tìm thấy tài khoản.');
@@ -216,6 +225,7 @@ function appOrigin(req: Request): string | null {
   return `${req.protocol}://${req.get('host')}`;
 }
 
+// Nhóm tuyến OAuth: cấu hình provider, bắt đầu chuyển hướng, xác minh callback và liên kết tài khoản.
 export const authRouter = Router();
 
 type OAuthProvider = 'google' | 'facebook';
@@ -237,6 +247,8 @@ function oauthLinkRedirect(origin: string, provider: OAuthProvider, error?: stri
   else url.searchParams.set('oauth_link', provider);
   return url.toString();
 }
+
+// Đổi authorization code lấy hồ sơ từ Google/Facebook qua endpoint tương ứng.
 async function oauthProfile(provider: OAuthProvider, code: string, redirectUri: string, config: { clientId: string; clientSecret: string }): Promise<OAuthProfile> {
   const timeout = () => AbortSignal.timeout(10_000);
   if (provider === 'google') {
@@ -270,6 +282,8 @@ async function oauthProfile(provider: OAuthProvider, code: string, redirectUri: 
   if (!profile.id) throw new Error('oauth_profile');
   return { id: profile.id, name: profile.name || '', email: profile.email ? normalizeEmail(profile.email) : null, emailVerified: false };
 }
+
+// Tìm liên kết OAuth đã có; tài khoản mới cần email, còn tài khoản có sẵn chỉ tự liên kết Google đã xác minh.
 function socialAccount(provider: OAuthProvider, profile: OAuthProfile): DbUser {
   if (!profile.id || profile.id.length > 255) throw new Error('oauth_profile');
   const linked = db.prepare('SELECT user_id FROM oauth_accounts WHERE provider = ? AND provider_user_id = ?').get(provider, profile.id) as { user_id: string } | undefined;
@@ -306,6 +320,8 @@ authRouter.get('/oauth/links', (req, res) => {
   const links = db.prepare('SELECT provider FROM oauth_accounts WHERE user_id = ?').all(user.id) as { provider: string }[];
   res.json({ google: links.some(link => link.provider === 'google'), facebook: links.some(link => link.provider === 'facebook') });
 });
+
+// Ghi state ngắn hạn và cookie đối chiếu để bảo vệ luồng chuyển hướng OAuth.
 function beginOAuth(req: Request, res: Response, provider: OAuthProvider, linkUserId: string | null = null) {
   const config = oauthConfig(provider); const origin = appOrigin(req);
   if (!config || !origin) return res.status(503).json({ success: false, error: 'Đăng nhập qua dịch vụ này chưa được cấu hình.' });
@@ -371,6 +387,8 @@ authRouter.get('/oauth/:provider/callback', async (req, res) => {
 function requestToken(req: Request) {
   return /^Bearer\s+(.+)$/i.exec(req.headers.authorization || '')?.[1] || cookieValue(req, 'cyberaware_session') || '';
 }
+
+// Xác định người dùng hiện tại từ bearer token hoặc cookie phiên.
 export function currentUser(req: Request) {
   const bearer = /^Bearer\s+(.+)$/i.exec(req.headers.authorization || '')?.[1];
   return bearer ? verifyAccessToken(bearer) : sessionUser(req) || verifyAccessToken(cookieValue(req, 'cyberaware_session') || '');
@@ -382,6 +400,7 @@ export function me(req: Request, res: Response) {
   return res.json({ success: true, user: publicUser(user) });
 }
 
+// Đăng ký mới đi qua mã xác minh email trước khi ghi tài khoản chính thức.
 authRouter.post('/register', async (req: Request, res: Response) => {
   const { fullname, password } = req.body || {};
   const email = normalizeEmail(req.body?.email);
@@ -412,6 +431,7 @@ authRouter.post('/register', async (req: Request, res: Response) => {
   return res.status(202).json({ success: true, requiresVerification: true, expiresInSeconds: VERIFY_MS / 1000, deliveryMode: process.env.SMTP_HOST ? 'email' : 'local' });
 });
 
+// Gửi lại mã chỉ khi challenge đăng ký vẫn hợp lệ và đã qua thời gian chờ.
 authRouter.post('/resend-verification', async (req: Request, res: Response) => {
   const email = normalizeEmail(req.body?.email);
   const challenge = cookieValue(req, 'cyberaware_verify');
@@ -437,6 +457,7 @@ authRouter.post('/resend-verification', async (req: Request, res: Response) => {
   return res.json({ success: true, expiresInSeconds: VERIFY_MS / 1000, deliveryMode: process.env.SMTP_HOST ? 'email' : 'local' });
 });
 
+// Xác minh mã/challenge rồi chuyển đăng ký chờ thành tài khoản và phiên đăng nhập.
 authRouter.post('/verify-email', (req: Request, res: Response) => {
   const email = normalizeEmail(req.body?.email);
   const code = req.body?.code;
@@ -467,6 +488,7 @@ authRouter.post('/verify-email', (req: Request, res: Response) => {
   return res.status(201).json({ success: true, user: publicUser(user), token: signAccessToken(user, sessionId) });
 });
 
+// Đăng nhập tạo phiên và access token; đăng xuất thu hồi thông tin phiên tương ứng.
 authRouter.post('/login', (req: Request, res: Response) => {
   const email = normalizeEmail(req.body?.email);
   const password = req.body?.password;
@@ -482,6 +504,7 @@ authRouter.post('/login', (req: Request, res: Response) => {
 
 authRouter.get('/me', me);
 
+// Đăng xuất thu hồi bearer token/cookie phiên hiện tại nếu có.
 authRouter.post('/logout', (req: Request, res: Response) => {
   const token = requestToken(req);
   const session = cookieValue(req, 'cyberaware_session');
@@ -511,6 +534,7 @@ function sessionDevice(agent: string): { device: string; browser: string } {
   return { device, browser };
 }
 
+// Quản lý các thiết bị đã đăng nhập: xem, thu hồi một phiên hoặc toàn bộ phiên khác.
 authRouter.get('/sessions', (req: Request, res: Response) => {
   const account = currentUser(req);
   if (!account) return res.status(401).json({ success: false, error: 'Vui lòng đăng nhập.' });
@@ -538,6 +562,7 @@ authRouter.post('/sessions/revoke-others', (req: Request, res: Response) => {
   return res.json({ success: true, revokedCount: result.changes });
 });
 
+// Đổi mật khẩu yêu cầu mật khẩu hiện tại và làm mất hiệu lực các phiên/token cũ.
 authRouter.post('/change-password', (req: Request, res: Response) => {
   const account = currentUser(req);
   if (!account) return res.status(401).json({ success: false, error: 'Vui lòng đăng nhập.' });
@@ -559,6 +584,7 @@ authRouter.post('/change-password', (req: Request, res: Response) => {
   return res.json({ success: true, requiresLogin: true });
 });
 
+// Khôi phục mật khẩu qua mã email, grant ngắn hạn rồi mới cho phép đặt mật khẩu mới.
 authRouter.post('/forgot-password', async (req: Request, res: Response) => {
   const email = normalizeEmail(req.body?.email);
   if (!emailPattern.test(email) || email.length > 254) return res.status(400).json({ success: false, error: 'Email không hợp lệ.' });
@@ -591,6 +617,7 @@ authRouter.post('/forgot-password', async (req: Request, res: Response) => {
   return res.json({ success: true, message: 'Nếu email có tài khoản, mã xác thực gồm 8 chữ số sẽ được gửi tới địa chỉ đó.', expiresInSeconds: 300, deliveryMode: mailConfigured ? 'email' : 'local' });
 });
 
+// Mã khôi phục đúng sẽ tạo grant ngắn hạn để đặt mật khẩu mới.
 authRouter.post('/verify-reset-code', (req: Request, res: Response) => {
   const email = normalizeEmail(req.body?.email);
   const code = req.body?.code;
@@ -632,6 +659,7 @@ authRouter.post('/reset-password/cancel', (req: Request, res: Response) => {
   return res.json({ success: true });
 });
 
+// Dùng grant một lần để đổi mật khẩu và vô hiệu hóa các phiên trước đó.
 authRouter.post('/reset-password', (req: Request, res: Response) => {
   const token = cookieValue(req, 'cyberaware_reset');
   const password = req.body?.newPassword;

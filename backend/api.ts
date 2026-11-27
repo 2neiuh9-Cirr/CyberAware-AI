@@ -8,6 +8,7 @@ import { registerLearningRoutes } from './routes/public/learning';
 import { registerStatsRoutes } from './routes/public/stats';
 import { registerGmailAddonRoutes } from './routes/public/gmailAddon';
 
+// Gom các tuyến API công khai theo chức năng để server chỉ cần gắn một router.
 export const apiRouter = Router();
 registerHomeRoutes(apiRouter);
 registerAccountRoutes(apiRouter);
@@ -17,6 +18,7 @@ registerLearningRoutes(apiRouter);
 registerStatsRoutes(apiRouter);
 registerGmailAddonRoutes(apiRouter);
 
+// Đổi lỗi nghiệp vụ và lỗi body parser thành phản hồi JSON thống nhất; chỉ ghi chi tiết lỗi máy chủ vào log.
 export function apiError(error: any, _req: Request, res: Response, _next: NextFunction) {
   const status = error instanceof ApiError ? error.status : error.type === 'entity.too.large' ? 413 : error.type === 'entity.parse.failed' ? 400 : 500;
   if (status === 500) console.error('API error:', error);

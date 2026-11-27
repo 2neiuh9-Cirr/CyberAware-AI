@@ -8,8 +8,11 @@ import { registerAdminUserRoutes } from './routes/admin/users';
 import { registerAdminCourseRoutes } from './routes/admin/courses';
 import { registerAdminQuestionRoutes } from './routes/admin/questions';
 
+// Kiểm tra vai trò quản trị trước khi đăng ký các tuyến quản lý bên dưới.
 export const adminRouter = Router();
 adminRouter.use((req, _res, next) => { try { admin(req); next(); } catch (error) { next(error); } });
+
+// Mỗi nhóm tuyến phụ trách một vùng dữ liệu của trang quản trị.
 registerChatSettingsRoutes(adminRouter);
 registerAdminOverviewRoutes(adminRouter);
 registerAdminReportRoutes(adminRouter);

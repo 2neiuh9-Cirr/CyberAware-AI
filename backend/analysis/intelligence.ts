@@ -2,6 +2,7 @@ import { db } from '../database';
 
 export type ScamRule = { id: string; type: string; title: string; terms: string; weight: number; enabled: number; updatedAt: string };
 
+// Kho quy tắc và cảnh báo đã duyệt dùng cho bộ quét và truy xuất nguồn của chatbot.
 db.exec(`
   CREATE TABLE IF NOT EXISTS scam_rules (
     id TEXT PRIMARY KEY, type TEXT NOT NULL, title TEXT NOT NULL, terms TEXT NOT NULL,
@@ -17,6 +18,8 @@ db.exec(`
 `);
 
 const stamp = new Date().toISOString();
+
+// Quy tắc mặc định được nạp khi chưa có, tránh ghi đè chỉnh sửa của quản trị viên.
 const seedRules: Array<[string, string, string, string[], number]> = [
   ['sms-authority-threat', 'sms', 'Mạo danh cơ quan, đe dọa hoặc ép thời gian', ['cong an', 'vien kiem sat', 'co quan dieu tra', 'truy to', 'lenh bat', 'phat nguoi', 'cat dien', 'khoa tai khoan', 'trong 2 gio', 'trong 24 gio'], 20],
   ['sms-credential-theft', 'sms', 'Lấy cắp thông tin xác thực hoặc cài ứng dụng', ['otp', 'ma xac thuc', 'mat khau', 'ma pin', 'ma cvv', 'so the', 'dang nhap', 'xac minh danh tinh', '.apk', 'cap quyen', 'chia se man hinh'], 35],
@@ -40,6 +43,7 @@ const seedRules: Array<[string, string, string, string[], number]> = [
 const putRule = db.prepare('INSERT OR IGNORE INTO scam_rules (id,type,title,terms,weight,enabled,updated_at) VALUES (?,?,?,?,?,1,?)');
 for (const [id, type, title, terms, weight] of seedRules) putRule.run(id, type, title, JSON.stringify(terms), weight, stamp);
 
+// Cảnh báo có nguồn và ngày công bố; chỉ bản ghi ở trạng thái reviewed được đem đối chiếu.
 const seedIntel = [
   { id: 'official-voice-impersonation-2023', title: 'Cuộc gọi mạo danh cơ quan nhà nước, ngân hàng, nhà mạng', category: 'Mạo danh cơ quan/tổ chức', summary: 'Cảnh báo về đối tượng dùng số thuê bao giả mạo cơ quan nhà nước, công an, viện kiểm sát, ngân hàng hoặc nhà mạng để thu thập thông tin, đe dọa và chiếm đoạt tài sản. Bản ghi lưu thủ đoạn chung, không liệt kê số điện thoại cụ thể.', sourceName: 'Cổng thông tin Bộ Thông tin và Truyền thông', sourceUrl: 'https://cspl.mic.gov.vn/Pages/TinTuc/138687/CAC-SO-dIEN-THOAI-GOI-TU-CAC-dON-VI-THUOC-BO-THONG-TIN-VA-TRUYEN-THONG-GOI-dEN-NGUOI-DAN-SE-DUOC-HIEN-THI-TEN-DINH-DANH.html', sourceDate: '2023-10-29', terms: ['gia mao', 'cong an', 'vien kiem sat', 'ngan hang', 'nha mang', 'thu thap thong tin', 'de doa'], indicators: [] },
   { id: 'official-fake-electricity-tax-2025', title: 'Mạo danh thuế/điện lực để lấy dữ liệu hoặc tiền', category: 'Mạo danh cơ quan/dịch vụ', summary: 'Cảnh báo ghi nhận giả danh công chức thuế yêu cầu thông tin/giấy phép qua Zalo và giả danh điện lực đe dọa cắt điện, yêu cầu nộp tiền hoặc cài ứng dụng/website giả. Chỉ dùng cụm thủ đoạn chung để đối chiếu.', sourceName: 'Nền tảng ONETOUCH thuộc Bộ TT&TT', sourceUrl: 'https://onetouch.mic.gov.vn/chi-tiet-tin-tuc/lua-dao-truc-tuyen-van-nan-nhung-ngay-dau-nam-2025', sourceDate: '2025-01-15', terms: ['gia mao', 'cong chuc thue', 'giay phep kinh doanh', 'dien luc', 'cat dien', 'cai ung dung', 'website gia mao'], indicators: [] },
@@ -57,10 +61,12 @@ const seedIntel = [
 const putIntel = db.prepare('INSERT OR IGNORE INTO threat_intel (id,title,category,summary,source_name,source_url,source_date,terms,indicators,status,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
 for (const item of seedIntel) putIntel.run(item.id, item.title, item.category, item.summary, item.sourceName, item.sourceUrl, item.sourceDate, JSON.stringify(item.terms), JSON.stringify(item.indicators), 'reviewed', stamp);
 
+// Chuẩn hóa chữ tiếng Việt để dò các biến thể có/không dấu.
 export function normalizedText(value: string) {
   return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
 }
 
+// Cộng trọng số của quy tắc đang bật, mỗi quy tắc được tính tối đa một lần.
 export function evaluateStoredRules(type: string, text: string) {
   const plain = normalizedText(text);
   const rules = db.prepare("SELECT id,type,title,terms,weight,enabled,updated_at AS updatedAt FROM scam_rules WHERE type IN (?,?) AND enabled = 1 AND id NOT LIKE 'sms-official-%' ORDER BY id").all(type, 'all') as unknown as ScamRule[];
@@ -78,6 +84,7 @@ export function evaluateStoredRules(type: string, text: string) {
   return { score: Math.min(score, 90), flags, matches, rulesVersion: rules.map(rule => rule.updatedAt).sort().at(-1) || null };
 }
 
+// Đối chiếu chỉ dấu chính xác cho URL/số điện thoại/tài khoản; tin nhắn dùng từ khóa cảnh báo.
 export function matchReviewedIntel(type: string, query: string) {
   const plain = normalizedText(query);
   const rows = db.prepare("SELECT id,title,category,summary,source_name AS sourceName,source_url AS sourceUrl,source_date AS sourceDate,terms,indicators FROM threat_intel WHERE status='reviewed'").all() as Array<Record<string, string>>;

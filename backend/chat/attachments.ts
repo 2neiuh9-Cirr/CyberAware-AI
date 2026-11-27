@@ -18,6 +18,7 @@ export type ProcessedChatAttachment = {
   modelPart?: { inlineData: { mimeType: string; data: string } };
 };
 
+// Giới hạn kích thước tệp, lượng văn bản trích xuất và phạm vi đọc của từng định dạng.
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES = 8 * 1024 * 1024;
 const MAX_DOCUMENT_TEXT = 160_000;
@@ -37,6 +38,7 @@ const fileTypes: Record<string, { kind: ChatAttachment['kind']; mimeType: string
   '.xlsx': { kind: 'document', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
 };
 
+// Chỉ giữ tên tệp để hiển thị; loại bỏ đường dẫn và ký tự điều khiển do người dùng gửi lên.
 function safeName(value: string) {
   const name = path.basename(value).replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 120);
   return name || 'tep-dinh-kem';
@@ -50,6 +52,7 @@ function trimmedText(value: string) {
     : clean;
 }
 
+// Các từ quá chung không giúp xác định đoạn tài liệu liên quan đến câu hỏi.
 const searchStopWords = new Set('va la cua cho trong voi nhung cac mot nay do kia gi nao hay giup toi ban doc phan tich giai thich noi dung tai lieu file sau day ve chi tiet tom tat tong hop toan bo bao cao ky'.split(' '));
 
 function normalizedSearchText(value: string) {
@@ -82,6 +85,7 @@ function documentChunks(value: string, limit = 700) {
   return chunks;
 }
 
+// Với tài liệu dài, chọn đoạn khớp từ khóa câu hỏi và đoạn kề bên trong giới hạn ngữ cảnh gửi AI.
 export function selectRelevantDocumentText(value: string, question: string, maxChars = MAX_RETRIEVED_TEXT) {
   if (value.length <= maxChars) return value;
   const chunks = documentChunks(value);
@@ -94,6 +98,8 @@ export function selectRelevantDocumentText(value: string, question: string, maxC
     return { index, score: matches + (terms.length > 1 && normalizedChunks[index].includes(normalizedSearchText(question)) ? terms.length : 0) };
   }).filter(item => item.score > 0).sort((a, b) => b.score - a.score || a.index - b.index);
   const selected = new Set<number>();
+
+  // Nếu không có từ khớp, lấy mẫu rải đều; nếu có, giữ phần đầu và các đoạn liền kề kết quả tốt.
   if (!ranked.length) {
     const sampleCount = Math.max(1, Math.floor(maxChars / 1200));
     for (let index = 0; index < sampleCount; index++) selected.add(Math.round(index * (chunks.length - 1) / Math.max(1, sampleCount - 1)));
@@ -117,6 +123,7 @@ export function selectRelevantDocumentText(value: string, question: string, maxC
   return result.join('\n\n');
 }
 
+// So chữ ký đầu tệp với phần mở rộng để chặn tệp giả dạng trước khi đưa vào bộ giải mã.
 function assertSignature(extension: string, bytes: Buffer) {
   const isZip = bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4b && [0x03, 0x05, 0x07].includes(bytes[2]) && [0x04, 0x06, 0x08].includes(bytes[3]);
   if (extension === '.pdf' && bytes.subarray(0, 5).toString('ascii') !== '%PDF-') throw new ApiError(415, 'Tệp không đúng định dạng PDF.');
@@ -126,6 +133,7 @@ function assertSignature(extension: string, bytes: Buffer) {
   if (extension === '.webp' && (bytes.subarray(0, 4).toString('ascii') !== 'RIFF' || bytes.subarray(8, 12).toString('ascii') !== 'WEBP')) throw new ApiError(415, 'Ảnh WebP không hợp lệ.');
 }
 
+// Đọc PDF theo trang, ghép ký tự theo tọa độ để giữ dòng và đánh dấu số trang khi trích dẫn.
 async function parsePdf(bytes: Buffer) {
   const task = getDocument({ data: new Uint8Array(bytes), useSystemFonts: false, verbosity: VerbosityLevel.ERRORS });
   try {
@@ -159,6 +167,8 @@ async function parsePdf(bytes: Buffer) {
       if (pages.join('\n').length >= MAX_DOCUMENT_TEXT) break;
     }
     const text = trimmedText(pages.join('\n\n'));
+
+    // PDF quét hoặc thiếu lớp chữ sẽ được gửi nguyên tệp để model đọc trực tiếp.
     const hasMostlyScannedPages = pagesWithReadableText < Math.ceil(pdf.numPages * 0.85);
     return { text, inspectDirectly: !text || hasMostlyScannedPages };
   } finally {
@@ -166,12 +176,14 @@ async function parsePdf(bytes: Buffer) {
   }
 }
 
+// DOCX được trích văn bản thô; đánh số đoạn để AI có thể chỉ ra vị trí trong câu trả lời.
 async function parseWord(bytes: Buffer) {
   const result = await mammoth.extractRawText({ buffer: bytes });
   return trimmedText(result.value.split(/\n+/).map(paragraph => paragraph.trim()).filter(Boolean)
     .map((paragraph, index) => `[Đoạn ${index + 1}] ${paragraph}`).join('\n\n'));
 }
 
+// Chuyển các kiểu giá trị ô Excel (ngày, công thức, rich text, liên kết) thành văn bản.
 function cellText(value: CellValue) {
   if (value == null) return '';
   if (value instanceof Date) return value.toISOString();
@@ -185,6 +197,7 @@ function cellText(value: CellValue) {
   return String(value);
 }
 
+// Duyệt từng trang tính, giới hạn số dòng/cột và gắn địa chỉ ô cho dữ liệu gửi vào model.
 async function parseExcel(bytes: Buffer) {
   const workbook = new ExcelJS.Workbook();
   const arrayBuffer=bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength) as ArrayBuffer;
@@ -225,6 +238,7 @@ async function parseExcel(bytes: Buffer) {
   return trimmedText(output.join('\n'));
 }
 
+// Điểm vào chung: xác thực tệp, chuẩn hóa ảnh hoặc trích văn bản tài liệu cho luồng chat.
 export async function processChatAttachment(file: Blob & { name?: string }) : Promise<ProcessedChatAttachment> {
   const name = safeName(file.name || 'tep-dinh-kem');
   const extension = path.extname(name).toLowerCase();
@@ -238,6 +252,7 @@ export async function processChatAttachment(file: Blob & { name?: string }) : Pr
   const bytes = Buffer.from(await file.arrayBuffer());
   assertSignature(extension, bytes);
 
+  // Ảnh được xoay/thu nhỏ để gửi AI; bản xem trước nhỏ hơn được trả về giao diện chat.
   if (type.kind === 'image') {
     let image: Buffer;
     try {
@@ -256,6 +271,7 @@ export async function processChatAttachment(file: Blob & { name?: string }) : Pr
   }
 
   try {
+    // PDF có chữ dùng văn bản trích xuất; PDF quét có thể kèm bản gốc để model đọc trực tiếp.
     if (extension === '.pdf') {
       const parsed = await parsePdf(bytes);
       return {
@@ -264,6 +280,8 @@ export async function processChatAttachment(file: Blob & { name?: string }) : Pr
         ...(parsed.inspectDirectly ? { modelPart: { inlineData: { mimeType: 'application/pdf', data: bytes.toString('base64') } } } : {}),
       };
     }
+
+    // DOCX/XLSX được chuyển thành văn bản trước khi đưa vào câu hỏi.
     const extractedText = extension === '.docx' ? await parseWord(bytes) : await parseExcel(bytes);
     if (!extractedText) throw new ApiError(422, 'Không trích xuất được văn bản từ tệp. Hãy kiểm tra tệp có dữ liệu và không bị khóa mật khẩu.');
     return { attachment: { kind: 'document', name, mimeType: type.mimeType }, extractedText };

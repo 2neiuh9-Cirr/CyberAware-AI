@@ -6,7 +6,9 @@ import { ApiError, integer, rateLimit, textField } from '../../http';
 import { normalizeQuery, scanType } from '../../analysis/analysis';
 import { now, user, report, publicReport } from './shared';
 
+// Báo cáo cộng đồng: tìm kiếm, gửi mới, bình chọn và kiểm duyệt.
 export function registerReportRoutes(router: Router) {
+  // Bộ lọc trạng thái/quyền xem được áp trước phân trang để không lộ báo cáo ẩn hoặc hàng chờ.
   router.get('/reports', (req, res) => {
     const account = currentUser(req); const mine = req.query.mine === 'true';
     if (mine && !account) throw new ApiError(401, 'Vui lòng đăng nhập.');
@@ -35,6 +37,8 @@ export function registerReportRoutes(router: Router) {
     if ((!!row.is_hidden || !['approved', 'unverified'].includes(String(row.status))) && row.user_id !== account?.id && account?.role !== 'admin') throw new ApiError(404, 'Không tìm thấy báo cáo công khai.');
     res.json(publicReport(row, account?.id));
   });
+
+  // Báo cáo mới cần đăng nhập và không được chứa mã xác thực/mật khẩu trong mô tả.
   router.post('/report', rateLimit(10, 60_000), (req, res) => {
     const account = user(req); const type = scanType(req.body?.type);
     const target = normalizeQuery(type, req.body?.target);
@@ -45,6 +49,8 @@ export function registerReportRoutes(router: Router) {
     db.prepare('INSERT INTO reports (id,user_id,type,target,category,description,created_at) VALUES (?,?,?,?,?,?,?)').run(id, account.id, type, target, category, description, now());
     res.status(201).json({ success: true, report: publicReport(report(id), account.id) });
   });
+
+  // Bật/tắt một phiếu trong giao dịch, chỉ cho báo cáo đã duyệt và đang hiển thị.
   router.post('/reports/:id/votes', rateLimit(60, 60_000), (req, res) => {
     const account = user(req); const row = report(req.params.id);
     if (row.status !== 'approved' || row.is_hidden) throw new ApiError(409, 'Chỉ bình chọn báo cáo đã duyệt và đang hiển thị.');
@@ -57,6 +63,8 @@ export function registerReportRoutes(router: Router) {
     const result = publicReport(row, account.id);
     res.json({ votes: result.votes, votedByMe: result.votedByMe });
   });
+
+  // Cập nhật trạng thái kiểm duyệt và ghi lịch sử trong cùng giao dịch.
   router.patch('/admin/reports/:id/status', (req, res) => {
     const account = user(req);
     if (account.role !== 'admin') throw new ApiError(403, 'Chỉ quản trị viên có quyền kiểm duyệt.');

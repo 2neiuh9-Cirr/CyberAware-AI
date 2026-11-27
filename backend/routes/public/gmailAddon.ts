@@ -5,6 +5,7 @@ import { analyzeEmail } from '../../analysis/email';
 
 const windows = new Map<string, { count: number; expires: number }>();
 
+// Add-on dùng khóa riêng, so hash theo thời gian cố định thay vì so chuỗi trực tiếp.
 function authorized(provided: unknown): boolean {
   const secret = process.env.GMAIL_ADDON_API_KEY;
   if (!secret || secret.length < 32 || typeof provided !== 'string') return false;
@@ -13,6 +14,7 @@ function authorized(provided: unknown): boolean {
   return timingSafeEqual(a, b);
 }
 
+// Giới hạn thêm theo bản cài đặt add-on, ngoài rate limit của endpoint extension.
 function throttle(installId: unknown) {
   if (typeof installId !== 'string' || !/^[a-f0-9-]{36}$/.test(installId)) throw new ApiError(400, 'Mã cài đặt không hợp lệ.');
   const now = Date.now();
@@ -23,6 +25,7 @@ function throttle(installId: unknown) {
   if (windows.size > 5000) for (const [key, value] of windows) if (value.expires <= now) windows.delete(key);
 }
 
+// Hai lối vào email dùng chung bộ phân tích; AI chỉ bật khi header đồng ý có giá trị phù hợp.
 export function registerGmailAddonRoutes(router: Router) {
   router.post('/gmail-addon/analyze', async (req, res, next) => {
     try {
